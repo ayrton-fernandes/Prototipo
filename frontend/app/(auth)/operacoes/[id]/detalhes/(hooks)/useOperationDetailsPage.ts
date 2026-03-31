@@ -7,8 +7,33 @@ import { useAppDispatch } from "@/store/store";
 import { operationService } from "@/services/operationService";
 import { OperationResponse, OperationUserReference } from "@/domain/types/operation";
 import { OperationMemberRow, OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
+import { getImagePath } from "@/utils/getImagePath";
 
 const PHONE_PLACEHOLDER = "-";
+
+const MOCK_OPERATION_TARGETS: OperationTarget[] = [
+  {
+    id: 1,
+    name: "Henrique Alves de Lima",
+    cpf: "666.666.666-66",
+    birthDate: "02/02/1984",
+    imageUrl: getImagePath("image/alvo%203.png"),
+  },
+  {
+    id: 2,
+    name: "Lucia Gomes da Silva",
+    cpf: "666.666.666-66",
+    birthDate: "02/02/1984",
+    imageUrl: getImagePath("image/alvo%202.png"),
+  },
+  {
+    id: 3,
+    name: "Gabriel Tavares dos Santos",
+    cpf: "666.666.666-66",
+    birthDate: "02/02/1984",
+    imageUrl: getImagePath("image/Frame%2046246.png"),
+  },
+];
 
 type MemberRole = "Analista de Inteligência" | "Investigador";
 
@@ -79,8 +104,10 @@ export function useOperationDetailsPage() {
   const [processingAction, setProcessingAction] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Estrutura prevista para integração futura do endpoint de alvos.
-  const [targets] = useState<OperationTarget[]>([]);
+  const targets = useMemo(
+    () => MOCK_OPERATION_TARGETS.map((target) => ({ ...target })),
+    []
+  );
 
   const loadOperation = useCallback(async () => {
     if (operationId == null) {

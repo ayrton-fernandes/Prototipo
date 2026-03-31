@@ -3,12 +3,15 @@
 import Image from "next/image";
 import { Button, Card, Icon, Typography } from "@uigovpe/components";
 import { OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
+import { getImagePath } from "@/utils/getImagePath";
 
 interface OperationTargetsSectionProps {
   targets: OperationTarget[];
 }
 
 export default function OperationTargetsSection({ targets }: OperationTargetsSectionProps) {
+  const fallbackImage = getImagePath("logo-policia.png");
+
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -33,46 +36,58 @@ export default function OperationTargetsSection({ targets }: OperationTargetsSec
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
           {targets.map((target) => (
-            <Card key={target.id}>
-              <div className="flex items-start gap-3">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                  {target.imageUrl ? (
-                    <Image
-                      src={target.imageUrl}
-                      alt={target.name}
-                      width={64}
-                      height={64}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-slate-400">
-                      <Icon icon="person" />
+            <Card key={target.id} className="operation-target-card">
+              <div className="operation-target-card-content">
+                <div className="operation-target-avatar">
+                  <Image
+                    src={target.imageUrl ?? fallbackImage}
+                    alt={target.name}
+                    width={140}
+                    height={180}
+                    className="h-full w-full object-cover"
+                    priority
+                  />
+                </div>
+
+                <div className="operation-target-info">
+                  <Button
+                    icon={<Icon icon="more_vert" />}
+                    rounded
+                    text
+                    disabled
+                    aria-label={`Ações do alvo ${target.name}`}
+                    className="operation-target-action"
+                  />
+
+                  <div className="operation-target-name-wrap">
+                    <Typography variant="small" className="operation-target-label">
+                      Nome do Alvo:
+                    </Typography>
+                    <Typography variant="h3" className="operation-target-name">
+                      {target.name}
+                    </Typography>
+                  </div>
+
+                  <div className="operation-target-meta-grid">
+                    <div>
+                      <Typography variant="small" className="operation-target-label">
+                        CPF:
+                      </Typography>
+                      <Typography variant="p" className="operation-target-value">
+                        {target.cpf}
+                      </Typography>
                     </div>
-                  )}
-                </div>
 
-                <div className="flex flex-1 flex-col gap-1">
-                  <Typography variant="small" className="text-slate-500">
-                    Nome do alvo
-                  </Typography>
-                  <Typography variant="p" className="font-semibold">
-                    {target.name}
-                  </Typography>
-                  <Typography variant="small" className="text-slate-600">
-                    CPF: {target.cpf}
-                  </Typography>
-                  <Typography variant="small" className="text-slate-600">
-                    Data de nascimento: {target.birthDate}
-                  </Typography>
+                    <div>
+                      <Typography variant="small" className="operation-target-label">
+                        Data de Nascimento:
+                      </Typography>
+                      <Typography variant="p" className="operation-target-value">
+                        {target.birthDate}
+                      </Typography>
+                    </div>
+                  </div>
                 </div>
-
-                <Button
-                  icon={<Icon icon="more_vert" />}
-                  rounded
-                  outlined
-                  disabled
-                  aria-label="Ações do alvo"
-                />
               </div>
             </Card>
           ))}
