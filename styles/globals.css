@@ -1,0 +1,807 @@
+@import "@flaticon/flaticon-uicons/css/all/all.css";
+@import "tailwindcss" important;
+
+:root {
+  --root-font-size: 16px;
+  --brand-primary: #646cff;
+  --brand-primary-hover-light: #747bff;
+  --brand-primary-hover-dark: #535bf2;
+  --brand-login-bg-start: #1d1d1d;
+  --brand-login-bg-end: #121212;
+  --brand-accent: #ffe57f;
+  --brand-light-surface: #f8fafc;
+  --brand-modal-bg: #dfdfdf;
+  --color-text-placeholder: #dfdfdf;
+  --app-bg: var(--color-background-default);
+  --app-card-bg: var(--color-surface-secondary-softest);
+  --app-text: var(--color-text-default);
+  --scroll-thumb-color: var(--color-surface-primary-softest);
+  --scroll-thumb-hover-color: var(--color-surface-primary-soft);
+  --scroll-track-color: var(--color-surface-primary-default);
+}
+
+.dark {
+  --app-bg: #242424;
+  --app-card-bg: #252525;
+  --app-text: rgba(255, 255, 255, 0.87);
+  --color-background-default: #242424;
+  --color-background-darker: #1d1d1d;
+  --color-surface-primary-softest: #252525;
+  --color-surface-primary-default: #1d1d1d;
+  --color-surface-primary-strong: #121212;
+  --color-surface-secondary-softest: #252525;
+  --color-surface-secondary-softer: #1d1d1d;
+  --color-surface-secondary-soft: #1d1d1d;
+  --color-text-default: rgba(255, 255, 255, 0.87);
+  --color-text-secondary: #dfdfdf;
+  --color-text-placeholder: #dfdfdf;
+  --color-text-link: #ffe57f;
+  --color-outline-default: #3a3a3a;
+  --color-outline-softest: #2b2b2b;
+  --color-outline-primary: var(--brand-primary);
+  --scroll-thumb-color: #3d3d3d;
+  --scroll-thumb-hover-color: #565656;
+  --scroll-track-color: #1a1a1a;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  font-size: 1rem;
+  background: var(--app-bg) !important;
+  color: var(--app-text);
+}
+
+::selection {
+  background: #121212;
+  color: #f8fafc;
+}
+
+.content-section {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.page-content,
+.main-content,
+.main-content-backoffice {
+  background: var(--app-bg);
+}
+
+.dark .page-content,
+.dark .main-content-backoffice {
+  background: var(--brand-light-surface) !important;
+  color: #1f2937;
+}
+
+.p-card,
+.card {
+  background: var(--app-card-bg) !important;
+  color: var(--app-text);
+  border: 1px solid var(--color-outline-default);
+}
+
+.p-dialog,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-footer {
+  background: var(--brand-modal-bg) !important;
+}
+
+.delete-dialog.p-dialog,
+.delete-dialog .p-dialog-header,
+.delete-dialog .p-dialog-content,
+.delete-dialog .p-dialog-footer {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.delete-dialog .p-dialog-header,
+.delete-dialog .p-dialog-content,
+.delete-dialog .p-dialog-footer {
+  border-color: #d1d5db !important;
+}
+
+.delete-dialog .p-dialog-title,
+.delete-dialog .p-dialog-header .p-dialog-title,
+.delete-dialog .p-dialog-header .p-dialog-header-icon,
+.delete-dialog .p-dialog-header .p-dialog-header-icon svg,
+.delete-dialog .p-dialog-header .p-dialog-header-icon i,
+.delete-dialog .p-dialog-header .p-dialog-header-icon .material-symbols-outlined {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.delete-dialog .p-dialog-content,
+.delete-dialog .p-dialog-content p,
+.delete-dialog .p-dialog-content span,
+.delete-dialog .p-dialog-content label {
+  color: #000000 !important;
+}
+
+.delete-dialog-cancel-button.p-button,
+.delete-dialog-cancel-button.p-button-outlined {
+  background: #e5e7eb !important;
+  border-color: #9ca3af !important;
+  color: #111827 !important;
+}
+
+.delete-dialog-cancel-button.p-button:not(:disabled):hover,
+.delete-dialog-cancel-button.p-button-outlined:not(:disabled):hover {
+  background: #d1d5db !important;
+  border-color: #6b7280 !important;
+  color: #111827 !important;
+}
+
+.delete-dialog-cancel-button .material-symbols-outlined,
+.delete-dialog-cancel-button svg,
+.delete-dialog-cancel-button i {
+  color: #111827 !important;
+  fill: #111827 !important;
+  stroke: #111827 !important;
+}
+
+.dark.theme-primary .admin-sidebar {
+  background: linear-gradient(180deg, #1d1d1d 0%, #121212 100%) !important;
+}
+
+.dark.theme-primary .admin-sidebar-logo-box {
+  background: #0f0f0f;
+}
+
+.dark.theme-primary .admin-sidebar-item,
+.dark.theme-primary .admin-sidebar-item-subItem,
+.dark.theme-primary .admin-sidebar-sub-item,
+.dark.theme-primary .admin-sidebar-section-header {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.dark.theme-primary .admin-sidebar-item:not(:disabled):hover,
+.dark.theme-primary .admin-sidebar-item-subItem:not(:disabled):hover,
+.dark.theme-primary .admin-sidebar-sub-item:not(:disabled):hover,
+.dark.theme-primary .admin-sidebar-section-header:not(:disabled):hover,
+.dark.theme-primary .admin-sidebar-section-header.admin-sidebar-section-expanded {
+  background: #252525;
+}
+
+.dark.theme-primary .admin-sidebar-toggle-button,
+.dark.theme-primary .admin-sidebar-section-toggle-button,
+.dark.theme-primary .admin-sidebar-item-default-icon,
+.dark.theme-primary .admin-sidebar-section-icon {
+  color: var(--brand-accent);
+}
+
+html.dark .p-button {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #121212;
+  font-weight: 700;
+}
+
+html.dark .p-button:not(:disabled):hover:not(:active) {
+  background: #121212 !important;
+  border-color: #121212 !important;
+  color: var(--brand-accent) !important;
+}
+
+html.dark .p-button.p-button-outlined {
+  background: transparent;
+  border-color: var(--brand-accent) !important;
+  color: var(--brand-accent) !important;
+}
+
+html.dark .p-button.p-button-outlined:not(:disabled):hover {
+  background: rgba(255, 229, 127, 0.12);
+}
+
+html.dark .p-button.p-button-outlined .material-symbols-outlined,
+html.dark .p-button.p-button-outlined .fi,
+html.dark .p-button.p-button-outlined svg {
+  color: var(--brand-accent) !important;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
+}
+
+.login-page .p-card,
+.login-page .card {
+  background: #ffffff !important;
+  border-color: #d1d5db;
+  color: #000000 !important;
+}
+
+.login-page .p-card .p-card-title,
+.login-page .p-card .p-card-subtitle,
+.login-page .p-card label,
+.login-page .p-card .p-component,
+.login-page .p-card .p-inputtext,
+.login-page .p-card .p-password input,
+.login-page .p-card .p-input-icon,
+.login-page .p-card .p-input-icon i {
+  color: #000000 !important;
+}
+
+.login-page .p-card .p-inputtext,
+.login-page .p-card .p-password .p-inputtext {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+.login-page .p-card .p-inputtext::placeholder,
+.login-page .p-card .p-password .p-inputtext::placeholder {
+  color: #000000 !important;
+  opacity: 1;
+}
+
+.login-page .p-card .p-inputtext:hover,
+.login-page .p-card .p-inputtext:enabled:hover,
+.login-page .p-card .p-password .p-inputtext:hover,
+.login-page .p-card .p-password .p-inputtext:enabled:hover,
+.login-page .p-card .p-inputtext:focus,
+.login-page .p-card .p-inputtext:focus-visible,
+.login-page .p-card .p-password .p-inputtext:focus,
+.login-page .p-card .p-password .p-inputtext:focus-visible {
+  border-color: #000000 !important;
+  box-shadow: none !important;
+}
+
+.login-page .p-card .p-password .p-password-show-icon,
+.login-page .p-card .p-password .p-password-hide-icon {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+.login-page .p-card .p-password .p-password-show-icon svg,
+.login-page .p-card .p-password .p-password-hide-icon svg,
+.login-page .p-card .p-password .p-password-show-icon i,
+.login-page .p-card .p-password .p-password-hide-icon i,
+.login-page .p-card .p-password .p-password-show-icon span,
+.login-page .p-card .p-password .p-password-hide-icon span {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.login-page .p-button {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  font-weight: 700;
+}
+
+.verify-code-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
+}
+
+.verify-code-page .p-card,
+.verify-code-page .card {
+  background: #ffffff !important;
+  border-color: #d1d5db;
+  color: #000000 !important;
+}
+
+.verify-code-page .p-card .p-card-title,
+.verify-code-page .p-card .p-card-subtitle,
+.verify-code-page .p-card label,
+.verify-code-page .p-card .p-component,
+.verify-code-page .p-card .p-inputtext,
+.verify-code-page .p-card .p-input-icon,
+.verify-code-page .p-card .p-input-icon i {
+  color: #000000 !important;
+}
+
+.verify-code-page .p-card .p-inputtext {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+.verify-code-page .p-card .p-inputtext::placeholder {
+  color: #000000 !important;
+  opacity: 1;
+}
+
+.verify-code-page .p-card .p-inputtext:hover,
+.verify-code-page .p-card .p-inputtext:enabled:hover,
+.verify-code-page .p-card .p-inputtext:focus,
+.verify-code-page .p-card .p-inputtext:focus-visible {
+  border-color: #000000 !important;
+  box-shadow: none !important;
+}
+
+.verify-code-page .p-button {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  font-weight: 700;
+}
+
+.verify-code-page .text-primary {
+  color: #000000 !important;
+}
+
+.login-page .p-button:not(:disabled):hover:not(:active) {
+  filter: brightness(0.96);
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined", sans-serif;
+}
+
+html.fonts-loaded .material-symbols-outlined {
+  display: block !important;
+}
+
+.dark .contrast-img {
+  filter: brightness(0) invert(1);
+}
+
+/* DataTable Header Styling */
+.dark .p-datatable .p-datatable-thead > tr > th {
+  background: transparent !important;
+  color: var(--brand-accent) !important;
+  font-weight: 600;
+}
+
+.dark .p-datatable .p-datatable-thead > tr > th a {
+  color: var(--brand-accent) !important;
+}
+
+.dark .p-datatable .p-datatable-thead > tr > th .p-column-title,
+.dark .p-datatable .p-datatable-thead > tr > th .p-sortable-column-icon {
+  color: var(--brand-accent) !important;
+}
+
+/* Breadcrumb sem azul no dark */
+.dark .p-breadcrumb .p-menuitem-link,
+.dark .p-breadcrumb .p-menuitem-link .p-menuitem-text,
+.dark .p-breadcrumb .p-menuitem-link .p-menuitem-icon,
+.dark .p-breadcrumb .p-breadcrumb-chevron {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+.dark .p-breadcrumb .p-menuitem-link:hover,
+.dark .p-breadcrumb .p-menuitem-link:hover .p-menuitem-text,
+.dark .p-breadcrumb .p-menuitem-link:hover .p-menuitem-icon {
+  color: var(--brand-accent) !important;
+}
+
+/* Scrollbar da sidebar sem azul */
+.dark.theme-primary .admin-sidebar-container {
+  scrollbar-color: #3d3d3d #121212;
+}
+
+.dark.theme-primary .admin-sidebar-container::-webkit-scrollbar-track {
+  background: #121212 !important;
+}
+
+.dark.theme-primary .admin-sidebar-container::-webkit-scrollbar-thumb {
+  background-color: #3d3d3d !important;
+}
+
+.dark.theme-primary .admin-sidebar-container::-webkit-scrollbar-thumb:hover {
+  background-color: #565656 !important;
+}
+
+/* Menu de ações */
+.dark .p-menu,
+.dark .p-menu.p-component,
+.dark .p-menu .p-menu-list,
+.dark .p-menu .p-submenu-list,
+.dark .entity-action-menu {
+  background: #000000 !important;
+  border: 1px solid #2b2b2b !important;
+}
+
+.dark .p-menu .p-menuitem-content,
+.dark .p-menu .p-menuitem-link,
+.dark .entity-action-menu .p-menuitem-content,
+.dark .entity-action-menu .p-menuitem-link {
+  background: #000000 !important;
+  color: var(--brand-accent) !important;
+}
+
+.dark .p-menu .p-menuitem-link .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link .p-menuitem-text,
+.dark .p-menu .p-menuitem-link .entity-action-menu-icon,
+.dark .p-menu .p-menuitem-link .material-symbols-outlined,
+.dark .p-menu .p-menuitem-link svg,
+.dark .entity-action-menu .p-menuitem-link .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link svg {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+.dark .p-menu .p-menuitem-content:hover,
+.dark .p-menu .p-menuitem-link:hover,
+.dark .p-menu .p-menuitem-link:focus,
+.dark .p-menu .p-menuitem-link:active,
+.dark .p-menu .p-menuitem-link.p-focus,
+.dark .p-menu .p-menuitem-content.p-focus,
+.dark .entity-action-menu .p-menuitem-content:hover,
+.dark .entity-action-menu .p-menuitem-link:hover,
+.dark .entity-action-menu .p-menuitem-link:focus,
+.dark .entity-action-menu .p-menuitem-link:active,
+.dark .entity-action-menu .p-menuitem-link.p-focus,
+.dark .entity-action-menu .p-menuitem-content.p-focus {
+  background: var(--brand-accent) !important;
+  color: #000000 !important;
+}
+
+.dark .p-menu .p-menuitem-content:hover .p-menuitem-link,
+.dark .p-menu .p-menuitem-link:hover .p-menuitem-text,
+.dark .p-menu .p-menuitem-link:hover .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link:hover .entity-action-menu-icon,
+.dark .p-menu .p-menuitem-link:hover .material-symbols-outlined,
+.dark .p-menu .p-menuitem-link:hover svg,
+.dark .p-menu .p-menuitem-link:focus .p-menuitem-text,
+.dark .p-menu .p-menuitem-link:focus .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link:focus .entity-action-menu-icon,
+.dark .p-menu .p-menuitem-link:focus .material-symbols-outlined,
+.dark .p-menu .p-menuitem-link:focus svg,
+.dark .p-menu .p-menuitem-link.p-focus .p-menuitem-text,
+.dark .p-menu .p-menuitem-link.p-focus .p-menuitem-icon,
+.dark .p-menu .p-menuitem-link.p-focus .entity-action-menu-icon,
+.dark .p-menu .p-menuitem-link.p-focus .material-symbols-outlined,
+.dark .p-menu .p-menuitem-link.p-focus svg,
+.dark .entity-action-menu .p-menuitem-content:hover .p-menuitem-link,
+.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link:hover .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link:hover .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link:hover svg,
+.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link:focus .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link:focus .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link:focus svg,
+.dark .entity-action-menu .p-menuitem-link.p-focus .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link.p-focus .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link.p-focus .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link.p-focus .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link.p-focus svg {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* Action menu (botao e dropdown) */
+html.dark .entity-action-trigger.p-button.p-button-outlined {
+  background: #121212 !important;
+  border-color: var(--brand-accent) !important;
+  color: var(--brand-accent) !important;
+}
+
+html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
+  background: #000000 !important;
+  border-color: var(--brand-accent) !important;
+  color: var(--brand-accent) !important;
+}
+
+.dark .entity-action-menu {
+  background: #000000 !important;
+  border: 1px solid #2b2b2b !important;
+}
+
+.dark .entity-action-menu .p-menuitem-link,
+.dark .entity-action-menu .p-menuitem-link .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link svg {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+.dark .entity-action-menu .p-menuitem-link:hover,
+.dark .entity-action-menu .p-menuitem-link:focus,
+.dark .entity-action-menu .p-menuitem-link:active {
+  background: var(--brand-accent) !important;
+  color: #000000 !important;
+}
+
+.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link:hover .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link:hover .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link:hover svg,
+.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-text,
+.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-icon,
+.dark .entity-action-menu .p-menuitem-link:focus .entity-action-menu-icon,
+.dark .entity-action-menu .p-menuitem-link:focus .material-symbols-outlined,
+.dark .entity-action-menu .p-menuitem-link:focus svg {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* Radio button amarelo */
+.dark .p-radiobutton .p-radiobutton-box {
+  border-color: var(--brand-accent);
+}
+
+.dark .p-radiobutton .p-radiobutton-box.p-highlight {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+}
+
+.dark .p-radiobutton.p-radiobutton-checked .p-radiobutton-box {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+}
+
+.dark .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
+  background: #121212 !important;
+}
+
+.dark input[type="radio"] {
+  accent-color: var(--brand-accent);
+}
+
+/* Modal de operacao: branco, bordas cinza e dropdowns controlados */
+.operation-dialog.p-dialog,
+.operation-dialog .p-dialog,
+.operation-dialog .p-dialog-header,
+.operation-dialog .p-dialog-content,
+.operation-dialog .p-dialog-footer {
+  background: #ffffff !important;
+  color: #121212 !important;
+}
+
+.operation-dialog .p-dialog-title,
+.operation-dialog .p-component,
+.operation-dialog label,
+.operation-dialog .p-dropdown-label,
+.operation-dialog .p-dropdown-trigger,
+.operation-dialog .p-dropdown-trigger-icon,
+.operation-dialog .p-dropdown-trigger svg,
+.operation-dialog .p-dropdown-trigger i,
+.operation-dialog .p-dropdown-trigger .material-symbols-outlined,
+.operation-dialog .p-dropdown-trigger .ui-icon,
+.operation-dialog .p-input-icon,
+.operation-dialog .p-input-icon i {
+  color: #121212 !important;
+}
+
+.operation-dialog .p-dropdown-trigger,
+.operation-dialog .p-dropdown-trigger:hover,
+.operation-dialog .p-dropdown-trigger:focus,
+.operation-dialog .p-dropdown-trigger:focus-visible,
+.operation-dialog .p-dropdown-trigger-icon,
+.operation-dialog .p-dropdown-trigger:hover .p-dropdown-trigger-icon,
+.operation-dialog .p-dropdown-trigger:focus .p-dropdown-trigger-icon,
+.operation-dialog .p-dropdown-trigger:focus-visible .p-dropdown-trigger-icon,
+.operation-dialog .p-dropdown-trigger svg,
+.operation-dialog .p-dropdown-trigger i,
+.operation-dialog .p-dropdown-trigger .material-symbols-outlined,
+.operation-dialog .p-dropdown-trigger .ui-icon {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.operation-dialog .p-dialog-header-close,
+.operation-dialog .p-dialog-header-close:hover,
+.operation-dialog .p-dialog-header-close:focus,
+.operation-dialog .p-dialog-header-close:focus-visible,
+.operation-dialog .p-dialog-header-close .p-dialog-header-close-icon,
+.operation-dialog .p-dialog-header-close svg,
+.operation-dialog .p-dialog-header-close i,
+.operation-dialog .p-dialog-header-close .material-symbols-outlined,
+.operation-dialog .p-dialog-header-close .ui-icon {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+.operation-dialog .p-inputtext,
+.operation-dialog .p-inputtextarea,
+.operation-dialog .p-dropdown,
+.operation-dialog .p-multiselect,
+.operation-dialog .p-autocomplete,
+.operation-dialog .p-inputnumber input,
+.operation-dialog .p-calendar input,
+.operation-dialog .p-inputwrapper,
+.operation-dialog .p-inputwrapper .p-inputtext,
+.operation-dialog .p-inputwrapper .p-inputtextarea {
+  border-color: var(--color-outline-default) !important;
+  color: #121212 !important;
+}
+
+.operation-dialog .p-inputtext::placeholder,
+.operation-dialog .p-inputtextarea::placeholder,
+.operation-dialog .p-dropdown-label.p-placeholder,
+.operation-dialog .p-multiselect-label.p-placeholder,
+.operation-dialog .p-autocomplete input::placeholder,
+.operation-dialog .p-calendar input::placeholder,
+.operation-dialog .p-inputnumber input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+}
+
+.operation-dialog .p-inputtext:hover,
+.operation-dialog .p-inputtext:enabled:hover,
+.operation-dialog .p-inputtextarea:hover,
+.operation-dialog .p-inputtextarea:enabled:hover,
+.operation-dialog .p-dropdown:hover,
+.operation-dialog .p-multiselect:hover,
+.operation-dialog .p-autocomplete:hover,
+.operation-dialog .p-inputnumber:hover,
+.operation-dialog .p-calendar:hover,
+.operation-dialog .p-inputwrapper:hover .p-inputtext,
+.operation-dialog .p-inputwrapper:hover .p-inputtextarea {
+  border-color: var(--brand-accent) !important;
+}
+
+.operation-dialog .p-inputtext:focus,
+.operation-dialog .p-inputtext:focus-visible,
+.operation-dialog .p-inputtextarea:focus,
+.operation-dialog .p-inputtextarea:focus-visible,
+.operation-dialog .p-dropdown.p-focus,
+.operation-dialog .p-multiselect.p-focus,
+.operation-dialog .p-autocomplete.p-focus,
+.operation-dialog .p-inputnumber.p-focus,
+.operation-dialog .p-calendar:focus-within,
+.operation-dialog .p-inputwrapper-focus,
+.operation-dialog .p-inputwrapper-focus .p-inputtext,
+.operation-dialog .p-inputwrapper-focus .p-inputtextarea,
+.operation-dialog .p-inputwrapper-focus .p-dropdown,
+.operation-dialog .p-inputwrapper-focus .p-multiselect,
+.operation-dialog .p-inputwrapper-focus .p-inputnumber {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+  outline: none;
+}
+
+.operation-dialog .p-dropdown-panel,
+.operation-dialog .p-dropdown-items-wrapper,
+.operation-dialog .p-dropdown-items {
+  background: #e5e7eb !important;
+}
+
+.operation-dialog .p-dropdown-item,
+.operation-dialog .p-dropdown-panel .p-dropdown-item,
+.operation-dialog .p-dropdown-items .p-dropdown-item {
+  background: #d1d5db !important;
+  color: #000000 !important;
+}
+
+.operation-dialog .p-dropdown-item:hover,
+.operation-dialog .p-dropdown-panel .p-dropdown-item:hover,
+.operation-dialog .p-dropdown-items .p-dropdown-item:hover,
+.operation-dialog .p-dropdown-item.p-highlight,
+.operation-dialog .p-dropdown-panel .p-dropdown-item.p-highlight,
+.operation-dialog .p-dropdown-items .p-dropdown-item.p-highlight {
+  background: #cbd5e1 !important;
+  color: #000000 !important;
+}
+
+.operation-details-overview{
+  color: var(--brand-accent) !important;
+}
+
+html.dark .operation-dialog .operation-dialog-title,
+html.dark .operation-dialog .operation-dialog-title * {
+  color: #121212 !important;
+}
+
+html.dark .operation-dialog .operation-dialog-discard.p-button {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+html.dark .operation-dialog .operation-dialog-submit.p-button {
+  background: #16a34a !important;
+  border-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+html.dark .operation-dialog .operation-dialog-discard.p-button:hover,
+html.dark .operation-dialog .operation-dialog-submit.p-button:hover {
+  background: #121212 !important;
+  border-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+/* Verify Code Page Styling */
+.verify-code-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
+}
+
+.verify-code-page .p-card,
+.verify-code-page .card {
+  background: #ffffff !important;
+  border-color: #d1d5db;
+  color: #000000 !important;
+}
+
+.verify-code-page .p-button {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  font-weight: 700;
+}
+
+.verify-code-page .p-button:not(:disabled):hover:not(:active) {
+  filter: brightness(0.96);
+}
+
+/* Global focus and placeholder overrides */
+html.dark .p-card .p-inputtext:focus,
+html.dark .p-card .p-inputtext:focus-visible,
+html.dark .p-card .p-password .p-inputtext:focus,
+html.dark .p-card .p-password .p-inputtext:focus-visible,
+html.dark .p-card .p-inputtextarea:focus,
+html.dark .p-card .p-inputtextarea:focus-visible,
+html.dark .p-card .p-dropdown.p-focus,
+html.dark .p-card .p-multiselect.p-focus,
+html.dark .p-card .p-autocomplete.p-focus,
+html.dark .p-card .p-inputnumber.p-focus,
+html.dark .p-card .p-calendar:focus-within,
+html.dark .operation-dialog .p-inputtext:focus,
+html.dark .operation-dialog .p-inputtext:focus-visible,
+html.dark .operation-dialog .p-inputtextarea:focus,
+html.dark .operation-dialog .p-inputtextarea:focus-visible,
+html.dark .operation-dialog .p-dropdown.p-focus,
+html.dark .operation-dialog .p-multiselect.p-focus,
+html.dark .operation-dialog .p-autocomplete.p-focus,
+html.dark .operation-dialog .p-inputnumber.p-focus,
+html.dark .operation-dialog .p-calendar:focus-within,
+html.dark input:focus,
+html.dark input:focus-visible,
+html.dark textarea:focus,
+html.dark textarea:focus-visible,
+html.dark .p-inputwrapper-focus,
+html.dark .p-inputwrapper-focus .p-inputtext,
+html.dark .p-inputwrapper-focus .p-inputtextarea,
+html.dark .p-inputwrapper-focus .p-dropdown,
+html.dark .p-inputwrapper-focus .p-multiselect,
+html.dark .p-inputwrapper-focus .p-inputnumber {
+  border-color: var(--brand-accent) !important;
+  box-shadow: 0 0 0 1px rgba(255, 229, 127, 0.28) !important;
+  outline: none;
+}
+
+html.dark .p-card .p-inputtext::placeholder,
+html.dark .p-card .p-password .p-inputtext::placeholder,
+html.dark .p-card .p-inputtextarea::placeholder,
+html.dark .p-card .p-dropdown .p-dropdown-label.p-placeholder,
+html.dark .p-card .p-multiselect .p-multiselect-label.p-placeholder,
+html.dark .p-card .p-autocomplete input::placeholder,
+html.dark .p-card .p-calendar input::placeholder,
+html.dark .p-card .p-inputnumber input::placeholder,
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--color-text-placeholder) !important;
+  opacity: 1;
+}
+
+html.dark .operation-dialog .p-inputtext::placeholder,
+html.dark .operation-dialog .p-inputtextarea::placeholder,
+html.dark .operation-dialog .p-dropdown-label.p-placeholder,
+html.dark .operation-dialog .p-multiselect-label.p-placeholder,
+html.dark .operation-dialog .p-autocomplete input::placeholder,
+html.dark .operation-dialog .p-calendar input::placeholder,
+html.dark .operation-dialog .p-inputnumber input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+}

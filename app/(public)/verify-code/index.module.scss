@@ -1,0 +1,14 @@
+.verify {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verifyCard {
+  width: min(480px, 92vw);
+}
+
+.verifyButton {
+  width: 100%;
+}
