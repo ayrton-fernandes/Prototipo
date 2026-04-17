@@ -83,11 +83,11 @@ export default function DepartmentPage() {
 	return (
 		<>
 			<section className="mb-6">
-				<Typography variant="h1" className="mb-2 text-black">
+				<Typography variant="h1" className="mb-2 cpo-page-title">
 					Gestão de departamentos
 				</Typography>
 
-				<Typography variant="p" className="text-slate-500">Gerencie o domínio de departamentos do sistema.</Typography>
+				<Typography variant="p" className="cpo-page-subtitle">Gerencie o domínio de departamentos do sistema.</Typography>
 			</section>
 
 			<Card title="Departamentos" elevation="low">

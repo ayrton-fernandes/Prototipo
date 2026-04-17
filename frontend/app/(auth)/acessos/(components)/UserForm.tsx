@@ -76,7 +76,7 @@ export default function UserForm({
 						placeholder="Selecione o perfil"
 						disabled={disableRoleSelection}
 					/>
-					<Typography variant="small" className={errors.role ? "text-red-600" : "text-slate-500"}>
+					<Typography variant="small" className={errors.role ? "cpo-form-support-error" : ""}>
 						{errors.role ||
 							(disableRoleSelection
 								? "Seleção de perfil bloqueada para este formulário."

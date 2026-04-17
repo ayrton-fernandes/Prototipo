@@ -10,11 +10,11 @@ export default function CourtRegisterPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Cadastrar vara judicial
         </Typography>
 
-        <Typography variant="p">Crie uma nova vara judicial no sistema CPO Digital.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Crie uma nova vara judicial no sistema CPO Digital.</Typography>
       </section>
 
       <Card title="Nova vara judicial" elevation="low">

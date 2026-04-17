@@ -5,11 +5,11 @@ const GeneralPage = () => {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className='mb-2 text-black'>
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Página Inicial
         </Typography>
 
-        <Typography variant="p" className='text-slate-500'>
+        <Typography variant="p" className="cpo-page-subtitle">
           Bem-vindo ao sistema
         </Typography>
       </section>

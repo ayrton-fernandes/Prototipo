@@ -10,11 +10,11 @@ export default function DirectorateRegisterPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Cadastrar diretoria
         </Typography>
 
-        <Typography variant="p">Crie uma nova diretoria no sistema CPO Digital.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Crie uma nova diretoria no sistema CPO Digital.</Typography>
       </section>
 
       <Card title="Nova diretoria" elevation="low">

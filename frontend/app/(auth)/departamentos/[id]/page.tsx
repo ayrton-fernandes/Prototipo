@@ -25,11 +25,11 @@ export default function DepartmentEditPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Editar departamento
         </Typography>
 
-        <Typography variant="p">Atualize o nome e o status do departamento.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Atualize o nome e o status do departamento.</Typography>
       </section>
 
       <Card title="Editar departamento" elevation="low">

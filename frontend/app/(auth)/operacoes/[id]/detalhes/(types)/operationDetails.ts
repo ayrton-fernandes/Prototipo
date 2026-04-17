@@ -1,6 +1,8 @@
+import { OperationMemberPermission } from "@/domain/types/operationMember";
+
 export interface OperationTarget {
   id: number;
-  name: string;
+  fullName: string;
   cpf: string;
   birthDate: string;
   imageUrl?: string;
@@ -11,6 +13,7 @@ export interface OperationMemberRow {
   name: string;
   email: string;
   role: string;
-  phone: string;
+  permission: OperationMemberPermission;
+  permissionLabel: string;
   active: boolean;
 }

@@ -5,88 +5,154 @@ import { useParams, useRouter } from "next/navigation";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { operationService } from "@/services/operationService";
-import { OperationResponse, OperationUserReference } from "@/domain/types/operation";
+import { operationMemberService } from "@/services/operationMemberService";
+import { targetService } from "@/services/targetService";
+import { userService } from "@/services/userService";
+import { infoEntryService } from "@/services/infoEntryService";
+import { fieldValueService } from "@/services/fieldValueService";
+import { templateService } from "@/services/templateService";
+import { templateFieldService } from "@/services/templateFieldService";
+import { extractPaginatedItems } from "@/utils/pagination";
+import { OperationResponse } from "@/domain/types/operation";
+import { TemplateResponse } from "@/domain/types/template";
+import { TemplateFieldResponse } from "@/domain/types/templateField";
+import { FieldValueResponse } from "@/domain/types/fieldValue";
+import { OperationMemberPermission, OperationMemberResponse } from "@/domain/types/operationMember";
+import { TargetResponse } from "@/domain/types/target";
+import { DomainProfile, UserListItem } from "@/domain/types/userManagement";
 import { OperationMemberRow, OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
-import { getImagePath } from "@/utils/getImagePath";
 
-const PHONE_PLACEHOLDER = "-";
+const MEMBER_PERMISSION_LABEL: Record<OperationMemberPermission, string> = {
+  READER: "Leitor",
+  EDITOR: "Editor",
+  COORDINATOR: "Coordenador",
+};
 
-const MOCK_OPERATION_TARGETS: OperationTarget[] = [
-  {
-    id: 1,
-    name: "Henrique Alves de Lima",
-    cpf: "666.666.666-66",
-    birthDate: "02/02/1984",
-    imageUrl: getImagePath("image/alvo%203.png"),
-  },
-  {
-    id: 2,
-    name: "Lucia Gomes da Silva",
-    cpf: "666.666.666-66",
-    birthDate: "02/02/1984",
-    imageUrl: getImagePath("image/alvo%202.png"),
-  },
-  {
-    id: 3,
-    name: "Gabriel Tavares dos Santos",
-    cpf: "666.666.666-66",
-    birthDate: "02/02/1984",
-    imageUrl: getImagePath("image/Frame%2046246.png"),
-  },
-];
+const normalizeText = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 
-type MemberRole = "Analista de Inteligência" | "Investigador";
+const normalizeInputType = (inputType: string): string => {
+  const normalized = inputType.trim().toUpperCase();
 
-interface MemberSource {
-  user: OperationUserReference;
-  role: MemberRole;
-}
-
-const buildMembersFromOperation = (operation: OperationResponse | null): OperationMemberRow[] => {
-  if (!operation) {
-    return [];
+  if (normalized === "GRUPO") {
+    return "GROUP";
   }
 
-  const sources: MemberSource[] = [];
-
-  if (operation.analystIntelligence) {
-    sources.push({
-      user: operation.analystIntelligence,
-      role: "Analista de Inteligência",
-    });
+  if (normalized === "TEXTO") {
+    return "TEXT";
   }
 
-  if (operation.investigator) {
-    sources.push({
-      user: operation.investigator,
-      role: "Investigador",
-    });
+  if (normalized === "NUMERICO") {
+    return "NUMBER";
   }
 
-  const memberById = new Map<number, OperationMemberRow>();
+  if (normalized === "DATA") {
+    return "DATE";
+  }
 
-  sources.forEach(({ user, role }) => {
-    const currentMember = memberById.get(user.id);
+  return normalized;
+};
 
-    if (!currentMember) {
-      memberById.set(user.id, {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role,
-        phone: PHONE_PLACEHOLDER,
-        active: user.active,
-      });
-      return;
-    }
+const getRecordTemplate = (templates: TemplateResponse[]): TemplateResponse | null => {
+  const targetTemplate = templates.find(
+    (template) => template.active && normalizeText(template.name) === "prontuario do alvo"
+  );
 
-    const hasRole = currentMember.role.split(" / ").includes(role);
-    if (!hasRole) {
-      currentMember.role = `${currentMember.role} / ${role}`;
-    }
-  });
+  return targetTemplate ?? templates.find((template) => template.active) ?? null;
+};
 
-  return Array.from(memberById.values());
+const getRecordPhotoFieldIds = (templateFields: TemplateFieldResponse[]): Set<number> => {
+  const photoGroupIds = templateFields
+    .filter(
+      (field) =>
+        normalizeInputType(field.inputType) === "GROUP" &&
+        normalizeText(field.label) === "fotos do alvo"
+    )
+    .map((field) => field.id);
+
+  const photoGroupIdSet = new Set(photoGroupIds);
+
+  const photoFieldIds = templateFields
+    .filter((field) => {
+      const isInputField = normalizeInputType(field.inputType) === "INPUT";
+
+      if (!isInputField) {
+        return false;
+      }
+
+      if (field.parentFieldId != null && photoGroupIdSet.has(field.parentFieldId)) {
+        return true;
+      }
+
+      return normalizeText(field.label).includes("foto");
+    })
+    .map((field) => field.id);
+
+  return new Set(photoFieldIds);
+};
+
+const getLatestImageValueContent = (fieldValues: FieldValueResponse[]): string | undefined => {
+  const imageValues = fieldValues.filter((fieldValue) => fieldValue.valueContent.trim().length > 0);
+
+  if (imageValues.length === 0) {
+    return undefined;
+  }
+
+  imageValues.sort(
+    (left, right) =>
+      new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
+  );
+
+  return imageValues[0].valueContent;
+};
+
+const buildProfileDescriptionByCode = (profiles: DomainProfile[]): Record<string, string> => {
+  return profiles.reduce<Record<string, string>>((acc, profile) => {
+    acc[profile.codeName] = profile.descName;
+    return acc;
+  }, {});
+};
+
+const getMemberRoleLabel = (user: UserListItem | undefined, profileDescriptionByCode: Record<string, string>): string => {
+  if (!user) {
+    return "Não identificado";
+  }
+
+  if (user.profileCodes.length === 0) {
+    return "Não informado";
+  }
+
+  return user.profileCodes
+    .map((code) => profileDescriptionByCode[code] ?? code)
+    .join(", ");
+};
+
+const buildOperationMemberRows = (
+  members: OperationMemberResponse[],
+  users: UserListItem[],
+  profileDescriptionByCode: Record<string, string>
+): OperationMemberRow[] => {
+  const userById = new Map<number, UserListItem>(users.map((user) => [user.id, user]));
+
+  return members
+    .map((member) => {
+      const user = userById.get(member.userId);
+
+      return {
+        id: member.userId,
+        name: user?.name ?? `Usuário #${member.userId}`,
+        email: user?.email ?? "-",
+        role: getMemberRoleLabel(user, profileDescriptionByCode),
+        permission: member.permission,
+        permissionLabel: MEMBER_PERMISSION_LABEL[member.permission],
+        active: member.active,
+      } satisfies OperationMemberRow;
+    })
+    .sort((left, right) => left.name.localeCompare(right.name, "pt-BR"));
 };
 
 export function useOperationDetailsPage() {
@@ -104,10 +170,15 @@ export function useOperationDetailsPage() {
   const [processingAction, setProcessingAction] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const targets = useMemo(
-    () => MOCK_OPERATION_TARGETS.map((target) => ({ ...target })),
-    []
-  );
+  const [targets, setTargets] = useState<OperationTarget[]>([]);
+  const [targetsLoading, setTargetsLoading] = useState(false);
+
+  const [members, setMembers] = useState<OperationMemberRow[]>([]);
+  const [memberUsers, setMemberUsers] = useState<UserListItem[]>([]);
+  const [memberProfileDescriptionByCode, setMemberProfileDescriptionByCode] = useState<Record<string, string>>({});
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [membersProcessing, setMembersProcessing] = useState(false);
+  const [membersErrorMessage, setMembersErrorMessage] = useState<string | null>(null);
 
   const loadOperation = useCallback(async () => {
     if (operationId == null) {
@@ -130,11 +201,253 @@ export function useOperationDetailsPage() {
     }
   }, [operationId]);
 
+  const loadTargets = useCallback(async () => {
+    if (operationId == null) {
+      setTargets([]);
+      return;
+    }
+
+    setTargetsLoading(true);
+    try {
+      const [targetsResponse, templatesResponse] = await Promise.all([
+        targetService.findAllByOperation(operationId),
+        templateService.findAll(),
+      ]);
+
+      const items = extractPaginatedItems(targetsResponse.data);
+      const recordTemplate = getRecordTemplate(templatesResponse.data);
+      let recordPhotoFieldIds = new Set<number>();
+
+      if (recordTemplate) {
+        const templateFieldsResponse = await templateFieldService.findAll(recordTemplate.id);
+        recordPhotoFieldIds = getRecordPhotoFieldIds(templateFieldsResponse.data);
+      }
+
+      const mapped = await Promise.all(
+        items.map(async (target: TargetResponse) => {
+          let imageUrl: string | undefined;
+
+          if (recordTemplate && recordPhotoFieldIds.size > 0) {
+            try {
+              const infoEntriesResponse = await infoEntryService.findAllByTarget(operationId, target.id);
+              const recordEntries = infoEntriesResponse.data.filter(
+                (entry) => entry.templateId === recordTemplate.id
+              );
+
+              const valuesByEntry = await Promise.all(
+                recordEntries.map(async (entry) => {
+                  const fieldValuesResponse = await fieldValueService.findAll(
+                    operationId,
+                    target.id,
+                    entry.id
+                  );
+
+                  return fieldValuesResponse.data.filter(
+                    (fieldValue) =>
+                      fieldValue.templateFieldId != null &&
+                      recordPhotoFieldIds.has(fieldValue.templateFieldId)
+                  );
+                })
+              );
+
+              imageUrl = getLatestImageValueContent(valuesByEntry.flat());
+            } catch {
+              imageUrl = undefined;
+            }
+          }
+
+          return {
+            id: target.id,
+            fullName: target.fullName,
+            cpf: target.cpf,
+            birthDate: target.birthDate ?? "",
+            imageUrl,
+          } satisfies OperationTarget;
+        })
+      );
+
+      setTargets(mapped);
+    } catch {
+      setTargets([]);
+    } finally {
+      setTargetsLoading(false);
+    }
+  }, [operationId]);
+
+  const loadMembers = useCallback(async () => {
+    if (operationId == null) {
+      setMembers([]);
+      setMemberUsers([]);
+      setMemberProfileDescriptionByCode({});
+      setMembersErrorMessage("Operação inválida.");
+      return;
+    }
+
+    setMembersLoading(true);
+    setMembersErrorMessage(null);
+
+    try {
+      const [membersResponse, usersResponse, profilesResponse] = await Promise.all([
+        operationMemberService.findAll(operationId),
+        userService.findAll(),
+        userService.findAllProfiles(),
+      ]);
+
+      const nextProfileMap = buildProfileDescriptionByCode(profilesResponse.data);
+
+      setMemberUsers(usersResponse.data);
+      setMemberProfileDescriptionByCode(nextProfileMap);
+      setMembers(buildOperationMemberRows(membersResponse.data, usersResponse.data, nextProfileMap));
+    } catch {
+      setMembers([]);
+      setMembersErrorMessage("Não foi possível carregar os membros da operação.");
+    } finally {
+      setMembersLoading(false);
+    }
+  }, [operationId]);
+
+  const createMember = useCallback(
+    async (userId: number, permission: Extract<OperationMemberPermission, "READER" | "EDITOR">) => {
+      if (operationId == null) {
+        return false;
+      }
+
+      setMembersProcessing(true);
+      try {
+        await operationMemberService.create(operationId, { userId, permission });
+        await loadMembers();
+        dispatch(
+          showToast({
+            severity: "success",
+            summary: "Membro adicionado",
+            detail: "O membro foi vinculado à operação com sucesso.",
+          })
+        );
+        return true;
+      } catch {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "Falha ao adicionar membro",
+            detail: "Não foi possível vincular o membro à operação.",
+          })
+        );
+        return false;
+      } finally {
+        setMembersProcessing(false);
+      }
+    },
+    [dispatch, loadMembers, operationId]
+  );
+
+  const updateMemberPermission = useCallback(
+    async (userId: number, permission: Extract<OperationMemberPermission, "READER" | "EDITOR">) => {
+      if (operationId == null) {
+        return false;
+      }
+
+      setMembersProcessing(true);
+      try {
+        await operationMemberService.updatePermission(operationId, userId, { permission });
+        await loadMembers();
+        dispatch(
+          showToast({
+            severity: "success",
+            summary: "Permissão atualizada",
+            detail: "A permissão do membro foi atualizada.",
+          })
+        );
+        return true;
+      } catch {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "Falha ao atualizar permissão",
+            detail: "Não foi possível atualizar a permissão do membro.",
+          })
+        );
+        return false;
+      } finally {
+        setMembersProcessing(false);
+      }
+    },
+    [dispatch, loadMembers, operationId]
+  );
+
+  const deleteMember = useCallback(
+    async (userId: number) => {
+      if (operationId == null) {
+        return false;
+      }
+
+      setMembersProcessing(true);
+      try {
+        await operationMemberService.delete(operationId, userId);
+        await loadMembers();
+        dispatch(
+          showToast({
+            severity: "success",
+            summary: "Membro removido",
+            detail: "O membro foi removido da operação.",
+          })
+        );
+        return true;
+      } catch {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "Falha ao remover membro",
+            detail: "Não foi possível remover o membro da operação.",
+          })
+        );
+        return false;
+      } finally {
+        setMembersProcessing(false);
+      }
+    },
+    [dispatch, loadMembers, operationId]
+  );
+
+  const deleteTargetById = useCallback(
+    async (targetId: number) => {
+      if (operationId == null) return;
+      setProcessingAction(true);
+      try {
+        await targetService.delete(operationId, targetId);
+        dispatch(
+          showToast({
+            severity: "success",
+            summary: "Alvo removido",
+            detail: "O alvo foi removido com sucesso.",
+          })
+        );
+        await loadTargets();
+      } catch {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "Falha ao remover",
+            detail: "Não foi possível remover o alvo.",
+          })
+        );
+      } finally {
+        setProcessingAction(false);
+      }
+    },
+    [dispatch, loadTargets, operationId]
+  );
+
   useEffect(() => {
     void loadOperation();
   }, [loadOperation]);
 
-  const members = useMemo(() => buildMembersFromOperation(operation), [operation]);
+  useEffect(() => {
+    void loadTargets();
+  }, [loadTargets]);
+
+  useEffect(() => {
+    void loadMembers();
+  }, [loadMembers]);
 
   const goToOperationsList = () => {
     router.push("/operacoes");
@@ -197,10 +510,22 @@ export function useOperationDetailsPage() {
     processingAction,
     errorMessage,
     targets,
+    targetsLoading,
     members,
+    memberUsers,
+    memberProfileDescriptionByCode,
+    membersLoading,
+    membersProcessing,
+    membersErrorMessage,
     goToOperationsList,
     editOperation,
     toggleOperationStatus,
+    createMember,
+    updateMemberPermission,
+    deleteMember,
+    reloadMembers: loadMembers,
     reload: loadOperation,
+    reloadTargets: loadTargets,
+    deleteTarget: deleteTargetById,
   };
 }

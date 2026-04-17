@@ -7,6 +7,10 @@ interface DeleteDialogProps {
   entity: string;
   loading?: boolean;
   article?: "esse" | "essa";
+  dialogClassName?: string;
+  cancelButtonClassName?: string;
+  confirmButtonClassName?: string;
+  confirmButtonDanger?: boolean;
   onHide: () => void;
   onConfirm: () => void;
 }
@@ -16,9 +20,25 @@ export default function DeleteDialog({
   entity,
   loading,
   article = "esse",
+  dialogClassName,
+  cancelButtonClassName,
+  confirmButtonClassName,
+  confirmButtonDanger = true,
   onHide,
   onConfirm,
 }: DeleteDialogProps) {
+  const dialogClassNames = ["delete-dialog", "max-w-sm", dialogClassName]
+    .filter(Boolean)
+    .join(" ");
+
+  const cancelButtonClassNames = ["delete-dialog-cancel-button", cancelButtonClassName]
+    .filter(Boolean)
+    .join(" ");
+
+  const confirmButtonClassNames = [confirmButtonClassName]
+    .filter(Boolean)
+    .join(" ");
+
   const headerElement = (
     <div className="flex items-center justify-center gap-2">
       <Typography fontWeight="bold" className="text-black">Deseja inativar {article} {entity}?</Typography>
@@ -27,11 +47,12 @@ export default function DeleteDialog({
 
   const footerContent = (
     <div className="flex gap-2 justify-end">
-      <Button outlined label="Cancelar" disabled={loading} onClick={onHide} className="delete-dialog-cancel-button" />
+      <Button outlined label="Cancelar" disabled={loading} onClick={onHide} className={cancelButtonClassNames} />
       <Button
         autoFocus
         label="Confirmar"
-        severity="danger"
+        severity={confirmButtonDanger ? "danger" : undefined}
+        className={confirmButtonClassNames}
         iconPos="right"
         loading={loading}
         onClick={onConfirm}
@@ -42,7 +63,7 @@ export default function DeleteDialog({
   return (
     <Dialog
       modal
-      className="delete-dialog max-w-sm"
+      className={dialogClassNames}
       header={headerElement}
       footer={footerContent}
       visible={visible}

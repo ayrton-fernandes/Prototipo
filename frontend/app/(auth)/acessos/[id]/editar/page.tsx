@@ -26,11 +26,11 @@ export default function UserEditPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Editar usuário
         </Typography>
 
-        <Typography variant="p">
+        <Typography variant="p" className="cpo-page-subtitle">
           Atualize nome, e-mail, senha e perfil. Você também pode ativar ou inativar este usuário.
         </Typography>
       </section>

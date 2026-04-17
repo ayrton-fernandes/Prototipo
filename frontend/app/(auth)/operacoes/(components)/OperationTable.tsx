@@ -16,12 +16,6 @@ interface OperationTableProps {
   onPageChange: (page: number) => void;
 }
 
-const headerCellStyle = {
-  headerCell: {
-    className: "font-bold text-sm",
-  },
-};
-
 const formatPageLabel = (page: number) => page.toString().padStart(2, "0");
 
 export default function OperationTable({
@@ -83,18 +77,17 @@ export default function OperationTable({
       <Table
         value={tableData}
         loading={loading}
-        tableStyle={{ width: "100%" }}
         pt={{
-          bodyRow: {
-            className: "text-sm font-normal",
+          root: {
+            className: "table-list table-list--operations",
           },
         }}
       >
-        <Column field="name" header="Nome da operação" style={{ width: "24%" }} pt={headerCellStyle} />
-        <Column field="code" header="Código" style={{ width: "18%" }} pt={headerCellStyle} />
-        <Column field="stationName" header="Delegacia responsável" style={{ width: "24%" }} pt={headerCellStyle} />
-        <Column field="delegateName" header="Delegado responsável" style={{ width: "24%" }} pt={headerCellStyle} />
-        <Column field="action" header="Ação" style={{ width: "10%" }} pt={headerCellStyle} />
+        <Column field="name" header="Nome da operação" />
+        <Column field="code" header="Código" />
+        <Column field="stationName" header="Delegacia responsável" />
+        <Column field="delegateName" header="Delegado responsável" />
+        <Column field="action" header="Ação" />
       </Table>
 
       {totalPages > 1 && (

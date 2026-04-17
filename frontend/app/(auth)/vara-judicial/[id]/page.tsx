@@ -25,11 +25,11 @@ export default function CourtEditPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Editar vara judicial
         </Typography>
 
-        <Typography variant="p">
+        <Typography variant="p" className="cpo-page-subtitle">
           Atualize o nome e o status da vara judicial.
         </Typography>
       </section>

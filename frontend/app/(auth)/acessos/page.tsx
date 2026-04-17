@@ -83,11 +83,11 @@ export default function AcessosPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2 text-black">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Gestão de acessos
         </Typography>
 
-        <Typography variant="p" className="text-slate-500">
+        <Typography variant="p" className="cpo-page-subtitle">
           Gerencie usuários e perfis de acesso do sistema.
         </Typography>
       </section>

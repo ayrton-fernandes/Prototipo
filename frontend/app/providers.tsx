@@ -11,9 +11,8 @@ import { Provider } from "react-redux";
 import { ToastProvider } from "@/components/ToastProvider";
 import { LayoutProvider, UiProvider } from "@uigovpe/components";
 import "material-symbols/outlined.css";
-import "@/styles/globals.css";
-
 import '@uigovpe/styles';
+import "@/styles/globals.css";
 import { store } from "@/store/store";
 
 export function Providers({ children }: { children: React.ReactNode }) {

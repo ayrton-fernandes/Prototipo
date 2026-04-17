@@ -1,5 +1,5 @@
 // page.tsx
-'use client'
+
 import { Card, Typography } from '@uigovpe/components';
 
 const Home = () => {

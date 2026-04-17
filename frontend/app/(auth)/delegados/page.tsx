@@ -83,11 +83,11 @@ export default function DelegatePage() {
 	return (
 		<>
 			<section className="mb-6">
-				<Typography variant="h1" className="mb-2 text-black">
+				<Typography variant="h1" className="mb-2 cpo-page-title">
 					Gestão de delegados
 				</Typography>
 
-				<Typography variant="p" className="text-slate-500">Gerencie o domínio de delegados do sistema.</Typography>
+				<Typography variant="p" className="cpo-page-subtitle">Gerencie o domínio de delegados do sistema.</Typography>
 			</section>
 
 			<Card title="Delegados" elevation="low">

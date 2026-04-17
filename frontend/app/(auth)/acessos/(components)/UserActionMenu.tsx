@@ -43,8 +43,7 @@ export default function UserActionMenu({
 				popupAlignment="right"
 				className="entity-action-menu"
 				pt={{
-					root: { style: { backgroundColor: "#000000", border: "1px solid #2b2b2b" } },
-					menu: { className: "entity-action-menu-list", style: { backgroundColor: "#000000" } },
+					menu: { className: "entity-action-menu-list" },
 					menuitem: { className: "entity-action-menu-item" },
 					content: { className: "entity-action-menu-content" },
 					action: { className: "entity-action-menu-link" },

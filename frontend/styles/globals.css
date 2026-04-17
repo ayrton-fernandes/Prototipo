@@ -1,6 +1,7 @@
 @import "@flaticon/flaticon-uicons/css/all/all.css";
 @import "tailwindcss" important;
 
+/* Theme tokens and dark palette */
 :root {
   --root-font-size: 16px;
   --brand-primary: #646cff;
@@ -12,12 +13,17 @@
   --brand-light-surface: #f8fafc;
   --brand-modal-bg: #dfdfdf;
   --color-text-placeholder: #dfdfdf;
+  --color-text-link: #000000;
   --app-bg: var(--color-background-default);
   --app-card-bg: var(--color-surface-secondary-softest);
   --app-text: var(--color-text-default);
   --scroll-thumb-color: var(--color-surface-primary-softest);
   --scroll-thumb-hover-color: var(--color-surface-primary-soft);
   --scroll-track-color: var(--color-surface-primary-default);
+  --cpo-page-title-color: #000000;
+  --cpo-page-subtitle-color: #64748b;
+  --cpo-form-support-text-color: #64748b;
+  --cpo-form-support-error-color: #dc2626;
 }
 
 .dark {
@@ -44,6 +50,7 @@
   --scroll-track-color: #1a1a1a;
 }
 
+/* Global reset and base layout */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -83,6 +90,7 @@ body {
   color: #1f2937;
 }
 
+/* Shared surfaces and dialogs */
 .p-card,
 .card {
   background: var(--app-card-bg) !important;
@@ -151,6 +159,7 @@ body {
   stroke: #111827 !important;
 }
 
+/* Sidebar and dark navigation */
 .dark.theme-primary .admin-sidebar {
   background: linear-gradient(180deg, #1d1d1d 0%, #121212 100%) !important;
 }
@@ -188,7 +197,7 @@ html.dark .p-button {
   font-weight: 700;
 }
 
-html.dark .p-button:not(:disabled):hover:not(:active) {
+html.dark .p-button:not(:disabled):hover {
   background: #121212 !important;
   border-color: #121212 !important;
   color: var(--brand-accent) !important;
@@ -210,49 +219,42 @@ html.dark .p-button.p-button-outlined svg {
   color: var(--brand-accent) !important;
 }
 
-.login-page {
+/* Auth pages (login and verification) */
+.login-page,
+.verify-code-page {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
 }
 
-.login-page .p-card,
-.login-page .card {
+.login-page :is(.p-card, .card),
+.verify-code-page :is(.p-card, .card) {
   background: #ffffff !important;
   border-color: #d1d5db;
   color: #000000 !important;
 }
 
-.login-page .p-card .p-card-title,
-.login-page .p-card .p-card-subtitle,
-.login-page .p-card label,
-.login-page .p-card .p-component,
-.login-page .p-card .p-inputtext,
-.login-page .p-card .p-password input,
-.login-page .p-card .p-input-icon,
-.login-page .p-card .p-input-icon i {
+.login-page .p-card :is(.p-card-title, .p-card-subtitle, label, .p-component, .p-inputtext, .p-password input, .p-input-icon, .p-input-icon i),
+.verify-code-page .p-card :is(.p-card-title, .p-card-subtitle, label, .p-component, .p-inputtext, .p-input-icon, .p-input-icon i) {
   color: #000000 !important;
 }
 
 .login-page .p-card .p-inputtext,
-.login-page .p-card .p-password .p-inputtext {
+.login-page .p-card .p-password .p-inputtext,
+.verify-code-page .p-card .p-inputtext {
   border-color: #000000 !important;
   color: #000000 !important;
 }
 
 .login-page .p-card .p-inputtext::placeholder,
-.login-page .p-card .p-password .p-inputtext::placeholder {
+.login-page .p-card .p-password .p-inputtext::placeholder,
+.verify-code-page .p-card .p-inputtext::placeholder {
   color: #000000 !important;
   opacity: 1;
 }
 
 .login-page .p-card .p-inputtext:hover,
-.login-page .p-card .p-inputtext:enabled:hover,
 .login-page .p-card .p-password .p-inputtext:hover,
-.login-page .p-card .p-password .p-inputtext:enabled:hover,
-.login-page .p-card .p-inputtext:focus,
-.login-page .p-card .p-inputtext:focus-visible,
-.login-page .p-card .p-password .p-inputtext:focus,
-.login-page .p-card .p-password .p-inputtext:focus-visible {
+.verify-code-page .p-card .p-inputtext:hover {
   border-color: #000000 !important;
   box-shadow: none !important;
 }
@@ -274,53 +276,7 @@ html.dark .p-button.p-button-outlined svg {
   stroke: #000000 !important;
 }
 
-.login-page .p-button {
-  background: var(--brand-accent) !important;
-  border-color: var(--brand-accent) !important;
-  color: #121212 !important;
-  font-weight: 700;
-}
-
-.verify-code-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
-}
-
-.verify-code-page .p-card,
-.verify-code-page .card {
-  background: #ffffff !important;
-  border-color: #d1d5db;
-  color: #000000 !important;
-}
-
-.verify-code-page .p-card .p-card-title,
-.verify-code-page .p-card .p-card-subtitle,
-.verify-code-page .p-card label,
-.verify-code-page .p-card .p-component,
-.verify-code-page .p-card .p-inputtext,
-.verify-code-page .p-card .p-input-icon,
-.verify-code-page .p-card .p-input-icon i {
-  color: #000000 !important;
-}
-
-.verify-code-page .p-card .p-inputtext {
-  border-color: #000000 !important;
-  color: #000000 !important;
-}
-
-.verify-code-page .p-card .p-inputtext::placeholder {
-  color: #000000 !important;
-  opacity: 1;
-}
-
-.verify-code-page .p-card .p-inputtext:hover,
-.verify-code-page .p-card .p-inputtext:enabled:hover,
-.verify-code-page .p-card .p-inputtext:focus,
-.verify-code-page .p-card .p-inputtext:focus-visible {
-  border-color: #000000 !important;
-  box-shadow: none !important;
-}
-
+.login-page .p-button,
 .verify-code-page .p-button {
   background: var(--brand-accent) !important;
   border-color: var(--brand-accent) !important;
@@ -328,14 +284,20 @@ html.dark .p-button.p-button-outlined svg {
   font-weight: 700;
 }
 
+.login-page .p-button:not(:disabled):hover,
+.verify-code-page .p-button:not(:disabled):hover {
+  filter: brightness(0.96);
+}
+
+.verify-code-page :is(.p-link, a) {
+  color: #000000 !important;
+}
+
 .verify-code-page .text-primary {
   color: #000000 !important;
 }
 
-.login-page .p-button:not(:disabled):hover:not(:active) {
-  filter: brightness(0.96);
-}
-
+/* Icon/font helpers */
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined", sans-serif;
 }
@@ -348,7 +310,7 @@ html.fonts-loaded .material-symbols-outlined {
   filter: brightness(0) invert(1);
 }
 
-/* DataTable Header Styling */
+/* Data table and breadcrumb overrides */
 .dark .p-datatable .p-datatable-thead > tr > th {
   background: transparent !important;
   color: var(--brand-accent) !important;
@@ -364,7 +326,6 @@ html.fonts-loaded .material-symbols-outlined {
   color: var(--brand-accent) !important;
 }
 
-/* Breadcrumb sem azul no dark */
 .dark .p-breadcrumb .p-menuitem-link,
 .dark .p-breadcrumb .p-menuitem-link .p-menuitem-text,
 .dark .p-breadcrumb .p-menuitem-link .p-menuitem-icon,
@@ -378,7 +339,7 @@ html.fonts-loaded .material-symbols-outlined {
   color: var(--brand-accent) !important;
 }
 
-/* Scrollbar da sidebar sem azul */
+/* Sidebar scrollbar */
 .dark.theme-primary .admin-sidebar-container {
   scrollbar-color: #3d3d3d #121212;
 }
@@ -395,7 +356,7 @@ html.fonts-loaded .material-symbols-outlined {
   background-color: #565656 !important;
 }
 
-/* Menu de ações */
+/* Action menu (base and hover only) */
 .dark .p-menu,
 .dark .p-menu.p-component,
 .dark .p-menu .p-menu-list,
@@ -430,16 +391,8 @@ html.fonts-loaded .material-symbols-outlined {
 
 .dark .p-menu .p-menuitem-content:hover,
 .dark .p-menu .p-menuitem-link:hover,
-.dark .p-menu .p-menuitem-link:focus,
-.dark .p-menu .p-menuitem-link:active,
-.dark .p-menu .p-menuitem-link.p-focus,
-.dark .p-menu .p-menuitem-content.p-focus,
 .dark .entity-action-menu .p-menuitem-content:hover,
-.dark .entity-action-menu .p-menuitem-link:hover,
-.dark .entity-action-menu .p-menuitem-link:focus,
-.dark .entity-action-menu .p-menuitem-link:active,
-.dark .entity-action-menu .p-menuitem-link.p-focus,
-.dark .entity-action-menu .p-menuitem-content.p-focus {
+.dark .entity-action-menu .p-menuitem-link:hover {
   background: var(--brand-accent) !important;
   color: #000000 !important;
 }
@@ -450,38 +403,18 @@ html.fonts-loaded .material-symbols-outlined {
 .dark .p-menu .p-menuitem-link:hover .entity-action-menu-icon,
 .dark .p-menu .p-menuitem-link:hover .material-symbols-outlined,
 .dark .p-menu .p-menuitem-link:hover svg,
-.dark .p-menu .p-menuitem-link:focus .p-menuitem-text,
-.dark .p-menu .p-menuitem-link:focus .p-menuitem-icon,
-.dark .p-menu .p-menuitem-link:focus .entity-action-menu-icon,
-.dark .p-menu .p-menuitem-link:focus .material-symbols-outlined,
-.dark .p-menu .p-menuitem-link:focus svg,
-.dark .p-menu .p-menuitem-link.p-focus .p-menuitem-text,
-.dark .p-menu .p-menuitem-link.p-focus .p-menuitem-icon,
-.dark .p-menu .p-menuitem-link.p-focus .entity-action-menu-icon,
-.dark .p-menu .p-menuitem-link.p-focus .material-symbols-outlined,
-.dark .p-menu .p-menuitem-link.p-focus svg,
 .dark .entity-action-menu .p-menuitem-content:hover .p-menuitem-link,
 .dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-text,
 .dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-icon,
 .dark .entity-action-menu .p-menuitem-link:hover .entity-action-menu-icon,
 .dark .entity-action-menu .p-menuitem-link:hover .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link:hover svg,
-.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-text,
-.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-icon,
-.dark .entity-action-menu .p-menuitem-link:focus .entity-action-menu-icon,
-.dark .entity-action-menu .p-menuitem-link:focus .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link:focus svg,
-.dark .entity-action-menu .p-menuitem-link.p-focus .p-menuitem-text,
-.dark .entity-action-menu .p-menuitem-link.p-focus .p-menuitem-icon,
-.dark .entity-action-menu .p-menuitem-link.p-focus .entity-action-menu-icon,
-.dark .entity-action-menu .p-menuitem-link.p-focus .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link.p-focus svg {
+.dark .entity-action-menu .p-menuitem-link:hover svg {
   color: #000000 !important;
   fill: #000000 !important;
   stroke: #000000 !important;
 }
 
-/* Action menu (botao e dropdown) */
+/* Action trigger button */
 html.dark .entity-action-trigger.p-button.p-button-outlined {
   background: #121212 !important;
   border-color: var(--brand-accent) !important;
@@ -494,57 +427,9 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
   color: var(--brand-accent) !important;
 }
 
-.dark .entity-action-menu {
-  background: #000000 !important;
-  border: 1px solid #2b2b2b !important;
-}
-
-.dark .entity-action-menu .p-menuitem-link,
-.dark .entity-action-menu .p-menuitem-link .p-menuitem-text,
-.dark .entity-action-menu .p-menuitem-link .p-menuitem-icon,
-.dark .entity-action-menu .p-menuitem-link .entity-action-menu-icon,
-.dark .entity-action-menu .p-menuitem-link .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link svg {
-  color: var(--brand-accent) !important;
-  fill: var(--brand-accent) !important;
-  stroke: var(--brand-accent) !important;
-}
-
-.dark .entity-action-menu .p-menuitem-link:hover,
-.dark .entity-action-menu .p-menuitem-link:focus,
-.dark .entity-action-menu .p-menuitem-link:active {
-  background: var(--brand-accent) !important;
-  color: #000000 !important;
-}
-
-.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-text,
-.dark .entity-action-menu .p-menuitem-link:hover .p-menuitem-icon,
-.dark .entity-action-menu .p-menuitem-link:hover .entity-action-menu-icon,
-.dark .entity-action-menu .p-menuitem-link:hover .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link:hover svg,
-.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-text,
-.dark .entity-action-menu .p-menuitem-link:focus .p-menuitem-icon,
-.dark .entity-action-menu .p-menuitem-link:focus .entity-action-menu-icon,
-.dark .entity-action-menu .p-menuitem-link:focus .material-symbols-outlined,
-.dark .entity-action-menu .p-menuitem-link:focus svg {
-  color: #000000 !important;
-  fill: #000000 !important;
-  stroke: #000000 !important;
-}
-
-/* Radio button amarelo */
+/* Radio buttons in dark mode */
 .dark .p-radiobutton .p-radiobutton-box {
   border-color: var(--brand-accent);
-}
-
-.dark .p-radiobutton .p-radiobutton-box.p-highlight {
-  background: var(--brand-accent) !important;
-  border-color: var(--brand-accent) !important;
-}
-
-.dark .p-radiobutton.p-radiobutton-checked .p-radiobutton-box {
-  background: var(--brand-accent) !important;
-  border-color: var(--brand-accent) !important;
 }
 
 .dark .p-radiobutton .p-radiobutton-box .p-radiobutton-icon {
@@ -555,7 +440,7 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
   accent-color: var(--brand-accent);
 }
 
-/* Modal de operacao: branco, bordas cinza e dropdowns controlados */
+/* Operation dialog and operation members */
 .operation-dialog.p-dialog,
 .operation-dialog .p-dialog,
 .operation-dialog .p-dialog-header,
@@ -581,13 +466,7 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 }
 
 .operation-dialog .p-dropdown-trigger,
-.operation-dialog .p-dropdown-trigger:hover,
-.operation-dialog .p-dropdown-trigger:focus,
-.operation-dialog .p-dropdown-trigger:focus-visible,
 .operation-dialog .p-dropdown-trigger-icon,
-.operation-dialog .p-dropdown-trigger:hover .p-dropdown-trigger-icon,
-.operation-dialog .p-dropdown-trigger:focus .p-dropdown-trigger-icon,
-.operation-dialog .p-dropdown-trigger:focus-visible .p-dropdown-trigger-icon,
 .operation-dialog .p-dropdown-trigger svg,
 .operation-dialog .p-dropdown-trigger i,
 .operation-dialog .p-dropdown-trigger .material-symbols-outlined,
@@ -598,9 +477,6 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 }
 
 .operation-dialog .p-dialog-header-close,
-.operation-dialog .p-dialog-header-close:hover,
-.operation-dialog .p-dialog-header-close:focus,
-.operation-dialog .p-dialog-header-close:focus-visible,
 .operation-dialog .p-dialog-header-close .p-dialog-header-close-icon,
 .operation-dialog .p-dialog-header-close svg,
 .operation-dialog .p-dialog-header-close i,
@@ -618,7 +494,6 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 .operation-dialog .p-autocomplete,
 .operation-dialog .p-inputnumber input,
 .operation-dialog .p-calendar input,
-.operation-dialog .p-inputwrapper,
 .operation-dialog .p-inputwrapper .p-inputtext,
 .operation-dialog .p-inputwrapper .p-inputtextarea {
   border-color: var(--color-outline-default) !important;
@@ -637,9 +512,7 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 }
 
 .operation-dialog .p-inputtext:hover,
-.operation-dialog .p-inputtext:enabled:hover,
 .operation-dialog .p-inputtextarea:hover,
-.operation-dialog .p-inputtextarea:enabled:hover,
 .operation-dialog .p-dropdown:hover,
 .operation-dialog .p-multiselect:hover,
 .operation-dialog .p-autocomplete:hover,
@@ -650,145 +523,385 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
   border-color: var(--brand-accent) !important;
 }
 
-.operation-dialog .p-inputtext:focus,
-.operation-dialog .p-inputtext:focus-visible,
-.operation-dialog .p-inputtextarea:focus,
-.operation-dialog .p-inputtextarea:focus-visible,
-.operation-dialog .p-dropdown.p-focus,
-.operation-dialog .p-multiselect.p-focus,
-.operation-dialog .p-autocomplete.p-focus,
-.operation-dialog .p-inputnumber.p-focus,
-.operation-dialog .p-calendar:focus-within,
-.operation-dialog .p-inputwrapper-focus,
-.operation-dialog .p-inputwrapper-focus .p-inputtext,
-.operation-dialog .p-inputwrapper-focus .p-inputtextarea,
-.operation-dialog .p-inputwrapper-focus .p-dropdown,
-.operation-dialog .p-inputwrapper-focus .p-multiselect,
-.operation-dialog .p-inputwrapper-focus .p-inputnumber {
-  border-color: #000000 !important;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
-  outline: none;
-}
-
-.operation-dialog .p-dropdown-panel,
-.operation-dialog .p-dropdown-items-wrapper,
-.operation-dialog .p-dropdown-items {
+.operation-dialog .p-dropdown-panel {
   background: #e5e7eb !important;
 }
 
-.operation-dialog .p-dropdown-item,
-.operation-dialog .p-dropdown-panel .p-dropdown-item,
-.operation-dialog .p-dropdown-items .p-dropdown-item {
+.operation-dialog .p-dropdown-item {
   background: #d1d5db !important;
   color: #000000 !important;
 }
 
-.operation-dialog .p-dropdown-item:hover,
-.operation-dialog .p-dropdown-panel .p-dropdown-item:hover,
-.operation-dialog .p-dropdown-items .p-dropdown-item:hover,
-.operation-dialog .p-dropdown-item.p-highlight,
-.operation-dialog .p-dropdown-panel .p-dropdown-item.p-highlight,
-.operation-dialog .p-dropdown-items .p-dropdown-item.p-highlight {
+.operation-dialog .p-dropdown-item:hover {
   background: #cbd5e1 !important;
   color: #000000 !important;
 }
 
-.operation-details-overview{
-  color: var(--brand-accent) !important;
+.operation-members-permission-grid {
+  border: 1px solid var(--color-outline-default) !important;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  padding: 0.875rem 1rem;
 }
 
-.operation-target-card.p-card,
-.operation-target-card.card {
-  background: linear-gradient(135deg, #2b2d33 0%, #202228 100%) !important;
-  border: 1px solid #3d414b !important;
-  border-radius: 18px !important;
-  color: #f7f9fc !important;
+.operation-members-dialog .p-checkbox .p-checkbox-box {
+  border-color: #000000 !important;
+  background: #ffffff !important;
 }
 
-.operation-target-card .p-card-body,
-.operation-target-card .p-card-content {
-  padding: 0 !important;
+.operation-members-dialog .p-checkbox:not(.p-disabled) .p-checkbox-box:hover {
+  border-color: #000000 !important;
 }
 
-.operation-target-card-content {
-  display: flex;
-  align-items: stretch;
-  min-height: 200px;
+.operation-members-dialog .p-checkbox .p-checkbox-box.p-highlight,
+.operation-members-dialog .p-checkbox.p-highlight .p-checkbox-box {
+  border-color: #000000 !important;
+  background: #000000 !important;
 }
 
-.operation-target-avatar {
-  width: 160px;
-  min-width: 160px;
-  border-radius: 14px;
-  overflow: hidden;
-  margin: 14px;
+.operation-members-dialog .p-checkbox .p-checkbox-icon {
+  color: #ffffff !important;
 }
 
-.operation-target-info {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 14px;
-  padding: 14px 16px 14px 4px;
-}
-
-.operation-target-action.p-button {
-  align-self: flex-end;
-  color: #f7f9fc !important;
-}
-
-.operation-target-name-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.operation-target-label {
-  color: #f2d468 !important;
+:is(.operation-members-dialog, .operation-members-delete-dialog) .operation-members-submit-button.p-button {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
   font-weight: 700;
 }
 
-.operation-target-name {
-  color: #f7f9fc !important;
-  font-size: 2rem;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+:is(.operation-members-dialog, .operation-members-delete-dialog) .operation-members-submit-button.p-button :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #121212 !important;
+  fill: #121212 !important;
+  stroke: #121212 !important;
 }
 
-.operation-target-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+:is(.operation-members-dialog, .operation-members-delete-dialog) .operation-members-submit-button.p-button:not(:disabled):hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: var(--brand-accent) !important;
 }
 
-.operation-target-value {
-  color: #f7f9fc !important;
+:is(.operation-members-dialog, .operation-members-delete-dialog) .operation-members-submit-button.p-button:not(:disabled):hover :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
 }
 
-@media (max-width: 880px) {
-  .operation-target-card-content {
-    min-height: initial;
-    flex-direction: column;
-  }
+/* Prontuario target module */
+.target-sections-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 1.5rem;
+}
 
-  .operation-target-avatar {
-    width: calc(100% - 24px);
-    min-width: 0;
-    height: 240px;
-    margin: 12px;
-  }
+.target-sections-nav-button {
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: #0f172a;
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  padding: 0.45rem 0.55rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
 
-  .operation-target-info {
-    padding: 0 12px 14px;
-  }
+.target-sections-nav-button--active {
+  background: #121212;
+  color: #ffffff;
+}
 
-  .operation-target-name {
-    font-size: 1.65rem;
-  }
+.target-sections-nav-button:disabled {
+  color: #64748b;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 
-  .operation-target-meta-grid {
-    grid-template-columns: 1fr;
-  }
+.target-sections-nav-button:not(:disabled):not(.target-sections-nav-button--active):hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) :is(label, .p-card label, .p-inputwrapper label) {
+  color: #1f2937 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) :is(
+  .p-inputtext,
+  .p-inputtextarea,
+  .p-dropdown,
+  .p-multiselect,
+  .p-autocomplete,
+  .p-inputnumber input,
+  .p-calendar input,
+  .p-inputwrapper .p-inputtext,
+  .p-inputwrapper .p-inputtextarea
+) {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) :is(
+  .p-inputtext::placeholder,
+  .p-inputtextarea::placeholder,
+  .p-dropdown-label.p-placeholder,
+  .p-multiselect-label.p-placeholder,
+  .p-autocomplete input::placeholder,
+  .p-calendar input::placeholder,
+  .p-inputnumber input::placeholder
+) {
+  color: #64748b !important;
+  opacity: 1;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger-icon,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger svg,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger i,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger .material-symbols-outlined,
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger .ui-icon {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown .p-dropdown-trigger {
+  background: #ffffff !important;
+  border-left: 1px solid #cbd5e1 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) :is(
+  .p-inputtext:hover,
+  .p-inputtextarea:hover,
+  .p-dropdown:hover,
+  .p-multiselect:hover,
+  .p-autocomplete:hover,
+  .p-inputnumber:hover,
+  .p-calendar:hover,
+  .p-inputwrapper:hover .p-inputtext,
+  .p-inputwrapper:hover .p-inputtextarea
+) {
+  border-color: #0f172a !important;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown:hover .p-dropdown-trigger {
+  border-left-color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown-panel {
+  background: #ffffff !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown-item {
+  color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .p-dropdown-item:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  font-weight: 700;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button:not(:disabled):hover {
+  filter: brightness(0.96);
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button :is(.material-symbols-outlined, svg, i) {
+  color: #121212 !important;
+}
+
+.prontuario-target-dialog.p-dialog,
+.prontuario-target-dialog .p-dialog,
+.prontuario-target-dialog .p-dialog-header,
+.prontuario-target-dialog .p-dialog-content,
+.prontuario-target-dialog .p-dialog-footer {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.prontuario-target-dialog-wide.p-dialog,
+.prontuario-target-dialog-wide .p-dialog {
+  max-height: calc(100vh - 24px) !important;
+}
+
+.prontuario-target-dialog-wide .p-dialog-content {
+  overflow: visible !important;
+}
+
+.prontuario-target-dialog .p-dialog-title,
+.prontuario-target-dialog .p-component,
+.prontuario-target-dialog label,
+.prontuario-target-dialog .p-dropdown-label,
+.prontuario-target-dialog .p-dropdown-trigger-icon,
+.prontuario-target-dialog .p-dropdown-trigger svg,
+.prontuario-target-dialog .p-dropdown-trigger i,
+.prontuario-target-dialog .p-dropdown-trigger .material-symbols-outlined,
+.prontuario-target-dialog .p-dropdown-trigger .ui-icon,
+.prontuario-target-dialog .p-input-icon,
+.prontuario-target-dialog .p-input-icon i {
+  color: #0f172a !important;
+}
+
+.prontuario-target-dialog .p-dialog-header-close,
+.prontuario-target-dialog .p-dialog-header-close .p-dialog-header-close-icon,
+.prontuario-target-dialog .p-dialog-header-close svg,
+.prontuario-target-dialog .p-dialog-header-close i,
+.prontuario-target-dialog .p-dialog-header-close .material-symbols-outlined,
+.prontuario-target-dialog .p-dialog-header-close .ui-icon {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button-outlined,
+.prontuario-dialog-cancel-button.p-button,
+.prontuario-dialog-cancel-button.p-button-outlined {
+  background: transparent !important;
+  border: 1px solid #0f172a !important;
+  color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button .p-button-label,
+.prontuario-dialog-cancel-button .p-button-label {
+  color: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button .material-symbols-outlined,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button svg,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button i,
+.prontuario-dialog-cancel-button .material-symbols-outlined,
+.prontuario-dialog-cancel-button svg,
+.prontuario-dialog-cancel-button i {
+  color: #0f172a !important;
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover,
+.prontuario-dialog-cancel-button.p-button:not(:disabled):hover,
+.prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  color: var(--brand-accent) !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button:not(:disabled):hover .p-button-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover .p-button-label,
+.prontuario-dialog-cancel-button.p-button:not(:disabled):hover .p-button-label,
+.prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover .p-button-label {
+  color: var(--brand-accent) !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button:not(:disabled):hover :is(.material-symbols-outlined, svg, i),
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover :is(.material-symbols-outlined, svg, i),
+.prontuario-dialog-cancel-button.p-button:not(:disabled):hover :is(.material-symbols-outlined, svg, i),
+.prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover :is(.material-symbols-outlined, svg, i) {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* Force black cancel button in dark mode (overrides global outlined yellow) */
+html.dark .p-button.prontuario-dialog-cancel-button,
+html.dark .p-button.prontuario-dialog-cancel-button.p-button-outlined {
+  background: transparent !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+html.dark .p-button.prontuario-dialog-cancel-button .p-button-label,
+html.dark .p-button.prontuario-dialog-cancel-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+html.dark .p-button.prontuario-dialog-cancel-button:not(:disabled):hover,
+html.dark .p-button.prontuario-dialog-cancel-button.p-button-outlined:not(:disabled):hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.dark .p-button.prontuario-dialog-cancel-button:not(:disabled):hover .p-button-label,
+html.dark .p-button.prontuario-dialog-cancel-button:not(:disabled):hover :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Trash button for repeatable groups */
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined {
+  background: transparent !important;
+  border: 1px solid #000000 !important;
+  color: #000000 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined:not(:disabled):hover {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  color: var(--brand-accent) !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined:not(:disabled):hover :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* Force black trash button base in dark mode (overrides global outlined yellow) */
+html.dark .p-button.prontuario-trash-button,
+html.dark .p-button.prontuario-trash-button.p-button-outlined {
+  background: transparent !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+html.dark .p-button.prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-repeatable-add-button.p-button {
+  margin-bottom: 0.375rem;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog)
+  .prontuario-repeatable-add-button.p-button:not(:disabled):hover :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* Operation details emphasis */
+.operation-details-overview {
+  color: var(--brand-accent) !important;
 }
 
 html.dark .operation-dialog .operation-dialog-title,
@@ -815,66 +928,7 @@ html.dark .operation-dialog .operation-dialog-submit.p-button:hover {
   color: #ffffff !important;
 }
 
-/* Verify Code Page Styling */
-.verify-code-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--brand-login-bg-start) 0%, var(--brand-login-bg-end) 100%);
-}
-
-.verify-code-page .p-card,
-.verify-code-page .card {
-  background: #ffffff !important;
-  border-color: #d1d5db;
-  color: #000000 !important;
-}
-
-.verify-code-page .p-button {
-  background: var(--brand-accent) !important;
-  border-color: var(--brand-accent) !important;
-  color: #121212 !important;
-  font-weight: 700;
-}
-
-.verify-code-page .p-button:not(:disabled):hover:not(:active) {
-  filter: brightness(0.96);
-}
-
-/* Global focus and placeholder overrides */
-html.dark .p-card .p-inputtext:focus,
-html.dark .p-card .p-inputtext:focus-visible,
-html.dark .p-card .p-password .p-inputtext:focus,
-html.dark .p-card .p-password .p-inputtext:focus-visible,
-html.dark .p-card .p-inputtextarea:focus,
-html.dark .p-card .p-inputtextarea:focus-visible,
-html.dark .p-card .p-dropdown.p-focus,
-html.dark .p-card .p-multiselect.p-focus,
-html.dark .p-card .p-autocomplete.p-focus,
-html.dark .p-card .p-inputnumber.p-focus,
-html.dark .p-card .p-calendar:focus-within,
-html.dark .operation-dialog .p-inputtext:focus,
-html.dark .operation-dialog .p-inputtext:focus-visible,
-html.dark .operation-dialog .p-inputtextarea:focus,
-html.dark .operation-dialog .p-inputtextarea:focus-visible,
-html.dark .operation-dialog .p-dropdown.p-focus,
-html.dark .operation-dialog .p-multiselect.p-focus,
-html.dark .operation-dialog .p-autocomplete.p-focus,
-html.dark .operation-dialog .p-inputnumber.p-focus,
-html.dark .operation-dialog .p-calendar:focus-within,
-html.dark input:focus,
-html.dark input:focus-visible,
-html.dark textarea:focus,
-html.dark textarea:focus-visible,
-html.dark .p-inputwrapper-focus,
-html.dark .p-inputwrapper-focus .p-inputtext,
-html.dark .p-inputwrapper-focus .p-inputtextarea,
-html.dark .p-inputwrapper-focus .p-dropdown,
-html.dark .p-inputwrapper-focus .p-multiselect,
-html.dark .p-inputwrapper-focus .p-inputnumber {
-  border-color: var(--brand-accent) !important;
-  box-shadow: 0 0 0 1px rgba(255, 229, 127, 0.28) !important;
-  outline: none;
-}
-
+/* Placeholder overrides (dark mode) */
 html.dark .p-card .p-inputtext::placeholder,
 html.dark .p-card .p-password .p-inputtext::placeholder,
 html.dark .p-card .p-inputtextarea::placeholder,
@@ -898,4 +952,405 @@ html.dark .operation-dialog .p-calendar input::placeholder,
 html.dark .operation-dialog .p-inputnumber input::placeholder {
   color: #6b7280 !important;
   opacity: 1;
+}
+
+/* Semantic text helpers */
+.cpo-page-title {
+  color: var(--cpo-page-title-color) !important;
+}
+
+.cpo-page-subtitle {
+  color: var(--cpo-page-subtitle-color) !important;
+}
+
+.cpo-form-support-text {
+  color: var(--cpo-form-support-text-color) !important;
+}
+
+.cpo-form-support-error {
+  color: var(--cpo-form-support-error-color) !important;
+}
+
+/* Auth and loading layout wrappers */
+.app-loading-state {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-page-shell {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.auth-page-panel {
+  width: 100%;
+  max-width: 28rem;
+}
+
+/* Data table sizing rules */
+.table-list .p-datatable-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table-list .p-datatable-thead > tr > th {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.table-list .p-datatable-tbody > tr {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Standard list with code column */
+.table-list--standard-with-code .p-datatable-thead > tr > th:nth-child(1),
+.table-list--standard-with-code .p-datatable-tbody > tr > td:nth-child(1) {
+  width: 36%;
+}
+
+.table-list--standard-with-code .p-datatable-thead > tr > th:nth-child(2),
+.table-list--standard-with-code .p-datatable-tbody > tr > td:nth-child(2) {
+  width: 30%;
+}
+
+.table-list--standard-with-code .p-datatable-thead > tr > th:nth-child(3),
+.table-list--standard-with-code .p-datatable-tbody > tr > td:nth-child(3) {
+  width: 18%;
+}
+
+.table-list--standard-with-code .p-datatable-thead > tr > th:nth-child(4),
+.table-list--standard-with-code .p-datatable-tbody > tr > td:nth-child(4) {
+  width: 16%;
+}
+
+/* Standard list without code column */
+.table-list--standard-without-code .p-datatable-thead > tr > th:nth-child(1),
+.table-list--standard-without-code .p-datatable-tbody > tr > td:nth-child(1) {
+  width: 60%;
+}
+
+.table-list--standard-without-code .p-datatable-thead > tr > th:nth-child(2),
+.table-list--standard-without-code .p-datatable-tbody > tr > td:nth-child(2) {
+  width: 22%;
+}
+
+.table-list--standard-without-code .p-datatable-thead > tr > th:nth-child(3),
+.table-list--standard-without-code .p-datatable-tbody > tr > td:nth-child(3) {
+  width: 18%;
+}
+
+/* User list */
+.table-list--users .p-datatable-thead > tr > th:nth-child(1),
+.table-list--users .p-datatable-tbody > tr > td:nth-child(1) {
+  width: 30%;
+}
+
+.table-list--users .p-datatable-thead > tr > th:nth-child(2),
+.table-list--users .p-datatable-tbody > tr > td:nth-child(2) {
+  width: 28%;
+}
+
+.table-list--users .p-datatable-thead > tr > th:nth-child(3),
+.table-list--users .p-datatable-tbody > tr > td:nth-child(3) {
+  width: 24%;
+}
+
+.table-list--users .p-datatable-thead > tr > th:nth-child(4),
+.table-list--users .p-datatable-tbody > tr > td:nth-child(4) {
+  width: 10%;
+}
+
+.table-list--users .p-datatable-thead > tr > th:nth-child(5),
+.table-list--users .p-datatable-tbody > tr > td:nth-child(5) {
+  width: 8%;
+}
+
+/* Operations list */
+.table-list--operations .p-datatable-thead > tr > th:nth-child(1),
+.table-list--operations .p-datatable-tbody > tr > td:nth-child(1) {
+  width: 24%;
+}
+
+.table-list--operations .p-datatable-thead > tr > th:nth-child(2),
+.table-list--operations .p-datatable-tbody > tr > td:nth-child(2) {
+  width: 18%;
+}
+
+.table-list--operations .p-datatable-thead > tr > th:nth-child(3),
+.table-list--operations .p-datatable-tbody > tr > td:nth-child(3) {
+  width: 24%;
+}
+
+.table-list--operations .p-datatable-thead > tr > th:nth-child(4),
+.table-list--operations .p-datatable-tbody > tr > td:nth-child(4) {
+  width: 24%;
+}
+
+.table-list--operations .p-datatable-thead > tr > th:nth-child(5),
+.table-list--operations .p-datatable-tbody > tr > td:nth-child(5) {
+  width: 10%;
+}
+
+/* Operation members list */
+.table-list--operation-members .p-datatable-thead > tr > th:nth-child(1),
+.table-list--operation-members .p-datatable-tbody > tr > td:nth-child(1) {
+  width: 24%;
+}
+
+.table-list--operation-members .p-datatable-thead > tr > th:nth-child(2),
+.table-list--operation-members .p-datatable-tbody > tr > td:nth-child(2) {
+  width: 24%;
+}
+
+.table-list--operation-members .p-datatable-thead > tr > th:nth-child(3),
+.table-list--operation-members .p-datatable-tbody > tr > td:nth-child(3) {
+  width: 22%;
+}
+
+.table-list--operation-members .p-datatable-thead > tr > th:nth-child(4),
+.table-list--operation-members .p-datatable-tbody > tr > td:nth-child(4) {
+  width: 20%;
+}
+
+.table-list--operation-members .p-datatable-thead > tr > th:nth-child(5),
+.table-list--operation-members .p-datatable-tbody > tr > td:nth-child(5) {
+  width: 10%;
+}
+
+.operation-dialog--wide {
+  width: min(50vw, 1700px);
+}
+
+/* Prontuario cards and tabs */
+.prontuario-target-dialog-wide.p-dialog,
+.prontuario-target-dialog-wide .p-dialog {
+  width: min(56rem, 96vw) !important;
+}
+
+.prontuario-surface-card {
+  border-radius: 1.75rem;
+  border: 1px solid #e2e8f0;
+  background: #ffffff !important;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.prontuario-instance-card {
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 1rem;
+}
+
+.prontuario-image-upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.prontuario-image-upload-input-group {
+  display: flex;
+  flex: 1 1 22rem;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.prontuario-image-upload-file-name {
+  color: #475569 !important;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.prontuario-image-upload-preview-action {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.prontuario-image-preview-button.p-button,
+.prontuario-image-preview-button.p-button-outlined {
+  width: auto;
+  min-width: 17.5rem;
+  max-width: 100%;
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  font-weight: 700;
+}
+
+.prontuario-image-preview-button.p-button :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i),
+.prontuario-image-preview-button.p-button-outlined :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #121212 !important;
+  fill: #121212 !important;
+  stroke: #121212 !important;
+}
+
+.prontuario-image-preview-button.p-button:not(:disabled):hover,
+.prontuario-image-preview-button.p-button-outlined:not(:disabled):hover {
+  background: #000000 !important;
+  border-color: #000000 !important;
+  color: var(--brand-accent) !important;
+}
+
+.prontuario-image-preview-button.p-button:not(:disabled):hover :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i),
+.prontuario-image-preview-button.p-button-outlined:not(:disabled):hover :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+.prontuario-image-preview-dialog.p-dialog,
+.prontuario-image-preview-dialog .p-dialog {
+  width: min(64rem, 96vw) !important;
+}
+
+.prontuario-image-preview-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prontuario-image-preview-viewport {
+  min-height: 22rem;
+  height: min(65vh, 42rem);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.prontuario-image-preview-transform-wrapper,
+.prontuario-image-preview-transform-content {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.prontuario-image-preview-media {
+  position: relative;
+  width: 100%;
+  min-height: 12rem;
+  height: 100%;
+  transform-origin: center center;
+  cursor: grab;
+  transition: transform 0.3s ease;
+}
+
+.prontuario-image-preview-media:active {
+  cursor: grabbing;
+}
+
+.prontuario-image-preview-rotation-0 {
+  transform: rotate(0deg);
+}
+
+.prontuario-image-preview-rotation-90 {
+  transform: rotate(90deg);
+}
+
+.prontuario-image-preview-rotation-180 {
+  transform: rotate(180deg);
+}
+
+.prontuario-image-preview-rotation-270 {
+  transform: rotate(270deg);
+}
+
+.prontuario-image-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.prontuario-image-preview-actions .p-button {
+  min-width: 7.75rem;
+}
+
+@media (max-width: 768px) {
+  .prontuario-image-upload-row,
+  .prontuario-image-upload-input-group {
+    align-items: stretch;
+  }
+
+  .prontuario-image-upload-preview-action {
+    width: 100%;
+  }
+
+  .prontuario-image-preview-button.p-button,
+  .prontuario-image-preview-button.p-button-outlined {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .prontuario-image-preview-actions .p-button {
+    min-width: 100%;
+  }
+}
+
+.prontuario-sidebar-card {
+  min-height: 16rem;
+  border: 0;
+  border-radius: 1.75rem;
+  background: #dcecfb;
+  padding: 1.5rem;
+  box-shadow: none;
+}
+
+.prontuario-sidebar-card-title {
+  max-width: 11rem;
+  white-space: pre-line;
+  color: #0f172a !important;
+  line-height: 1.25;
+}
+
+.prontuario-category-tab.p-button {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: left;
+}
+
+.prontuario-category-tab--selected.p-button {
+  border-color: #ffe57f;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.prontuario-category-tab--unselected.p-button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.prontuario-category-tab-title {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.prontuario-category-tab-description {
+  color: #cbd5e1 !important;
+}
+
+.prontuario-category-tab-metadata {
+  color: #94a3b8 !important;
+}
+
+.target-card {
+  position: relative;
+  min-height: 180px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  padding: 2rem;
 }

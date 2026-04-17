@@ -10,11 +10,11 @@ export default function UserRegisterPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Cadastrar usuário
         </Typography>
 
-        <Typography variant="p">Crie um novo acesso ao sistema CPO Digital.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Crie um novo acesso ao sistema CPO Digital.</Typography>
       </section>
 
       <Card title="Novo usuário" elevation="low">

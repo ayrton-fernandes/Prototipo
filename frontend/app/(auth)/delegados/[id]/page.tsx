@@ -25,11 +25,11 @@ export default function DelegateEditPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Editar delegado
         </Typography>
 
-        <Typography variant="p">Atualize o nome e o status do delegado.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Atualize o nome e o status do delegado.</Typography>
       </section>
 
       <Card title="Editar delegado" elevation="low">

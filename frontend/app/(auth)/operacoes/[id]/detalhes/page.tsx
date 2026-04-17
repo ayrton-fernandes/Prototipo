@@ -14,9 +14,19 @@ export default function OperationDetailsPage() {
     errorMessage,
     targets,
     members,
+    memberUsers,
+    memberProfileDescriptionByCode,
+    membersLoading,
+    membersProcessing,
+    membersErrorMessage,
     goToOperationsList,
     editOperation,
     toggleOperationStatus,
+    createMember,
+    updateMemberPermission,
+    deleteMember,
+    deleteTarget,
+    reloadTargets,
   } = useOperationDetailsPage();
 
   if (loading) {
@@ -60,9 +70,24 @@ export default function OperationDetailsPage() {
           onDeleteOrReactivate={toggleOperationStatus}
         />
 
-        <OperationTargetsSection targets={targets} />
+        <OperationTargetsSection targets={targets} onDelete={async (targetId) => {
+          if (deleteTarget) {
+            await deleteTarget(targetId);
+            if (reloadTargets) reloadTargets();
+          }
+        }} />
 
-        <OperationMembersSection members={members} />
+        <OperationMembersSection
+          members={members}
+          users={memberUsers}
+          profileDescriptionByCode={memberProfileDescriptionByCode}
+          loading={membersLoading}
+          processing={membersProcessing}
+          errorMessage={membersErrorMessage}
+          onCreate={createMember}
+          onUpdatePermission={updateMemberPermission}
+          onDelete={deleteMember}
+        />
       </div>
     </>
   );

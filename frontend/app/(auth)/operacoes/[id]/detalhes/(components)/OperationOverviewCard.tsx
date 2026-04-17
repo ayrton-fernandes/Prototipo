@@ -22,7 +22,7 @@ export default function OperationOverviewCard({
       <div className="flex flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <Typography variant="h3" className="">{operation.name}</Typography>
+            <Typography variant="h3">{operation.name}</Typography>
             <Typography variant="small" className="text-slate-500">
               {operation.operationCode}
             </Typography>
@@ -40,10 +40,10 @@ export default function OperationOverviewCard({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Typography variant="small" className="font-semibold text operation-details-overview">
+          <Typography variant="small" className="font-semibold operation-details-overview">
             Informações e observações gerais
           </Typography>
-          <Typography variant="p" >
+          <Typography variant="p">
             {operation.description?.trim() || "Sem observações registradas."}
           </Typography>
         </div>

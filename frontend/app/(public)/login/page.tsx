@@ -2,14 +2,13 @@
 
 import { Button, Card, FlexContainer, InputPassword, InputText, } from "@uigovpe/components";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { useForm, Controller } from 'react-hook-form';
 import { useMemo, useState } from "react";
 import { authService } from "@/services/authService";
 import { getImagePath } from "@/utils/getImagePath";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { footerLogo, logoPrograma } from "@/config/constant/layout/layout.config";
+
 
 type LoginFormData = {
   email: string;
@@ -123,35 +122,8 @@ export default function Login() {
 
   return (
     <>
-      <div className="login-page flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-md p-6 md:p-10">
-          {/* <FlexContainer
-            direction="row"
-            gap="12"
-            justify="center"
-            align="center"
-            className="mb-10 max-w-96"
-          >
-          <div>
-            <Image
-              src={getImagePath(logoPrograma.src)}
-              width={200}
-              height={100}
-              alt={logoPrograma.alt}
-              className="responsive-img rounded"
-            />
-          </div>
-          <div>
-            <Image
-              src={getImagePath(footerLogo.src)}
-              width={200}
-              height={100}
-              alt={footerLogo.alt}
-              className="contrast-img responsive-img rounded"
-            />
-          </div>
-        </FlexContainer> */}
-
+      <div className="auth-page-shell login-page">
+        <div className="auth-page-panel p-6 md:p-10">
           <Card title="Login">
             <form onSubmit={handleSubmit(onSubmit)}>
               <FlexContainer

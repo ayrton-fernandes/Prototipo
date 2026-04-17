@@ -10,11 +10,11 @@ export default function StationRegisterPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Cadastrar delegacia
         </Typography>
 
-        <Typography variant="p">Crie uma nova delegacia no sistema CPO Digital.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Crie uma nova delegacia no sistema CPO Digital.</Typography>
       </section>
 
       <Card title="Nova delegacia" elevation="low">

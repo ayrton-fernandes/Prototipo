@@ -1,16 +1,31 @@
 "use client";
 
 import Image from "next/image";
-import { Button, Card, Icon, Typography } from "@uigovpe/components";
+import { Button, Card, Icon, Menu, Typography } from "@uigovpe/components";
+import { useRouter, useParams } from "next/navigation";
 import { OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
-import { getImagePath } from "@/utils/getImagePath";
+import EntityActionMenu from "@/components/EntityActionMenu";
+import { maskCpf, formatDateToDisplay } from "@/utils/formatters";
 
 interface OperationTargetsSectionProps {
   targets: OperationTarget[];
+  onDelete?: (targetId: number) => void;
 }
 
-export default function OperationTargetsSection({ targets }: OperationTargetsSectionProps) {
-  const fallbackImage = getImagePath("logo-policia.png");
+export default function OperationTargetsSection({ targets, onDelete }: OperationTargetsSectionProps) {
+  const router = useRouter();
+  const params = useParams() as { id?: string };
+
+  const handleCreate = () => {
+    const id = params?.id ?? null;
+    if (id) {
+      router.push(`/operacoes/${id}/detalhes/alvo/cadastrar`);
+      return;
+    }
+
+    // fallback
+    window.location.assign(window.location.pathname + "/cadastrar");
+  };
 
   return (
     <section className="flex flex-col gap-4">
@@ -24,7 +39,7 @@ export default function OperationTargetsSection({ targets }: OperationTargetsSec
           </Typography>
         </div>
 
-        <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} disabled />
+        <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} onClick={handleCreate} />
       </div>
 
       {targets.length === 0 ? (
@@ -34,57 +49,55 @@ export default function OperationTargetsSection({ targets }: OperationTargetsSec
           </Typography>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {targets.map((target) => (
-            <Card key={target.id} className="operation-target-card">
-              <div className="operation-target-card-content">
-                <div className="operation-target-avatar">
-                  <Image
-                    src={target.imageUrl ?? fallbackImage}
-                    alt={target.name}
-                    width={140}
-                    height={180}
-                    className="h-full w-full object-cover"
-                    priority
-                  />
+            <Card key={target.id} className="target-card">
+              <div className="absolute top-4 right-4 z-10">
+                <EntityActionMenu
+                  active={true}
+                  onEdit={() => router.push(`/operacoes/${params?.id}/detalhes/alvo/${target.id}/editar`)}
+                  onViewDetails={() => router.push(`/operacoes/${params?.id}/detalhes/alvo/${target.id}`)}
+                  onDelete={async () => {
+                    if (onDelete) {
+                      await onDelete(target.id);
+                    }
+                  }}
+                  onReactivate={() => {}}
+                  editLabel="Editar alvo"
+                  showViewDetails
+                />
+              </div>
+
+              <div className="flex items-start gap-6">
+                <div className="h-28 w-28 md:h-36 md:w-36 overflow-hidden rounded-lg bg-slate-100 flex-shrink-0">
+                  {target.imageUrl ? (
+                    <img src={target.imageUrl} alt={target.fullName} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <span className="text-slate-600 font-medium">(sem foto)</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="operation-target-info">
-                  <Button
-                    icon={<Icon icon="more_vert" />}
-                    rounded
-                    text
-                    disabled
-                    aria-label={`Ações do alvo ${target.name}`}
-                    className="operation-target-action"
-                  />
-
-                  <div className="operation-target-name-wrap">
-                    <Typography variant="small" className="operation-target-label">
+                <div className="flex flex-1 min-w-0 flex-col gap-4 overflow-hidden">
+                  <div>
+                    <Typography variant="small" className="text-slate-400">
                       Nome do Alvo:
                     </Typography>
-                    <Typography variant="h3" className="operation-target-name">
-                      {target.name}
+                    <Typography variant="p" className="font-semibold text-white md:text-2xl text-xl break-words">
+                      {target.fullName}
                     </Typography>
                   </div>
 
-                  <div className="operation-target-meta-grid">
-                    <div>
-                      <Typography variant="small" className="operation-target-label">
-                        CPF:
-                      </Typography>
-                      <Typography variant="p" className="operation-target-value">
-                        {target.cpf}
-                      </Typography>
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-12 mt-1 text-slate-300 w-full">
+                    <div className="flex flex-col min-w-0">
+                      <Typography variant="small" className="text-slate-400">CPF</Typography>
+                      <Typography variant="p" className="font-medium truncate">{target.cpf ? maskCpf(target.cpf) : '-'}</Typography>
                     </div>
 
-                    <div>
-                      <Typography variant="small" className="operation-target-label">
-                        Data de Nascimento:
-                      </Typography>
-                      <Typography variant="p" className="operation-target-value">
-                        {target.birthDate}
-                      </Typography>
+                    <div className="flex flex-col min-w-0">
+                      <Typography variant="small" className="text-slate-400">Data de Nascimento</Typography>
+                      <Typography variant="p" className="font-medium truncate">{target.birthDate ? formatDateToDisplay(target.birthDate) : '-'}</Typography>
                     </div>
                   </div>
                 </div>

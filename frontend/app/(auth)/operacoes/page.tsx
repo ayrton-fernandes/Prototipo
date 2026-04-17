@@ -41,11 +41,11 @@ export default function OperationsPage() {
     <>
       <section className="mb-6">
         <div>
-          <Typography variant="h1" className="mb-2 text-black">
+          <Typography variant="h1" className="mb-2 cpo-page-title">
             Gestão de operações
           </Typography>
 
-          <Typography variant="p" className="text-slate-500">
+          <Typography variant="p" className="cpo-page-subtitle">
             Gerencie o domínio de operações do sistema.
           </Typography>
         </div>

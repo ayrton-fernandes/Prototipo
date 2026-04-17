@@ -83,11 +83,11 @@ export default function StationPage() {
 	return (
 		<>
 			<section className="mb-6">
-				<Typography variant="h1" className="mb-2 text-black">
+				<Typography variant="h1" className="mb-2 cpo-page-title">
 					Gestão de delegacias
 				</Typography>
 
-				<Typography variant="p" className="text-slate-500">
+				<Typography variant="p" className="cpo-page-subtitle">
 					Gerencie o domínio de delegacias do sistema.
 				</Typography>
 			</section>

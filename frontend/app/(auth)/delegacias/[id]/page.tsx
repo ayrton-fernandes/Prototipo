@@ -25,11 +25,11 @@ export default function StationEditPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2">
+        <Typography variant="h1" className="mb-2 cpo-page-title">
           Editar delegacia
         </Typography>
 
-        <Typography variant="p">Atualize o nome e o status da delegacia.</Typography>
+        <Typography variant="p" className="cpo-page-subtitle">Atualize o nome e o status da delegacia.</Typography>
       </section>
 
       <Card title="Editar delegacia" elevation="low">

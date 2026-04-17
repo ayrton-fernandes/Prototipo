@@ -45,27 +45,20 @@ export default function DirectorateTable({
     ),
   }));
 
-  const headerCellStyle = {
-    headerCell: {
-      className: "font-bold text-sm",
-    },
-  };
-
   return (
     <Table
       value={tableData}
       loading={loading}
-      tableStyle={{ width: "100%" }}
       pt={{
-        bodyRow: {
-          className: "text-sm font-normal",
+        root: {
+          className: "table-list table-list--standard-with-code",
         },
       }}
     >
-      <Column field="descName" header="Diretoria" style={{ width: "36%" }} pt={headerCellStyle} />
-      <Column field="codeName" header="Código" style={{ width: "30%" }} pt={headerCellStyle} />
-      <Column field="status" header="Status" style={{ width: "18%" }} pt={headerCellStyle} />
-      <Column field="action" header="Ação" style={{ width: "16%" }} pt={headerCellStyle} />
+      <Column field="descName" header="Diretoria" />
+      <Column field="codeName" header="Código" />
+      <Column field="status" header="Status" />
+      <Column field="action" header="Ação" />
     </Table>
   );
 }

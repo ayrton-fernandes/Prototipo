@@ -111,7 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <AppLayout>
         <GovBar showThemeController={false} />
         <AppLayout.MainLayout>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div className="app-loading-state">
             Carregando...
           </div>
         </AppLayout.MainLayout>

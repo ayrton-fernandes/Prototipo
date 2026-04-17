@@ -15,12 +15,6 @@ interface EntityTableProps {
 	onReactivate: (id: number) => void;
 }
 
-const headerCellStyle = {
-	headerCell: {
-		className: "font-bold text-sm",
-	},
-};
-
 export default function EntityTable({
 	items,
 	loading,
@@ -38,6 +32,10 @@ export default function EntityTable({
 			</Typography>
 		);
 	}
+
+	const tableClassName = showCodeName
+		? "table-list table-list--standard-with-code"
+		: "table-list table-list--standard-without-code";
 
 	const tableData = items.map((item) => ({
 		...item,
@@ -61,17 +59,16 @@ export default function EntityTable({
 		<Table
 			value={tableData}
 			loading={loading}
-			tableStyle={{ width: "100%" }}
 			pt={{
-				bodyRow: {
-					className: "text-sm font-normal",
+				root: {
+					className: tableClassName,
 				},
 			}}
 		>
-			<Column field="descName" header={nameHeader} style={{ width: showCodeName ? "36%" : "60%" }} pt={headerCellStyle} />
-			{showCodeName && <Column field="codeName" header="Código" style={{ width: "30%" }} pt={headerCellStyle} />}
-			<Column field="status" header="Status" style={{ width: "18%" }} pt={headerCellStyle} />
-			<Column field="action" header="Ação" style={{ width: "16%" }} pt={headerCellStyle} />
+			<Column field="descName" header={nameHeader} />
+			{showCodeName && <Column field="codeName" header="Código" />}
+			<Column field="status" header="Status" />
+			<Column field="action" header="Ação" />
 		</Table>
 	);
 }

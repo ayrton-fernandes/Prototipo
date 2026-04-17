@@ -13,12 +13,6 @@ interface UsersTableProps {
   onReactivate: (id: number) => void;
 }
 
-const headerCellStyle = {
-  headerCell: {
-    className: "font-bold text-sm",
-  },
-};
-
 export default function UsersTable({
   users,
   profileDescriptionByCode,
@@ -57,18 +51,17 @@ export default function UsersTable({
     <Table
       value={tableData}
       loading={loading}
-      tableStyle={{ width: "100%" }}
       pt={{
-        bodyRow: {
-          className: "text-sm font-normal",
+        root: {
+          className: "table-list table-list--users",
         },
       }}
     >
-      <Column field="name" header="Nome" style={{ width: "30%" }} pt={headerCellStyle} />
-      <Column field="email" header="E-mail" style={{ width: "28%" }} pt={headerCellStyle} />
-      <Column field="perfis" header="Perfis" style={{ width: "24%" }} pt={headerCellStyle} />
-      <Column field="status" header="Status" style={{ width: "10%" }} pt={headerCellStyle} />
-      <Column field="action" header="Ação" style={{ width: "8%" }} pt={headerCellStyle} />
+      <Column field="name" header="Nome" />
+      <Column field="email" header="E-mail" />
+      <Column field="perfis" header="Perfis" />
+      <Column field="status" header="Status" />
+      <Column field="action" header="Ação" />
     </Table>
   );
 }
