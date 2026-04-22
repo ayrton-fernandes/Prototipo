@@ -12,7 +12,7 @@ export default function CreateTargetPage() {
     <>
       <TargetSectionsHeader />
 
-      <section className="mb-6">
+      <section className="mb-6 ">
         <Typography variant="h1" className="mb-2 cpo-page-title">
           Cadastrar Alvo
         </Typography>
@@ -21,7 +21,7 @@ export default function CreateTargetPage() {
         </Typography>
       </section>
 
-      <Card title="Novo alvo" elevation="low">
+      <Card title="Novo alvo" className="text-white" elevation="low">
         <TargetForm
           title="Dados do alvo"
           submitLabel="Avançar"

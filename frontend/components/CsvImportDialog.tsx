@@ -29,8 +29,7 @@ export default function CsvImportDialog({ operationId }: Props) {
         onClick={() => openFor('targets')} 
       />
       <Button 
-        label="Importar Prontuários" 
-        outlined 
+        label="Importar Prontuários"  
         icon={<Icon icon="upload" />} 
         onClick={() => openFor('prontuarios')} 
       />

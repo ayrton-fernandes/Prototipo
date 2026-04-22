@@ -145,7 +145,7 @@ export default function Login() {
                 justify="center"
                 align="start"
               >
-                <div className="w-full">
+                <div className="w-full text-black">
                   <Controller
                     name="email"
                     control={control}
