@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BaseResponseDTO } from "@/domain/types/base";
-import { courtService } from "@/services/courtService";
+import { domainCourtService } from "@/services/domainCourtService";
 
 export function useCourtsList() {
   const [courts, setCourts] = useState<BaseResponseDTO[]>([]);
@@ -12,7 +12,7 @@ export function useCourtsList() {
   const fetchCourts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await courtService.findAll();
+      const response = await domainCourtService.findAll();
       setCourts(response.data);
     } finally {
       setLoading(false);

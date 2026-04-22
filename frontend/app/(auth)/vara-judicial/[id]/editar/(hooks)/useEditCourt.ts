@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { courtService } from "@/services/courtService";
+import { domainCourtService } from "@/services/domainCourtService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { CourtFormErrors, CourtFormState } from "@/app/(auth)/vara-judicial/(types)/courtForm";
@@ -30,7 +30,7 @@ export function useEditCourt(courtId: number) {
   const loadCourt = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await courtService.findById(courtId);
+      const response = await domainCourtService.findById(courtId);
       const court = response.data;
 
       setForm({
@@ -72,15 +72,15 @@ export function useEditCourt(courtId: number) {
     if (hasStatusChange) setStatusLoading(true);
 
     try {
-      await courtService.update(courtId, {
+      await domainCourtService.update(courtId, {
         descName: form.descName.trim(),
       });
 
       if (hasStatusChange) {
         if (selectedIsActive) {
-          await courtService.reactivateById(courtId);
+          await domainCourtService.reactivateById(courtId);
         } else {
-          await courtService.deleteById(courtId);
+          await domainCourtService.deleteById(courtId);
         }
         setOriginalIsActive(selectedIsActive);
       }

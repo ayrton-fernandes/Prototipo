@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { BaseCreateDTO, BaseResponseDTO, BaseUpdateDTO } from "@/domain/types/base";
-import { stationService } from "@/services/stationService";
+import { domainStationService } from "@/services/domainStationService";
 
 interface StationState {
     items: BaseResponseDTO[];
@@ -19,7 +19,7 @@ const initialState: StationState = {
 export const fetchAllStations = createAsyncThunk<BaseResponseDTO[]>(
     "station/fetchAll",
     async () => {
-        const response = await stationService.findAll();
+        const response = await domainStationService.findAll();
         return response.data;
     }
 );
@@ -27,7 +27,7 @@ export const fetchAllStations = createAsyncThunk<BaseResponseDTO[]>(
 export const fetchStationById = createAsyncThunk<BaseResponseDTO, number>(
     "station/fetchById",
     async (id: number) => {
-        const response = await stationService.findById(id);
+        const response = await domainStationService.findById(id);
         return response.data;
     }
 );
@@ -35,28 +35,28 @@ export const fetchStationById = createAsyncThunk<BaseResponseDTO, number>(
 export const createStation = createAsyncThunk<void, BaseCreateDTO>(
     "station/create",
     async (payload: BaseCreateDTO) => {
-        await stationService.create(payload);
+        await domainStationService.create(payload);
     }
 );
 
 export const updateStation = createAsyncThunk<void, { id: number; payload: BaseUpdateDTO }>(
     "station/update",
     async ({ id, payload }: { id: number; payload: BaseUpdateDTO }) => {
-        await stationService.update(id, payload);
+        await domainStationService.update(id, payload);
     }
 );
 
 export const deleteStationById = createAsyncThunk<void, number>(
     "station/deleteById",
     async (id: number) => {
-        await stationService.deleteById(id);
+        await domainStationService.deleteById(id);
     }
 );
 
 export const reactivateStationById = createAsyncThunk<void, number>(
     "station/reactivateById",
     async (id: number) => {
-        await stationService.reactivateById(id);
+        await domainStationService.reactivateById(id);
     }
 );
 

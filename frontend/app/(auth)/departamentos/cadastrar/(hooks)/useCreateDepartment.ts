@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { departmentService } from "@/services/departmentService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DepartmentFormErrors, DepartmentFormState } from "@/app/(auth)/departamentos/(types)/departmentForm";
@@ -38,7 +38,7 @@ export function useCreateDepartment() {
 
     setLoading(true);
     try {
-      await departmentService.create({
+      await domainDepartmentService.create({
         descName: form.descName.trim(),
       });
 

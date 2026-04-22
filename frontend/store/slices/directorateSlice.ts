@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { BaseCreateDTO, BaseResponseDTO, BaseUpdateDTO } from "@/domain/types/base";
-import { directorateService } from "@/services/directorateService";
+import { domainDirectorateService } from "@/services/domainDirectorateService";
 
 interface DirectorateState {
     items: BaseResponseDTO[];
@@ -19,7 +19,7 @@ const initialState: DirectorateState = {
 export const fetchAllDirectorates = createAsyncThunk<BaseResponseDTO[]>(
     "directorate/fetchAll",
     async () => {
-        const response = await directorateService.findAll();
+        const response = await domainDirectorateService.findAll();
         return response.data;
     }
 );
@@ -27,7 +27,7 @@ export const fetchAllDirectorates = createAsyncThunk<BaseResponseDTO[]>(
 export const fetchDirectorateById = createAsyncThunk<BaseResponseDTO, number>(
     "directorate/fetchById",
     async (id: number) => {
-        const response = await directorateService.findById(id);
+        const response = await domainDirectorateService.findById(id);
         return response.data;
     }
 );
@@ -35,28 +35,28 @@ export const fetchDirectorateById = createAsyncThunk<BaseResponseDTO, number>(
 export const createDirectorate = createAsyncThunk<void, BaseCreateDTO>(
     "directorate/create",
     async (payload: BaseCreateDTO) => {
-        await directorateService.create(payload);
+        await domainDirectorateService.create(payload);
     }
 );
 
 export const updateDirectorate = createAsyncThunk<void, { id: number; payload: BaseUpdateDTO }>(
     "directorate/update",
     async ({ id, payload }: { id: number; payload: BaseUpdateDTO }) => {
-        await directorateService.update(id, payload);
+        await domainDirectorateService.update(id, payload);
     }
 );
 
 export const deleteDirectorateById = createAsyncThunk<void, number>(
     "directorate/deleteById",
     async (id: number) => {
-        await directorateService.deleteById(id);
+        await domainDirectorateService.deleteById(id);
     }
 );
 
 export const reactivateDirectorateById = createAsyncThunk<void, number>(
     "directorate/reactivateById",
     async (id: number) => {
-        await directorateService.reactivateById(id);
+        await domainDirectorateService.reactivateById(id);
     }
 );
 

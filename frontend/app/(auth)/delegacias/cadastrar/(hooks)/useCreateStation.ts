@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { stationService } from "@/services/stationService";
+import { domainStationService } from "@/services/domainStationService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { StationFormErrors, StationFormState } from "@/app/(auth)/delegacias/(types)/stationForm";
@@ -38,7 +38,7 @@ export function useCreateStation() {
 
     setLoading(true);
     try {
-      await stationService.create({
+      await domainStationService.create({
         descName: form.descName.trim(),
       });
 

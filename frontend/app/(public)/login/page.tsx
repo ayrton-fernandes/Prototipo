@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, FlexContainer, InputPassword, InputText, } from "@uigovpe/components";
+import { Button, Card, FlexContainer, InputPassword, InputText, Typography, } from "@uigovpe/components";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from 'react-hook-form';
 import { useMemo, useState } from "react";
@@ -58,24 +58,24 @@ export default function Login() {
   // Função de validação customizada
   const validateForm = (data: LoginFormData): boolean => {
     let isValid = true;
-    
+
     // Limpa erros anteriores
     clearErrors();
-    
+
     // Valida email
     const emailError = validateEmail(data.email);
     if (emailError) {
       setError('email', { type: 'manual', message: emailError });
       isValid = false;
     }
-    
+
     // Valida senha
     const passwordError = validatePassword(data.senha);
     if (passwordError) {
       setError('senha', { type: 'manual', message: passwordError });
       isValid = false;
     }
-    
+
     return isValid;
   };
 
@@ -89,42 +89,55 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-        await authService.requestOtp({
-          email: data.email,
-          password: data.senha,
-        });
+      await authService.requestOtp({
+        email: data.email,
+        password: data.senha,
+      });
 
-        dispatch(
-          showToast({
-            severity: "success",
-            summary: "Código enviado",
-            detail: "Enviamos o código OTP para o seu e-mail.",
-          })
-        );
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Código enviado",
+          detail: "Enviamos o código OTP para o seu e-mail.",
+        })
+      );
 
-        sessionStorage.setItem("pendingLoginEmail", data.email);
-        const target = `/verify-code?redirectTo=${encodeURIComponent(redirectPath)}`;
-        window.location.assign(target);
+      sessionStorage.setItem("pendingLoginEmail", data.email);
+      const target = `/verify-code?redirectTo=${encodeURIComponent(redirectPath)}`;
+      window.location.assign(target);
 
     } catch (error) {
-        dispatch(
-          showToast({
-            severity: "error",
-            summary: "Não foi possível solicitar o código",
-            detail: "Verifique suas credenciais e tente novamente.",
-          })
-        );
-        console.error("Erro ao fazer login:", error);
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Não foi possível solicitar o código",
+          detail: "Verifique suas credenciais e tente novamente.",
+        })
+      );
+      console.error("Erro ao fazer login:", error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <>
       <div className="auth-page-shell login-page">
         <div className="auth-page-panel p-6 md:p-10">
-          <Card title="Login">
+          <Card>
+            <FlexContainer
+              direction="col"
+              gap="2"
+              align='center'
+              className="w-full"
+            >
+              <Typography variant="span" className="text-black" fontWeight="bold">
+                CPO DIGITAL
+              </Typography>
+              <Typography variant="span" className="text-sm text-black" textAlign="center">
+                Controle de Operações Policiais - Governo de Pernambuco
+              </Typography>
+            </FlexContainer>
             <form onSubmit={handleSubmit(onSubmit)}>
               <FlexContainer
                 direction="col"
@@ -132,40 +145,40 @@ export default function Login() {
                 justify="center"
                 align="start"
               >
-              <div className="w-full">
-                <Controller
-                  name="email"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <InputText
-                      {...field}
-                      label="E-mail"
-                      invalid={!!errors.email}
-                      placeholder="Ex: exemplo@gmail.com"
-                      supportText={errors.email?.message}
-                    />
-                  )}
-                />
-              </div>
+                <div className="w-full">
+                  <Controller
+                    name="email"
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <InputText
+                        {...field}
+                        label="E-mail"
+                        invalid={!!errors.email}
+                        placeholder="Ex: exemplo@gmail.com"
+                        supportText={errors.email?.message}
+                      />
+                    )}
+                  />
+                </div>
 
-              <div className="w-full">
-                <Controller
-                  name="senha"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <InputPassword
-                      {...field}
-                      label="Senha"
-                      placeholder="Digite sua senha"
-                      invalid={!!errors.senha}
-                      supportText={errors.senha?.message}
-                      keyfilter={/^\S+$/}
-                    />
-                  )}
-                />
-              </div>
+                <div className="w-full">
+                  <Controller
+                    name="senha"
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <InputPassword
+                        {...field}
+                        label="Senha"
+                        placeholder="Digite sua senha"
+                        invalid={!!errors.senha}
+                        supportText={errors.senha?.message}
+                        keyfilter={/^\S+$/}
+                      />
+                    )}
+                  />
+                </div>
                 <Button
                   type="submit"
                   label="Entrar"

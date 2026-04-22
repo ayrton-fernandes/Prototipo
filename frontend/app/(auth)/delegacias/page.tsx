@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, InputText, Typography } from "@uigovpe/components";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { stationService } from "@/services/stationService";
+import { domainStationService } from "@/services/domainStationService";
 import StationTable from "@/app/(auth)/delegacias/(components)/StationTable";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useStationsList } from "@/app/(auth)/delegacias/(hooks)/useStationsList";
@@ -32,7 +32,7 @@ export default function StationPage() {
 		setConfirmVisible(false);
 
 		try {
-			await stationService.deleteById(targetId);
+			await domainStationService.deleteById(targetId);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -58,7 +58,7 @@ export default function StationPage() {
 	const handleReactivate = async (id: number) => {
 		setProcessingId(id);
 		try {
-			await stationService.reactivateById(id);
+			await domainStationService.reactivateById(id);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -92,7 +92,7 @@ export default function StationPage() {
 				</Typography>
 			</section>
 
-			<Card title="Delegacias" elevation="low">
+			<Card title="Delegacias" elevation="low" className="cpo-text-on-dark">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
 						<div className="w-full md:max-w-sm">
@@ -125,6 +125,10 @@ export default function StationPage() {
 				visible={confirmVisible}
 				entity="delegacia"
 				loading={isProcessing}
+				dialogClassName="operation-members-delete-dialog"
+				cancelButtonClassName="prontuario-dialog-cancel-button"
+				confirmButtonClassName="operation-members-submit-button"
+				confirmButtonDanger={false}
 				onHide={() => {
 					if (isProcessing) return;
 					setConfirmVisible(false);

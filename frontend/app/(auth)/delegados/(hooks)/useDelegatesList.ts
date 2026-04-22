@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BaseResponseDTO } from "@/domain/types/base";
-import { delegateService } from "@/services/delagateService";
+import { domainDelegateService } from "@/services/domainDelagateService";
 
 export function useDelegatesList() {
   const [delegates, setDelegates] = useState<BaseResponseDTO[]>([]);
@@ -12,7 +12,7 @@ export function useDelegatesList() {
   const fetchDelegates = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await delegateService.findAll();
+      const response = await domainDelegateService.findAll();
       setDelegates(response.data);
     } finally {
       setLoading(false);

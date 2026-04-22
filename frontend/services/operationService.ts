@@ -1,30 +1,30 @@
 import api from "@/services/api/api";
 import { OperationPayload, OperationResponse } from "@/domain/types/operation";
 
-const baseUrl = "/operation";
+const baseUrl = "/operations";
 
 export const operationService = {
   findAll() {
-    return api.get<OperationResponse[]>(`${baseUrl}/find-all`);
+    return api.get<OperationResponse[]>(`${baseUrl}`);
   },
 
   findById(id: number) {
-    return api.get<OperationResponse>(`${baseUrl}/find-by-id/${id}`);
+    return api.get<OperationResponse>(`${baseUrl}/${id}`);
   },
 
   create(payload: OperationPayload) {
-    return api.post<void>(`${baseUrl}/create`, payload);
+    return api.post<void>(`${baseUrl}`, payload);
   },
 
   update(id: number, payload: OperationPayload) {
-    return api.patch<void>(`${baseUrl}/patch/${id}`, payload);
+    return api.patch<void>(`${baseUrl}/${id}`, payload);
   },
 
   deleteById(id: number) {
-    return api.delete<void>(`${baseUrl}/delete-by-id/${id}`);
+    return api.delete<void>(`${baseUrl}/${id}`);
   },
 
   reactivateById(id: number) {
-    return api.patch<void>(`${baseUrl}/reactivate/${id}`);
+    return api.put<void>(`${baseUrl}/${id}/activation`);
   },
 };

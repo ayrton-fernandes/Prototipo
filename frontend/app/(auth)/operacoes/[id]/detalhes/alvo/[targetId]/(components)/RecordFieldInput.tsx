@@ -2,6 +2,7 @@
 
 import { ChangeEvent, ReactNode, useRef, useState } from "react";
 import { Button, Dropdown, Icon, InputText, InputTextarea, Typography } from "@uigovpe/components";
+import ProntuarioImagePreview from "./RecordImagePreview";
 import { maskDateInput } from "@/utils/formatters";
 import { TemplateFieldResponse } from "@/domain/types/templateField";
 import {
@@ -22,7 +23,7 @@ interface ProntuarioFieldInputProps {
   inputTypeOverride?: CanonicalInputType | null;
   disabled?: boolean;
   rightAction?: ReactNode;
-  onChange: (nextValue: string) => void;
+  onChange: (nextValue: string, selectedFile?: File) => void;
 }
 
 export default function ProntuarioFieldInput({
@@ -41,6 +42,10 @@ export default function ProntuarioFieldInput({
   const fieldLabel = displayLabel ?? field.label;
   const hasImageValue = value.trim().length > 0;
   const uploadStatusLabel = selectedFileName || (hasImageValue ? "Imagem carregada." : "Nenhum arquivo escolhido.");
+  const looksLikeFileValue = (val: string) => {
+    const v = val.trim();
+    return /^(blob:|data:|https?:\/\/|\/)\w*/i.test(v);
+  };
 
   if (inputType === "GROUP") {
     return null;
@@ -99,31 +104,16 @@ export default function ProntuarioFieldInput({
         return;
       }
 
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (typeof reader.result !== "string" || reader.result.trim().length === 0) {
-          setUploadError("Não foi possível ler a imagem selecionada.");
-          return;
-        }
-
-        setUploadError(null);
-        setSelectedFileName(selectedFile.name);
-        onChange(reader.result);
-      };
-
-      reader.onerror = () => {
-        setUploadError("Não foi possível processar a imagem selecionada.");
-        setSelectedFileName("");
-      };
-
-      reader.readAsDataURL(selectedFile);
+      const previewUrl = URL.createObjectURL(selectedFile);
+      setUploadError(null);
+      setSelectedFileName(selectedFile.name);
+      onChange(previewUrl, selectedFile);
       event.target.value = "";
     };
 
     return (
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-slate-700">{fieldLabel}</label>
+        <label className="text-sm font-medium text-white">{fieldLabel}</label>
 
         <input
           ref={fileInputRef}
@@ -141,6 +131,7 @@ export default function ProntuarioFieldInput({
               icon={<Icon icon="upload_file" />}
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
+              className="prontuario-primary-button"
             />
 
             <Typography variant="small" className="prontuario-image-upload-file-name">
@@ -148,10 +139,17 @@ export default function ProntuarioFieldInput({
             </Typography>
           </div>
 
-          {rightAction ? <div className="prontuario-image-upload-preview-action">{rightAction}</div> : null}
+          {rightAction ? (
+            <div className="prontuario-image-upload-preview-action">{rightAction}</div>
+          ) : null}
+          {!rightAction && hasImageValue && looksLikeFileValue(value) ? (
+            <div className="prontuario-image-upload-preview-action">
+              <ProntuarioImagePreview imageUrl={value} alt={fieldLabel} />
+            </div>
+          ) : null}
         </div>
 
-        <Typography variant="small" className="text-slate-500">
+        <Typography variant="small" className="text-white">
           Envie uma imagem do dispositivo (PNG, JPG, WEBP ou GIF, até 5 MB).
         </Typography>
 
@@ -162,7 +160,7 @@ export default function ProntuarioFieldInput({
         ) : null}
 
         {hasImageValue ? (
-          <Typography variant="small" className="text-slate-600">
+          <Typography variant="small" className="text-white">
             Imagem pronta para salvar nesta seção.
           </Typography>
         ) : null}

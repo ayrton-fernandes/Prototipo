@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { courtService } from "@/services/courtService";
+import { domainCourtService } from "@/services/domainCourtService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { CourtFormErrors, CourtFormState } from "@/app/(auth)/vara-judicial/(types)/courtForm";
@@ -38,7 +38,7 @@ export function useCreateCourt() {
 
     setLoading(true);
     try {
-      await courtService.create({
+      await domainCourtService.create({
         descName: form.descName.trim(),
       });
 

@@ -14,7 +14,7 @@ const GeneralPage = () => {
         </Typography>
       </section>
 
-      <Card title="Início" elevation='low'>
+      <Card title="Início" elevation='low' className="cpo-text-on-dark">
         <Typography variant="p">
           Esta é a página inicial do sistema.
         </Typography>

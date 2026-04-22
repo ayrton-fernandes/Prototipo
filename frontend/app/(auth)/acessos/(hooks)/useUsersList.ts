@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { userService } from "@/services/userService";
 import { UserListItem } from "@/domain/types/userManagement";
+import { domainProfileService } from "@/services/domainProfileService";
 
 export function useUsersList() {
   const [users, setUsers] = useState<UserListItem[]>([]);
@@ -15,7 +16,7 @@ export function useUsersList() {
     try {
       const [usersResponse, profilesResponse] = await Promise.all([
         userService.findAll(),
-        userService.findAllProfiles(),
+        domainProfileService.findAll(),
       ]);
 
       setUsers(usersResponse.data);

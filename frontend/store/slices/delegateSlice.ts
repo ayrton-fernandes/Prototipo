@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { BaseCreateDTO, BaseResponseDTO, BaseUpdateDTO } from "@/domain/types/base";
-import { delegateService } from "@/services/delagateService";
+import { domainDelegateService } from "@/services/domainDelagateService";
 
 interface DelegateState {
     items: BaseResponseDTO[];
@@ -19,7 +19,7 @@ const initialState: DelegateState = {
 export const fetchAllDelegates = createAsyncThunk<BaseResponseDTO[]>(
     "delegate/fetchAll",
     async () => {
-        const response = await delegateService.findAll();
+        const response = await domainDelegateService.findAll();
         return response.data;
     }
 );
@@ -27,7 +27,7 @@ export const fetchAllDelegates = createAsyncThunk<BaseResponseDTO[]>(
 export const fetchDelegateById = createAsyncThunk<BaseResponseDTO, number>(
     "delegate/fetchById",
     async (id: number) => {
-        const response = await delegateService.findById(id);
+        const response = await domainDelegateService.findById(id);
         return response.data;
     }
 );
@@ -35,28 +35,28 @@ export const fetchDelegateById = createAsyncThunk<BaseResponseDTO, number>(
 export const createDelegate = createAsyncThunk<void, BaseCreateDTO>(
     "delegate/create",
     async (payload: BaseCreateDTO) => {
-        await delegateService.create(payload);
+        await domainDelegateService.create(payload);
     }
 );
 
 export const updateDelegate = createAsyncThunk<void, { id: number; payload: BaseUpdateDTO }>(
     "delegate/update",
     async ({ id, payload }: { id: number; payload: BaseUpdateDTO }) => {
-        await delegateService.update(id, payload);
+        await domainDelegateService.update(id, payload);
     }
 );
 
 export const deleteDelegateById = createAsyncThunk<void, number>(
     "delegate/deleteById",
     async (id: number) => {
-        await delegateService.deleteById(id);
+        await domainDelegateService.deleteById(id);
     }
 );
 
 export const reactivateDelegateById = createAsyncThunk<void, number>(
     "delegate/reactivateById",
     async (id: number) => {
-        await delegateService.reactivateById(id);
+        await domainDelegateService.reactivateById(id);
     }
 );
 

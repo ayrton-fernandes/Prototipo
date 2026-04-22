@@ -92,7 +92,7 @@ export default function AcessosPage() {
         </Typography>
       </section>
 
-      <Card title="Usuários" elevation="low">
+      <Card title="Usuários" elevation="low" className="cpo-text-on-dark">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
             <div className="w-full md:max-w-sm">

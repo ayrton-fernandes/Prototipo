@@ -23,7 +23,7 @@ interface ProntuarioGroupSectionProps {
   groupNode: TemplateGroupNode;
   drafts: Record<string, ProntuarioFieldDraft>;
   disabled?: boolean;
-  onFieldChange: (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string) => void;
+  onFieldChange: (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string, selectedFile?: File) => void;
   onAddInstance: (groupNode: TemplateGroupNode) => void;
   onRemoveInstance: (groupNode: TemplateGroupNode, groupInstanceId: string | null) => void;
 }
@@ -42,16 +42,7 @@ const TARGET_IMAGES_GROUP_LABELS = new Set(["fotos do alvo", "imagem do alvo", "
 
 const isTargetImagesGroup = (label: string): boolean => TARGET_IMAGES_GROUP_LABELS.has(normalizeFiliacaoValue(label));
 
-const isPreviewableImageValue = (value: string): boolean => {
-  const normalizedValue = value.trim().toLowerCase();
-
-  return (
-    normalizedValue.startsWith("data:image/") ||
-    normalizedValue.startsWith("blob:") ||
-    normalizedValue.startsWith("http://") ||
-    normalizedValue.startsWith("https://")
-  );
-};
+const isPreviewableImageValue = (value: string): boolean => value.trim().length > 0;
 
 const IMMUTABLE_TARGET_FIELD_LABELS = new Set([
   "nome do alvo",
@@ -129,7 +120,7 @@ export default function ProntuarioGroupSection({
                 field={field}
                 value={drafts[buildTemplateFieldDraftKey(entryId, field.id, null)]?.valueContent ?? ""}
                 disabled={disabled}
-                onChange={(nextValue) => onFieldChange(field, null, nextValue)}
+                onChange={(nextValue, selectedFile) => onFieldChange(field, null, nextValue, selectedFile)}
               />
             </div>
           ))}
@@ -143,10 +134,10 @@ export default function ProntuarioGroupSection({
   }
 
   return (
-    <Card className="prontuario-surface-card flex flex-col gap-5">
+    <Card className="prontuario-surface-card flex flex-col gap-5 text-white">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-        <div className="flex flex-col gap-1">
-          <Typography variant="h4" className="text-slate-900">
+          <div className="flex flex-col gap-1">
+          <Typography variant="h4" className="text-white">
             {displayLabel}
           </Typography>
         </div>
@@ -165,7 +156,7 @@ export default function ProntuarioGroupSection({
       <div className="flex flex-col gap-4">
         {showEmptyRepeatableMessage ? (
           <div className="prontuario-instance-card">
-            <Typography variant="small" className="text-slate-500">
+            <Typography variant="small" className="text-white">
               {emptyRepeatableMessage}
             </Typography>
           </div>
@@ -178,7 +169,7 @@ export default function ProntuarioGroupSection({
           >
             {repeatable ? (
               <div className="mb-3 flex items-center justify-between gap-3">
-                <Typography variant="small" className="text-slate-500">
+                <Typography variant="small" className="text-white">
                   {filiacaoGroup ? `Filiação ${instanceIndex + 1}` : `Item ${instanceIndex + 1}`}
                 </Typography>
 
@@ -197,7 +188,7 @@ export default function ProntuarioGroupSection({
                     }
                   />
                 ) : (
-                  <Typography variant="small" className="text-slate-500">
+                  <Typography variant="small" className="text-white">
                     {editableGroupFields.length} campo(s)
                   </Typography>
                 )}
@@ -233,7 +224,7 @@ export default function ProntuarioGroupSection({
                       value={draft?.valueContent ?? ""}
                       disabled={disabled}
                       rightAction={rightAction}
-                      onChange={(nextValue) => onFieldChange(field, groupInstanceId, nextValue)}
+                      onChange={(nextValue, selectedFile) => onFieldChange(field, groupInstanceId, nextValue, selectedFile)}
                     />
                   );
                 };
@@ -279,7 +270,7 @@ export default function ProntuarioGroupSection({
                       inputTypeOverride={presentation.inputTypeOverride}
                       value={draft?.valueContent ?? ""}
                       disabled={disabled}
-                      onChange={(nextValue) => onFieldChange(field, groupInstanceId, nextValue)}
+                      onChange={(nextValue, selectedFile) => onFieldChange(field, groupInstanceId, nextValue, selectedFile)}
                     />
                   );
                 })}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { showToast } from "@/store/slices/toastSlice";
@@ -35,6 +35,7 @@ import {
   hasVisibleDraftValue,
   isValidUuid,
   normalizeGroupInstanceId,
+  normalizeInputType,
   PRONTUARIO_CATEGORY_CONFIGS,
   ProntuarioCategoryCode,
   ProntuarioCategoryConfig,
@@ -65,6 +66,11 @@ export interface ProntuarioCategoryTabItem {
   entryId: number | null;
   filledCount: number;
   totalCount: number;
+}
+
+interface PendingImageUpload {
+  file: File;
+  previewUrl: string;
 }
 
 const CATEGORY_SEQUENCE: ProntuarioCategoryCode[] = ["IDENTIFICACAO", "CONTEXTO_OPERACIONAL", "VINCULO_RELACIONAL"];
@@ -172,6 +178,12 @@ const normalizeSaveErrorMessage = (message: string): string => {
   }
 
   return message;
+};
+
+const revokeObjectUrlIfNeeded = (value: string): void => {
+  if (value.startsWith("blob:")) {
+    URL.revokeObjectURL(value);
+  }
 };
 
 const extractSaveErrorMessage = (error: unknown, fallbackMessage: string): string => {
@@ -302,9 +314,73 @@ export function useTargetProntuario() {
   const [templateFields, setTemplateFields] = useState<TemplateFieldResponse[]>([]);
   const [entryStates, setEntryStates] = useState<Record<ProntuarioCategoryCode, ProntuarioEntryState | null>>(EMPTY_ENTRY_STATES);
   const [pendingFieldValueDeleteIdsByEntry, setPendingFieldValueDeleteIdsByEntry] = useState<Record<number, number[]>>({});
+  const [pendingImageUploadsByDraftKey, setPendingImageUploadsByDraftKey] = useState<Record<string, PendingImageUpload>>({});
+  const pendingImageUploadsRef = useRef<Record<string, PendingImageUpload>>({});
   const [selectedCategoryCode, setSelectedCategoryCode] = useState<ProntuarioCategoryCode>("IDENTIFICACAO");
   const [customFieldDialogVisible, setCustomFieldDialogVisible] = useState(false);
   const [customFieldForm, setCustomFieldForm] = useState<ProntuarioCustomFieldFormState>(DEFAULT_CUSTOM_FIELD_FORM);
+
+  const clearPendingImageUploads = useCallback(() => {
+    setPendingImageUploadsByDraftKey((current) => {
+      Object.values(current).forEach(({ previewUrl }) => revokeObjectUrlIfNeeded(previewUrl));
+      return {};
+    });
+  }, []);
+
+  const removePendingImageUploads = useCallback((draftKeys: string[]) => {
+    if (draftKeys.length === 0) {
+      return;
+    }
+
+    setPendingImageUploadsByDraftKey((current) => {
+      const keysToRemove = new Set(draftKeys);
+      let hasChanges = false;
+      const next = { ...current };
+
+      Object.entries(current).forEach(([draftKey, upload]) => {
+        if (!keysToRemove.has(draftKey)) {
+          return;
+        }
+
+        hasChanges = true;
+        revokeObjectUrlIfNeeded(upload.previewUrl);
+        delete next[draftKey];
+      });
+
+      return hasChanges ? next : current;
+    });
+  }, []);
+
+  const removePendingImageUploadsByEntry = useCallback((entryId: number) => {
+    const entryKeyPrefix = `entry:${entryId}:`;
+
+    setPendingImageUploadsByDraftKey((current) => {
+      let hasChanges = false;
+      const next = { ...current };
+
+      Object.entries(current).forEach(([draftKey, upload]) => {
+        if (!draftKey.startsWith(entryKeyPrefix)) {
+          return;
+        }
+
+        hasChanges = true;
+        revokeObjectUrlIfNeeded(upload.previewUrl);
+        delete next[draftKey];
+      });
+
+      return hasChanges ? next : current;
+    });
+  }, []);
+
+  useEffect(() => {
+    pendingImageUploadsRef.current = pendingImageUploadsByDraftKey;
+  }, [pendingImageUploadsByDraftKey]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(pendingImageUploadsRef.current).forEach(({ previewUrl }) => revokeObjectUrlIfNeeded(previewUrl));
+    };
+  }, []);
 
   const selectedCategoryConfig = useMemo(() => PRONTUARIO_CATEGORY_CONFIGS[selectedCategoryCode], [selectedCategoryCode]);
 
@@ -342,6 +418,7 @@ export function useTargetProntuario() {
 
   const loadProntuario = useCallback(async () => {
     if (!Number.isFinite(operationId) || !Number.isFinite(targetId)) {
+      clearPendingImageUploads();
       setErrorMessage("Não foi possível identificar a operação ou o alvo.");
       setLoading(false);
       return;
@@ -421,6 +498,7 @@ export function useTargetProntuario() {
       setTemplateFields(templateFieldsResponse.data);
       setEntryStates(nextEntryStates);
       setPendingFieldValueDeleteIdsByEntry({});
+      clearPendingImageUploads();
       setSelectedCategoryCode((current) => (nextEntryStates[current] ? current : orderedCategories[0].codeName as ProntuarioCategoryCode));
     } catch (loadError) {
       setErrorMessage(loadError instanceof Error ? loadError.message : "Não foi possível carregar o prontuário do alvo.");
@@ -430,10 +508,11 @@ export function useTargetProntuario() {
       setTemplateFields([]);
       setEntryStates(EMPTY_ENTRY_STATES());
       setPendingFieldValueDeleteIdsByEntry({});
+      clearPendingImageUploads();
     } finally {
       setLoading(false);
     }
-  }, [operationId, targetId]);
+  }, [clearPendingImageUploads, operationId, targetId]);
 
   useEffect(() => {
     void loadProntuario();
@@ -458,9 +537,16 @@ export function useTargetProntuario() {
   );
 
   const handleTemplateFieldChange = useCallback(
-    (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string) => {
+    (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string, selectedFile?: File) => {
+      const activeEntry = selectedEntryState;
+
+      if (!activeEntry) {
+        return;
+      }
+
+      const draftKey = buildTemplateFieldDraftKey(activeEntry.infoEntry.id, field.id, groupInstanceId);
+
       updateSelectedEntryState((entryState) => {
-        const draftKey = buildTemplateFieldDraftKey(entryState.infoEntry.id, field.id, groupInstanceId);
         const currentDraft = entryState.drafts[draftKey] ?? {
           fieldValueId: null,
           templateFieldId: field.id,
@@ -480,14 +566,44 @@ export function useTargetProntuario() {
           },
         };
       });
+
+      const isImageInputField = normalizeInputType(field.inputType) === "INPUT";
+
+      if (!isImageInputField || !selectedFile) {
+        removePendingImageUploads([draftKey]);
+        return;
+      }
+
+      setPendingImageUploadsByDraftKey((current) => {
+        const existingUpload = current[draftKey];
+
+        if (existingUpload) {
+          revokeObjectUrlIfNeeded(existingUpload.previewUrl);
+        }
+
+        return {
+          ...current,
+          [draftKey]: {
+            file: selectedFile,
+            previewUrl: nextValue,
+          },
+        };
+      });
     },
-    [updateSelectedEntryState]
+    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
   );
 
   const handleCustomFieldChange = useCallback(
-    (customField: CustomFieldResponse, nextValue: string) => {
+    (customField: CustomFieldResponse, nextValue: string, selectedFile?: File) => {
+      const activeEntry = selectedEntryState;
+
+      if (!activeEntry) {
+        return;
+      }
+
+      const draftKey = buildCustomFieldDraftKey(activeEntry.infoEntry.id, customField.id);
+
       updateSelectedEntryState((entryState) => {
-        const draftKey = buildCustomFieldDraftKey(entryState.infoEntry.id, customField.id);
         const currentDraft = entryState.drafts[draftKey] ?? {
           fieldValueId: null,
           templateFieldId: null,
@@ -507,8 +623,31 @@ export function useTargetProntuario() {
           },
         };
       });
+
+      const isImageInputField = normalizeInputType(customField.inputType) === "INPUT";
+
+      if (!isImageInputField || !selectedFile) {
+        removePendingImageUploads([draftKey]);
+        return;
+      }
+
+      setPendingImageUploadsByDraftKey((current) => {
+        const existingUpload = current[draftKey];
+
+        if (existingUpload) {
+          revokeObjectUrlIfNeeded(existingUpload.previewUrl);
+        }
+
+        return {
+          ...current,
+          [draftKey]: {
+            file: selectedFile,
+            previewUrl: nextValue,
+          },
+        };
+      });
     },
-    [updateSelectedEntryState]
+    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
   );
 
   const handleAddGroupInstance = useCallback(
@@ -535,6 +674,17 @@ export function useTargetProntuario() {
       }
 
       const removableFieldIds = new Set(groupNode.children.map((field) => field.id));
+      const draftKeysToRemove = Object.entries(activeEntry.drafts)
+        .filter(([, draft]) => {
+          const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+          return (
+            draftGroupInstanceId === normalizedGroupInstanceId &&
+            draft.templateFieldId != null &&
+            removableFieldIds.has(draft.templateFieldId)
+          );
+        })
+        .map(([draftKey]) => draftKey);
+
       const fieldValueIdsToDelete = Object.values(activeEntry.drafts)
         .filter((draft) => {
           const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
@@ -574,8 +724,10 @@ export function useTargetProntuario() {
           };
         });
       }
+
+      removePendingImageUploads(draftKeysToRemove);
     },
-    [selectedEntryState, updateSelectedEntryState]
+    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
   );
 
   const handleOpenCustomFieldDialog = useCallback(() => {
@@ -608,7 +760,8 @@ export function useTargetProntuario() {
       ...current,
       [selectedCategoryCode]: refreshedEntry,
     }));
-  }, [refreshEntryState, selectedCategoryCode, selectedEntryState]);
+    removePendingImageUploadsByEntry(activeEntry.infoEntry.id);
+  }, [refreshEntryState, removePendingImageUploadsByEntry, selectedCategoryCode, selectedEntryState]);
 
   const handleRemoveCustomField = useCallback(async (customField: CustomFieldResponse) => {
     const activeEntry = selectedEntryState;
@@ -711,11 +864,14 @@ export function useTargetProntuario() {
       return;
     }
 
-    const draftsToPersist = Object.values(activeEntry.drafts).filter((draft) => draft.valueContent.trim().length > 0);
-    const invalidGroupInstanceDrafts = draftsToPersist.filter((draft) => {
-      const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
-      return normalizedGroupInstanceId != null && !isValidUuid(normalizedGroupInstanceId);
-    });
+    const draftEntriesToPersist = Object.entries(activeEntry.drafts)
+      .filter(([, draft]) => draft.valueContent.trim().length > 0);
+    const invalidGroupInstanceDrafts = draftEntriesToPersist
+      .map(([, draft]) => draft)
+      .filter((draft) => {
+        const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+        return normalizedGroupInstanceId != null && !isValidUuid(normalizedGroupInstanceId);
+      });
 
     if (invalidGroupInstanceDrafts.length > 0) {
       const templateLabelById = new Map(templateFields.map((field) => [field.id, field.label]));
@@ -741,22 +897,58 @@ export function useTargetProntuario() {
 
     setSaving(true);
     try {
-      const upsertOperations = draftsToPersist
-        .map(async (draft) => {
-          const payload = buildDraftValuePayload(draft);
+      const templateInputTypeById = new Map(
+        templateFields.map((field) => [field.id, normalizeInputType(field.inputType)])
+      );
+      const customInputTypeById = new Map(
+        activeEntry.customFields.map((field) => [field.id, normalizeInputType(field.inputType)])
+      );
+      const upsertOperations: Array<Promise<unknown>> = [];
 
-          if (draft.fieldValueId != null) {
-            return fieldValueService.update(operationId, targetId, activeEntry.infoEntry.id, draft.fieldValueId, payload);
+      draftEntriesToPersist.forEach(([draftKey, draft]) => {
+        const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+        const isTemplateImageField =
+          draft.templateFieldId != null &&
+          templateInputTypeById.get(draft.templateFieldId) === "INPUT";
+        const isCustomImageField =
+          draft.customFieldId != null &&
+          customInputTypeById.get(draft.customFieldId) === "INPUT";
+        const isImageField = isTemplateImageField || isCustomImageField;
+
+        if (isImageField) {
+          const pendingImageUpload = pendingImageUploadsByDraftKey[draftKey];
+
+          if (!pendingImageUpload) {
+            return;
           }
 
-          return fieldValueService.create(operationId, targetId, activeEntry.infoEntry.id, payload);
-        });
+          upsertOperations.push(
+            fieldValueService.uploadMedia(operationId, targetId, activeEntry.infoEntry.id, {
+              templateFieldId: draft.templateFieldId,
+              customFieldId: draft.customFieldId,
+              groupInstanceId: normalizedGroupInstanceId,
+              file: pendingImageUpload.file,
+            })
+          );
+          return;
+        }
+
+        const payload = buildDraftValuePayload(draft, templateInputTypeById, customInputTypeById);
+
+        if (draft.fieldValueId != null) {
+          upsertOperations.push(fieldValueService.update(operationId, targetId, activeEntry.infoEntry.id, draft.fieldValueId, payload));
+          return;
+        }
+
+        upsertOperations.push(fieldValueService.create(operationId, targetId, activeEntry.infoEntry.id, payload));
+      });
 
       const deleteOperations = pendingDeleteIds.map((fieldValueId) =>
         fieldValueService.delete(operationId, targetId, activeEntry.infoEntry.id, fieldValueId)
       );
 
       await Promise.all([...deleteOperations, ...upsertOperations]);
+      removePendingImageUploadsByEntry(activeEntry.infoEntry.id);
       setPendingFieldValueDeleteIdsByEntry((current) => {
         if (!(activeEntry.infoEntry.id in current)) {
           return current;
@@ -775,7 +967,6 @@ export function useTargetProntuario() {
           detail: "Os dados da seção foram atualizados.",
         })
       );
-      goToOperationsDetails();
     } catch (saveError) {
       dispatch(
         showToast({
@@ -787,7 +978,18 @@ export function useTargetProntuario() {
     } finally {
       setSaving(false);
     }
-  }, [dispatch, goToOperationsDetails, operationId, pendingFieldValueDeleteIdsByEntry, reloadSelectedEntry, selectedEntryState, targetId, templateFields]);
+  }, [
+    dispatch,
+    goToOperationsDetails,
+    operationId,
+    pendingFieldValueDeleteIdsByEntry,
+    pendingImageUploadsByDraftKey,
+    reloadSelectedEntry,
+    removePendingImageUploadsByEntry,
+    selectedEntryState,
+    targetId,
+    templateFields,
+  ]);
 
   const categoryGroups = useMemo(() => {
     if (!templateFields.length) {

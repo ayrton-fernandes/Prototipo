@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { departmentService } from "@/services/departmentService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DepartmentFormErrors, DepartmentFormState } from "@/app/(auth)/departamentos/(types)/departmentForm";
@@ -30,7 +30,7 @@ export function useEditDepartment(departmentId: number) {
   const loadDepartment = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await departmentService.findById(departmentId);
+      const response = await domainDepartmentService.findById(departmentId);
       const department = response.data;
 
       setForm({
@@ -75,19 +75,19 @@ export function useEditDepartment(departmentId: number) {
       const needsReactivateBefore = !originalIsActive && selectedIsActive;
 
       if (needsReactivateBefore) {
-        await departmentService.reactivateById(departmentId);
+        await domainDepartmentService.reactivateById(departmentId);
         setOriginalIsActive(true);
       }
 
-      await departmentService.update(departmentId, {
+      await domainDepartmentService.update(departmentId, {
         descName: form.descName.trim(),
       });
 
       if (hasStatusChange && !needsReactivateBefore) {
         if (selectedIsActive) {
-          await departmentService.reactivateById(departmentId);
+          await domainDepartmentService.reactivateById(departmentId);
         } else {
-          await departmentService.deleteById(departmentId);
+          await domainDepartmentService.deleteById(departmentId);
         }
         setOriginalIsActive(selectedIsActive);
       }

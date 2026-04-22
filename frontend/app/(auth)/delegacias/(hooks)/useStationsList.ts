@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BaseResponseDTO } from "@/domain/types/base";
-import { stationService } from "@/services/stationService";
+import { domainStationService } from "@/services/domainStationService";
 
 export function useStationsList() {
   const [stations, setStations] = useState<BaseResponseDTO[]>([]);
@@ -12,7 +12,7 @@ export function useStationsList() {
   const fetchStations = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await stationService.findAll();
+      const response = await domainStationService.findAll();
       setStations(response.data);
     } finally {
       setLoading(false);

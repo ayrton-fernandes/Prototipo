@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, InputText, Typography } from "@uigovpe/components";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { delegateService } from "@/services/delagateService";
+import { domainDelegateService } from "@/services/domainDelagateService";
 import DelegateTable from "@/app/(auth)/delegados/(components)/DelegateTable";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useDelegatesList } from "@/app/(auth)/delegados/(hooks)/useDelegatesList";
@@ -32,7 +32,7 @@ export default function DelegatePage() {
 		setConfirmVisible(false);
 
 		try {
-			await delegateService.deleteById(targetId);
+			await domainDelegateService.deleteById(targetId);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -58,7 +58,7 @@ export default function DelegatePage() {
 	const handleReactivate = async (id: number) => {
 		setProcessingId(id);
 		try {
-			await delegateService.reactivateById(id);
+			await domainDelegateService.reactivateById(id);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -90,7 +90,7 @@ export default function DelegatePage() {
 				<Typography variant="p" className="cpo-page-subtitle">Gerencie o domínio de delegados do sistema.</Typography>
 			</section>
 
-			<Card title="Delegados" elevation="low">
+			<Card title="Delegados" elevation="low" className="cpo-text-on-dark">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
 						<div className="w-full md:max-w-sm">

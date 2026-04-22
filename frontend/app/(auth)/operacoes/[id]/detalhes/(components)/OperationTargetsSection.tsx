@@ -1,15 +1,47 @@
 "use client";
 
 import Image from "next/image";
-import { Button, Card, Icon, Menu, Typography } from "@uigovpe/components";
+import { Button, Card, Icon, Typography } from "@uigovpe/components";
 import { useRouter, useParams } from "next/navigation";
 import { OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
 import EntityActionMenu from "@/components/EntityActionMenu";
+import CsvImportDialog from "@/components/CsvImportDialog";
+import { useFieldValueImageSource } from "@/hooks/features/useFieldValueImageSource";
 import { maskCpf, formatDateToDisplay } from "@/utils/formatters";
 
 interface OperationTargetsSectionProps {
   targets: OperationTarget[];
   onDelete?: (targetId: number) => void;
+}
+
+interface TargetImageProps {
+  imageUrl?: string;
+  alt: string;
+}
+
+function TargetImage({ imageUrl, alt }: TargetImageProps) {
+  const resolvedImageUrl = useFieldValueImageSource(imageUrl ?? "");
+
+  if (!resolvedImageUrl) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <span className="text-slate-600 font-medium">(sem foto)</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full">
+      <Image
+        src={resolvedImageUrl}
+        alt={alt}
+        fill
+        unoptimized
+        className="object-cover"
+        sizes="(max-width: 768px) 112px, 144px"
+      />
+    </div>
+  );
 }
 
 export default function OperationTargetsSection({ targets, onDelete }: OperationTargetsSectionProps) {
@@ -39,7 +71,10 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
           </Typography>
         </div>
 
-        <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} onClick={handleCreate} />
+        <div className="flex items-center gap-3">
+          <CsvImportDialog operationId={params?.id ?? ''} />
+          <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} onClick={handleCreate} />
+        </div>
       </div>
 
       {targets.length === 0 ? (
@@ -70,13 +105,7 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
 
               <div className="flex items-start gap-6">
                 <div className="h-28 w-28 md:h-36 md:w-36 overflow-hidden rounded-lg bg-slate-100 flex-shrink-0">
-                  {target.imageUrl ? (
-                    <img src={target.imageUrl} alt={target.fullName} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <span className="text-slate-600 font-medium">(sem foto)</span>
-                    </div>
-                  )}
+                  <TargetImage imageUrl={target.imageUrl} alt={target.fullName} />
                 </div>
 
                 <div className="flex flex-1 min-w-0 flex-col gap-4 overflow-hidden">

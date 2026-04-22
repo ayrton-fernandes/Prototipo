@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { delegateService } from "@/services/delagateService";
+import { domainDelegateService } from "@/services/domainDelagateService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DelegateFormErrors, DelegateFormState } from "@/app/(auth)/delegados/(types)/delegateForm";
@@ -38,7 +38,7 @@ export function useCreateDelegate() {
 
     setLoading(true);
     try {
-      await delegateService.create({
+      await domainDelegateService.create({
         descName: form.descName.trim(),
       });
 

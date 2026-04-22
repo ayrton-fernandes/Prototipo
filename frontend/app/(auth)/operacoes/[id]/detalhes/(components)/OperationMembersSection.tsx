@@ -211,7 +211,7 @@ export default function OperationMembersSection({
         </div>
 
         {errorMessage ? (
-          <Card>
+          <Card className="cpo-text-on-dark">
             <Typography variant="p" className="text-slate-600">
               {errorMessage}
             </Typography>
@@ -219,13 +219,13 @@ export default function OperationMembersSection({
         ) : null}
 
         {members.length === 0 && !loading && !errorMessage ? (
-          <Card>
+          <Card className="cpo-text-on-dark">
             <Typography variant="p" className="text-slate-600">
               Nenhum membro associado à operação.
             </Typography>
           </Card>
         ) : (
-          <Card>
+          <Card className="cpo-text-on-dark">
             <Table
               value={tableData}
               loading={loading}

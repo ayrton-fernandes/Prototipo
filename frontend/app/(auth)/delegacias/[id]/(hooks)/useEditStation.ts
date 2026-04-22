@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { stationService } from "@/services/stationService";
+import { domainStationService } from "@/services/domainStationService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { StationFormErrors, StationFormState } from "@/app/(auth)/delegacias/(types)/stationForm";
@@ -30,7 +30,7 @@ export function useEditStation(stationId: number) {
   const loadStation = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await stationService.findById(stationId);
+      const response = await domainStationService.findById(stationId);
       const station = response.data;
 
       setForm({
@@ -75,19 +75,19 @@ export function useEditStation(stationId: number) {
       const needsReactivateBefore = !originalIsActive && selectedIsActive;
 
       if (needsReactivateBefore) {
-        await stationService.reactivateById(stationId);
+        await domainStationService.reactivateById(stationId);
         setOriginalIsActive(true);
       }
 
-      await stationService.update(stationId, {
+      await domainStationService.update(stationId, {
         descName: form.descName.trim(),
       });
 
       if (hasStatusChange && !needsReactivateBefore) {
         if (selectedIsActive) {
-          await stationService.reactivateById(stationId);
+          await domainStationService.reactivateById(stationId);
         } else {
-          await stationService.deleteById(stationId);
+          await domainStationService.deleteById(stationId);
         }
         setOriginalIsActive(selectedIsActive);
       }

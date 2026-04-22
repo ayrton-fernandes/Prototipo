@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { BaseCreateDTO, BaseResponseDTO, BaseUpdateDTO } from "@/domain/types/base";
-import { courtService } from "@/services/courtService";
+import { domainCourtService } from "@/services/domainCourtService";
 
 interface CourtState {
     items: BaseResponseDTO[];
@@ -19,7 +19,7 @@ const initialState: CourtState = {
 export const fetchAllCourts = createAsyncThunk<BaseResponseDTO[]>(
     "court/fetchAll",
     async () => {
-        const response = await courtService.findAll();
+        const response = await domainCourtService.findAll();
         return response.data;
     }
 );
@@ -27,7 +27,7 @@ export const fetchAllCourts = createAsyncThunk<BaseResponseDTO[]>(
 export const fetchCourtById = createAsyncThunk<BaseResponseDTO, number>(
     "court/fetchById",
     async (id: number) => {
-        const response = await courtService.findById(id);
+        const response = await domainCourtService.findById(id);
         return response.data;
     }
 );
@@ -35,28 +35,28 @@ export const fetchCourtById = createAsyncThunk<BaseResponseDTO, number>(
 export const createCourt = createAsyncThunk<void, BaseCreateDTO>(
     "court/create",
     async (payload: BaseCreateDTO) => {
-        await courtService.create(payload);
+        await domainCourtService.create(payload);
     }
 );
 
 export const updateCourt = createAsyncThunk<void, { id: number; payload: BaseUpdateDTO }>(
     "court/update",
     async ({ id, payload }: { id: number; payload: BaseUpdateDTO }) => {
-        await courtService.update(id, payload);
+        await domainCourtService.update(id, payload);
     }
 );
 
 export const deleteCourtById = createAsyncThunk<void, number>(
     "court/deleteById",
     async (id: number) => {
-        await courtService.deleteById(id);
+        await domainCourtService.deleteById(id);
     }
 );
 
 export const reactivateCourtById = createAsyncThunk<void, number>(
     "court/reactivateById",
     async (id: number) => {
-        await courtService.reactivateById(id);
+        await domainCourtService.reactivateById(id);
     }
 );
 

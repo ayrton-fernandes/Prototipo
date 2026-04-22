@@ -24,4 +24,16 @@ export const targetService = {
   delete(operationId: number, targetId: number) {
     return api.delete<void>(`${baseUrl}/${operationId}/target/${targetId}`);
   },
+
+  importTargets(operationId: number, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<void>(`${baseUrl}/${operationId}/target/import`, form);
+  },
+
+  importRecords(operationId: number, file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<void>(`${baseUrl}/${operationId}/target/records/import`, form);
+  },
 };

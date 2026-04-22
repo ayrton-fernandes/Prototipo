@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { directorateService } from "@/services/directorateService";
+import { domainDirectorateService } from "@/services/domainDirectorateService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DirectorateFormErrors, DirectorateFormState } from "@/app/(auth)/diretorias/(types)/directorateForm";
@@ -38,7 +38,7 @@ export function useCreateDirectorate() {
 
     setLoading(true);
     try {
-      await directorateService.create({
+      await domainDirectorateService.create({
         descName: form.descName.trim(),
       });
 

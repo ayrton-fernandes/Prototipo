@@ -41,7 +41,7 @@ export default function OperationDetailsPage() {
     return (
       <Card>
         <div className="flex flex-col gap-4">
-          <Typography variant="h3" className="text-black">Detalhes da operação</Typography>
+          <Typography variant="h3" className="">Detalhes da operação</Typography>
           <Typography variant="p">{errorMessage ?? "Operação não encontrada."}</Typography>
           <div className="flex justify-end">
             <Button label="Voltar para operações" onClick={goToOperationsList} />
@@ -54,10 +54,10 @@ export default function OperationDetailsPage() {
   return (
     <>
       <section className="mb-6">
-        <Typography variant="h1" className="mb-2 text-black">
+        <Typography variant="h1" className="mb-2">
           Detalhes da operação
         </Typography>
-        <Typography variant="p" className="text-slate-500">
+        <Typography variant="p" className="">
           Visualize os dados principais, alvos e membros vinculados à ORQ.
         </Typography>
       </section>

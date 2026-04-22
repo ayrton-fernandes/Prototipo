@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { Button, Dialog, Icon, Typography } from "@uigovpe/components";
 import { ReactZoomPanPinchRef, TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { useFieldValueImageSource } from "@/hooks/features/useFieldValueImageSource";
 
 type ImageRotation = 0 | 90 | 180 | 270;
 
@@ -34,6 +35,8 @@ export default function ProntuarioImagePreview({ imageUrl, alt }: ProntuarioImag
   const [rotation, setRotation] = useState<ImageRotation>(0);
   const [previewVisible, setPreviewVisible] = useState(false);
   const previewActionButtonClassName = "prontuario-dialog-cancel-button";
+  const resolvedImageUrl = useFieldValueImageSource(imageUrl);
+  const hasResolvedImage = resolvedImageUrl.trim().length > 0;
 
   const openPreview = () => {
     setPreviewVisible(true);
@@ -140,16 +143,22 @@ export default function ProntuarioImagePreview({ imageUrl, alt }: ProntuarioImag
                 wrapperClass="prontuario-image-preview-transform-wrapper"
                 contentClass="prontuario-image-preview-transform-content"
               >
-                <div className={`prontuario-image-preview-media ${rotationClassByValue[rotation]}`}>
-                  <Image
-                    src={imageUrl}
-                    alt={alt}
-                    fill
-                    unoptimized
-                    className="object-contain pointer-events-none select-none"
-                    sizes="(max-width: 1024px) 100vw, 70vw"
-                  />
-                </div>
+                {hasResolvedImage ? (
+                  <div className={`prontuario-image-preview-media ${rotationClassByValue[rotation]}`}>
+                    <Image
+                      src={resolvedImageUrl}
+                      alt={alt}
+                      fill
+                      unoptimized
+                      className="object-contain pointer-events-none select-none"
+                      sizes="(max-width: 1024px) 100vw, 70vw"
+                    />
+                  </div>
+                ) : (
+                  <Typography variant="small" className="text-slate-500">
+                    Não foi possível carregar a imagem para preview.
+                  </Typography>
+                )}
               </TransformComponent>
             </TransformWrapper>
           </div>

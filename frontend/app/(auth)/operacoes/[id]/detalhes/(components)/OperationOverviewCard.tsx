@@ -18,12 +18,12 @@ export default function OperationOverviewCard({
   onDeleteOrReactivate,
 }: OperationOverviewCardProps) {
   return (
-    <Card>
+    <Card className="cpo-text-on-dark">
       <div className="flex flex-col gap-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
             <Typography variant="h3">{operation.name}</Typography>
-            <Typography variant="small" className="text-slate-500">
+            <Typography variant="small">
               {operation.operationCode}
             </Typography>
           </div>

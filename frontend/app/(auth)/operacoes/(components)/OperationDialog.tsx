@@ -65,7 +65,7 @@ export default function OperationDialog({
       modal
       header={headerElement}
       footer={footerContent}
-      className="operation-dialog operation-dialog--wide"
+      className="operation-dialog operation-dialog--wide cpo-text-on-light"
       dismissableMask={!submitting}
       closable={!submitting}
       onHide={onClose}
@@ -108,7 +108,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.stationId)}>
-              {errors.stationId || "Selecione a delegacia responsável pela operação."}
+              {errors.stationId || ""}
             </Typography>
           </div>
 
@@ -125,7 +125,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.departmentId)}>
-              {errors.departmentId || "Selecione o departamento vinculado à operação."}
+              {errors.departmentId || ""}
             </Typography>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.delegateId)}>
-              {errors.delegateId || "Selecione o delegado responsável."}
+              {errors.delegateId || ""}
             </Typography>
           </div>
 
@@ -161,7 +161,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.investigatorId)}>
-              {errors.investigatorId || "Selecione o investigador vinculado à operação."}
+              {errors.investigatorId || ""}
             </Typography>
           </div>
 
@@ -178,7 +178,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.analystIntelligenceId)}>
-              {errors.analystIntelligenceId || "Selecione o analista de inteligência."}
+              {errors.analystIntelligenceId || ""}
             </Typography>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.directorateId)}>
-              {errors.directorateId || "Selecione a diretoria responsável."}
+              {errors.directorateId || ""}
             </Typography>
           </div>
 
@@ -214,7 +214,7 @@ export default function OperationDialog({
               disabled={loading || submitting}
             />
             <Typography variant="small" className={textSupportClass(errors.courtId)}>
-              {errors.courtId || "Selecione a vara judicial vinculada."}
+              {errors.courtId || ""}
             </Typography>
           </div>
         </div>

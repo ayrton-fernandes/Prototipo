@@ -21,11 +21,18 @@ import { OperationMemberPermission, OperationMemberResponse } from "@/domain/typ
 import { TargetResponse } from "@/domain/types/target";
 import { DomainProfile, UserListItem } from "@/domain/types/userManagement";
 import { OperationMemberRow, OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
+import { domainProfileService } from "@/services/domainProfileService";
 
 const MEMBER_PERMISSION_LABEL: Record<OperationMemberPermission, string> = {
   READER: "Leitor",
   EDITOR: "Editor",
   COORDINATOR: "Coordenador",
+};
+
+const EXCLUDED_MEMBER_PROFILE_CODES = new Set(["COOR_INTELLIGENCE", "PLANNING"]);
+
+const hasExcludedMemberProfile = (user: UserListItem): boolean => {
+  return user.profileCodes.some((profileCode) => EXCLUDED_MEMBER_PROFILE_CODES.has(profileCode));
 };
 
 const normalizeText = (value: string): string =>
@@ -139,6 +146,15 @@ const buildOperationMemberRows = (
   const userById = new Map<number, UserListItem>(users.map((user) => [user.id, user]));
 
   return members
+    .filter((member) => {
+      const user = userById.get(member.userId);
+
+      if (!user) {
+        return true;
+      }
+
+      return !hasExcludedMemberProfile(user);
+    })
     .map((member) => {
       const user = userById.get(member.userId);
 
@@ -290,12 +306,14 @@ export function useOperationDetailsPage() {
       const [membersResponse, usersResponse, profilesResponse] = await Promise.all([
         operationMemberService.findAll(operationId),
         userService.findAll(),
-        userService.findAllProfiles(),
+        domainProfileService.findAll()
       ]);
+
+      const allowedUsers = usersResponse.data.filter((user) => !hasExcludedMemberProfile(user));
 
       const nextProfileMap = buildProfileDescriptionByCode(profilesResponse.data);
 
-      setMemberUsers(usersResponse.data);
+      setMemberUsers(allowedUsers);
       setMemberProfileDescriptionByCode(nextProfileMap);
       setMembers(buildOperationMemberRows(membersResponse.data, usersResponse.data, nextProfileMap));
     } catch {

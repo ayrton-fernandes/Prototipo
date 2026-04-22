@@ -7,36 +7,35 @@ import {
   UserListItem,
 } from "@/domain/types/userManagement";
 
+
+const baseUrl = "/users";
+
 export const userService = {
   getCurrentUser() {
-    return api.get<UserMeResponse>("/users/me");
+    return api.get<UserMeResponse>(`${baseUrl}/me`);
   },
 
   findAll() {
-    return api.get<UserListItem[]>("/users/find-all");
+    return api.get<UserListItem[]>(`${baseUrl}` );
   },
 
   findById(id: number) {
-    return api.get<UserListItem>(`/users/find-by-id/${id}`);
+    return api.get<UserListItem>(`${baseUrl}/${id}`);
   },
 
   create(payload: CreateUserPayload) {
-    return api.post<void>("/users/create", payload);
+    return api.post<void>(`${baseUrl}`, payload);
   },
 
   update(id: number, payload: UpdateUserPayload) {
-    return api.patch<void>(`/users/patch/${id}`, payload);
+    return api.patch<void>(`${baseUrl}/${id}`, payload);
   },
 
   deleteById(id: number) {
-    return api.delete<void>(`/users/delete-by-id/${id}`);
+    return api.delete<void>(`${baseUrl}/${id}`);
   },
 
   reactivateById(id: number) {
-    return api.patch<void>(`/users/reactivate/${id}`);
-  },
-
-  findAllProfiles() {
-    return api.get<DomainProfile[]>("/profiles/find-all");
+    return api.put<void>(`${baseUrl}/${id}/activation`);
   },
 };

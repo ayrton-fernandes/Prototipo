@@ -3,7 +3,7 @@ import { CustomFieldResponse } from "@/domain/types/customField";
 import { FieldValueResponse } from "@/domain/types/fieldValue";
 import { TargetResponse } from "@/domain/types/target";
 import { TemplateFieldResponse } from "@/domain/types/templateField";
-import { formatDateToDisplay, maskCpf } from "@/utils/formatters";
+import { formatDateToBackend, formatDateToDisplay, maskCpf } from "@/utils/formatters";
 
 export type ProntuarioCategoryCode =
   | "IDENTIFICACAO"
@@ -458,12 +458,54 @@ export const buildEntryDraftForNewGroupInstance = (
   return nextDrafts;
 };
 
-export const buildDraftValuePayload = (draft: ProntuarioFieldDraft) => ({
-  templateFieldId: draft.templateFieldId,
-  customFieldId: draft.customFieldId,
-  groupInstanceId: normalizeGroupInstanceId(draft.groupInstanceId),
-  valueContent: draft.valueContent.trim(),
-});
+const DATE_BACKEND_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const normalizeDateValueForBackend = (value: string): string => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  if (DATE_BACKEND_REGEX.test(trimmed)) {
+    return trimmed;
+  }
+
+  return formatDateToBackend(trimmed) ?? trimmed;
+};
+
+const resolveDraftInputType = (
+  draft: ProntuarioFieldDraft,
+  templateInputTypeById?: ReadonlyMap<number, CanonicalInputType | null>,
+  customInputTypeById?: ReadonlyMap<number, CanonicalInputType | null>
+): CanonicalInputType | null => {
+  if (draft.templateFieldId != null) {
+    return templateInputTypeById?.get(draft.templateFieldId) ?? null;
+  }
+
+  if (draft.customFieldId != null) {
+    return customInputTypeById?.get(draft.customFieldId) ?? null;
+  }
+
+  return null;
+};
+
+export const buildDraftValuePayload = (
+  draft: ProntuarioFieldDraft,
+  templateInputTypeById?: ReadonlyMap<number, CanonicalInputType | null>,
+  customInputTypeById?: ReadonlyMap<number, CanonicalInputType | null>
+) => {
+  const inputType = resolveDraftInputType(draft, templateInputTypeById, customInputTypeById);
+  const trimmedValue = draft.valueContent.trim();
+  const normalizedValue = inputType === "DATE" ? normalizeDateValueForBackend(trimmedValue) : trimmedValue;
+
+  return {
+    templateFieldId: draft.templateFieldId,
+    customFieldId: draft.customFieldId,
+    groupInstanceId: normalizeGroupInstanceId(draft.groupInstanceId),
+    valueContent: normalizedValue,
+  };
+};
 
 export const hasVisibleDraftValue = (draft: ProntuarioFieldDraft): boolean =>
   draft.fieldValueId != null || draft.valueContent.trim().length > 0;

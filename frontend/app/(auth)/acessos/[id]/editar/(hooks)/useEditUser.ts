@@ -7,6 +7,7 @@ import { useAppDispatch } from "@/store/store";
 import { userService } from "@/services/userService";
 import { ProfileOption, UserFormErrors, UserFormState } from "@/app/(auth)/acessos/(types)/userForm";
 import { UserRole } from "@/domain/types/userManagement";
+import { domainProfileService } from "@/services/domainProfileService";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,7 +48,7 @@ export function useEditUser(userId: number) {
     try {
       const [userResponse, profilesResponse] = await Promise.all([
         userService.findById(userId),
-        userService.findAllProfiles(),
+        domainProfileService.findAll(),
       ]);
 
       const user = userResponse.data;

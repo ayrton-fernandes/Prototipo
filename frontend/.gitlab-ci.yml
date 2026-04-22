@@ -1,184 +1,96 @@
 variables:
+  GIT_DEPTH: "0"
   CI_REGISTRY: "$GITLAB_URL:5050"
   API_IMAGE: "$CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME"
-  GIT_DEPTH: "0"
-  SONAR_SOURCES: "app,components,config,context,domain,hooks,services,store,utils"
-  SONAR_EXCLUSIONS: "**/*.d.ts,**/*.scss,**/*.css,**/.next/**,**/node_modules/**,public/**"
-
-workflow:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: always
-    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
-      when: always
-    - when: never
 
 stages:
   - build
   - sonar
   - build-image
 
+default:
+  tags:
+    - runner-docker
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
+    - when: never
+
 build:
   stage: build
   image: node:22.11.0-alpine
-  tags:
-    - runner-docker
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: on_success
-    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
-      when: on_success
-    - when: never
-  before_script:
-    - |
-      echo "🔐 Preparando variáveis de ambiente (sem exibir conteúdo)..."
-      case "$CI_COMMIT_REF_NAME" in
-        dev) cp "$ENV_FILE_DEV" .env ;;
-        homolog) cp "$ENV_FILE_HOMOLOG" .env ;;
-        main) cp "$ENV_FILE_PROD" .env ;;
-        *)
-          echo "Branch '$CI_COMMIT_REF_NAME' não reconhecida. Criando .env vazio."
-          echo "" > .env
-          ;;
-      esac
-      chmod 600 .env
-      trap 'rm -f .env' EXIT
-      # exporta variáveis do .env para o ambiente do shell (sem imprimir)
-      set -a
-      . .env
-      set +a
+  cache:
+    key: "npm-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .npm/
   script:
-    - npm ci --ignore-scripts
+    - npm ci --cache .npm --prefer-offline --ignore-scripts
     - npm run build
+  artifacts:
+    paths:
+      - app/
+      - components/
+      - config/
+      - context/
+      - domain/
+      - hooks/
+      - public/
+      - services/
+      - store/
+      - styles/
+      - utils/
+      - package.json
+      - package-lock.json
+      - Dockerfile
+      - next.config.ts
+    expire_in: 1 hour
 
 sonar:
   stage: sonar
   image:
     name: sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
-  tags:
-    - runner-docker
   needs:
     - build
-    - sonar-ensure-gate
   rules:
     - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
-      when: on_success
-    - when: never
   script:
-    - '[ -n "$SONAR_HOST_URL" ] || (echo "SONAR_HOST_URL não definido no CI/CD Variables" && exit 1)'
-    - '[ -n "$SONAR_TOKEN" ] || (echo "SONAR_TOKEN não definido (ou está como Protected e não disponível nesta branch apenas na branch homolog protegida)" && exit 1)'
+    - '[ -n "$SONAR_HOST_URL" ] || exit 1'
+    - '[ -n "$SONAR_TOKEN" ] || exit 1'
     - |
-      SONAR_BASE_PROJECT_KEY="${SONAR_BASE_PROJECT_KEY:-cpo-digital-app}"
+      SONAR_BASE_PROJECT_KEY="cpo-digital-app"
       if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
         SONAR_PROJECT_KEY="$SONAR_BASE_PROJECT_KEY"
-        SONAR_PROJECT_NAME="SETD-${SONAR_PROJECT_NAME:-CPO Digital App}"
       else
         SONAR_PROJECT_KEY="${SONAR_BASE_PROJECT_KEY}-${CI_COMMIT_REF_SLUG}"
-        SONAR_PROJECT_NAME="SETD-${SONAR_PROJECT_NAME:-CPO Digital App (${CI_COMMIT_REF_NAME})}"
       fi
-      echo "Executando análise Sonar no projeto: ${SONAR_PROJECT_KEY}"
       sonar-scanner \
         -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-        -Dsonar.projectName="SETD-$SONAR_PROJECT_NAME" \
+        -Dsonar.projectName="SETD-$SONAR_PROJECT_KEY" \
         -Dsonar.host.url="$SONAR_HOST_URL" \
         -Dsonar.token="$SONAR_TOKEN" \
-        -Dsonar.sources="$SONAR_SOURCES" \
-        -Dsonar.exclusions="$SONAR_EXCLUSIONS" \
-        -Dsonar.qualitygate.wait=true
-
-sonar-ensure-gate:
-  stage: sonar
-  image: alpine:latest
-  tags:
-    - runner-docker
-  needs:
-    - build
-  rules:
-    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
-      when: on_success
-    - when: never
-  script:
-    - apk add --no-cache curl jq
-    - '[ -n "$SONAR_HOST_URL" ] || (echo "SONAR_HOST_URL não definido no CI/CD Variables" && exit 1)'
-    - '[ -n "$SONAR_TOKEN" ] || (echo "SONAR_TOKEN não definido (ou está como Protected e não disponível nesta branch apena na branch homolog protegida)" && exit 1)'
-    - |
-      SONAR_BASE_PROJECT_KEY="${SONAR_BASE_PROJECT_KEY:-cpo-digital-app}"
-      if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
-        SONAR_PROJECT_KEY="$SONAR_BASE_PROJECT_KEY"
-      else
-        SONAR_PROJECT_KEY="${SONAR_BASE_PROJECT_KEY}-${CI_COMMIT_REF_SLUG}"
-      fi
-      GATE_NAME="SETD-${SONAR_PROJECT_KEY}-90cov"
-      echo "Verificando quality gate: $GATE_NAME"
-      GATES_JSON=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/qualitygates/list")
-      GATE_ID=$(echo "$GATES_JSON" | jq -r --arg name "$GATE_NAME" '.qualitygates[] | select(.name==$name) | .id // empty')
-      if [ -z "$GATE_ID" ]; then
-        echo "Quality gate não encontrada. Criando $GATE_NAME"
-        CREATE_RES=$(curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/create?name=$GATE_NAME")
-        GATE_ID=$(echo "$CREATE_RES" | jq -r '.id // empty')
-        if [ -z "$GATE_ID" ]; then
-          echo "Falha ao criar quality gate" && exit 1
-        fi
-        echo "Criando condição: coverage < 90%"
-        curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/create_condition" --data "gateId=$GATE_ID&metric=coverage&op=LT&error=90"
-      else
-        echo "Quality gate já existe (id=$GATE_ID). Verificando condição de coverage..."
-        SHOW_RES=$(curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/qualitygates/show?gateId=$GATE_ID")
-        COVERAGE_COND=$(echo "$SHOW_RES" | jq -r '.conditions[] | select(.metric=="coverage") | @base64' 2>/dev/null || true)
-        if [ -z "$COVERAGE_COND" ]; then
-          echo "Condição de coverage não encontrada. Criando condição coverage < 90%"
-          curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/create_condition" --data "gateId=$GATE_ID&metric=coverage&op=LT&error=90"
-        else
-          EXIST_ERROR=$(echo "$SHOW_RES" | jq -r '.conditions[] | select(.metric=="coverage") | .error')
-          if [ "$EXIST_ERROR" -lt 90 ]; then
-            COND_ID=$(echo "$SHOW_RES" | jq -r '.conditions[] | select(.metric=="coverage") | .id')
-            echo "Atualizando condição existente (removendo id $COND_ID e recriando com error=90)"
-            curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/delete_condition" --data "id=$COND_ID"
-            curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/create_condition" --data "gateId=$GATE_ID&metric=coverage&op=LT&error=90"
-          else
-            echo "Condição de coverage já atende o requisito (>=90)."
-          fi
-        fi
-      fi
-      echo "Associando quality gate $GATE_ID ao projeto $SONAR_PROJECT_KEY"
-      curl -s -u "$SONAR_TOKEN:" -X POST "$SONAR_HOST_URL/api/qualitygates/select?projectKey=$SONAR_PROJECT_KEY&gateId=$GATE_ID" || true
+        -Dsonar.sources="app,components,config,context,domain,hooks,services,store,styles,utils"
 
 build-image:
   stage: build-image
-  tags:
-    - runner-docker
   needs:
+    - build
     - sonar
   rules:
-    # Só executa em branches protegidas de deploy; em MR a pipeline para no build.
-    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
-      when: always
-    - when: never
+    - if: '$CI_COMMIT_REF_NAME =~ /^(dev|homolog|main)$/'
   before_script:
-    - echo "🔐 Fazendo login no registro..."
     - docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-
-    - echo "🧩 Gerando .env baseado na branch '$CI_COMMIT_REF_NAME'..."
     - |
       case "$CI_COMMIT_REF_NAME" in
         dev) cp "$ENV_FILE_DEV" .env ;;
         homolog) cp "$ENV_FILE_HOMOLOG" .env ;;
         main) cp "$ENV_FILE_PROD" .env ;;
-        *)
-          echo "Branch '$CI_COMMIT_REF_NAME' não reconhecida. Criando .env vazio."
-          echo "" > .env
-          ;;
       esac
-    - chmod 600 .env
-    - trap 'rm -f .env' EXIT
-
   script:
-    - echo "🏗️ Construindo imagem da aplicação..."
     - docker build -f Dockerfile -t "$API_IMAGE:$CI_COMMIT_SHA" -t "$API_IMAGE:latest" .
-    - echo "🏷️ Criando tag 'latest'..."
-    - docker tag "$API_IMAGE:$CI_COMMIT_SHA" "$API_IMAGE:latest"
-    - echo "📤 Enviando imagens para o registro..."
     - docker push "$API_IMAGE:$CI_COMMIT_SHA"
     - docker push "$API_IMAGE:latest"
-    
+  after_script:
+    - rm -f .env

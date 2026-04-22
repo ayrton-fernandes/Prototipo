@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, InputText, Typography } from "@uigovpe/components";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { departmentService } from "@/services/departmentService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
 import DepartmentTable from "@/app/(auth)/departamentos/(components)/DepartmentTable";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useDepartmentsList } from "@/app/(auth)/departamentos/(hooks)/useDepartmentsList";
@@ -32,7 +32,7 @@ export default function DepartmentPage() {
 		setConfirmVisible(false);
 
 		try {
-			await departmentService.deleteById(targetId);
+			await domainDepartmentService.deleteById(targetId);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -58,7 +58,7 @@ export default function DepartmentPage() {
 	const handleReactivate = async (id: number) => {
 		setProcessingId(id);
 		try {
-			await departmentService.reactivateById(id);
+			await domainDepartmentService.reactivateById(id);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -90,7 +90,7 @@ export default function DepartmentPage() {
 				<Typography variant="p" className="cpo-page-subtitle">Gerencie o domínio de departamentos do sistema.</Typography>
 			</section>
 
-			<Card title="Departamentos" elevation="low">
+			<Card title="Departamentos" elevation="low" className="cpo-text-on-dark">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
 						<div className="w-full md:max-w-sm">

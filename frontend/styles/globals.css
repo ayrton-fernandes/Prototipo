@@ -68,6 +68,83 @@ body {
   color: var(--app-text);
 }
 
+.cpo-text-on-light,
+.cpo-text-on-light :is(
+  .p-component,
+  .p-dialog-title,
+  .p-card-title,
+  .p-card-subtitle,
+  .p-dropdown-label,
+  .p-dropdown-trigger,
+  .p-inputtext,
+  .p-inputtextarea,
+  .p-button-label,
+  .material-symbols-outlined,
+  label,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  small,
+  strong,
+  a,
+  i,
+  svg
+) {
+  color: #0f172a !important;
+}
+
+.cpo-text-on-light :is(svg, i) {
+  fill: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+.cpo-text-on-dark,
+.cpo-text-on-dark :is(
+  .p-component,
+  .p-dialog-title,
+  .p-card-title,
+  .p-card-subtitle,
+  .p-dropdown-label,
+  .p-dropdown-trigger,
+  .p-inputtext,
+  .p-inputtextarea,
+  .p-button-label,
+  .material-symbols-outlined,
+  label,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  small,
+  strong,
+  a,
+  i,
+  svg
+) {
+  color: #ffffff !important;
+}
+
+.cpo-text-on-dark :is(svg, i) {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Buttons should keep their own label/icon coloring; do not force white on button labels */
+.cpo-text-on-dark :is(.p-button .p-button-label, .p-button-label, .p-button .material-symbols-outlined, .p-button .fi, .p-button svg) {
+  color: unset !important;
+  fill: unset !important;
+  stroke: unset !important;
+}
+
 ::selection {
   background: #121212;
   color: #f8fafc;
@@ -96,6 +173,24 @@ body {
   background: var(--app-card-bg) !important;
   color: var(--app-text);
   border: 1px solid var(--color-outline-default);
+}
+
+/* Light-mode rule: whenever the page is not in `.dark` mode, ensure
+   standard surface components (cards) render with dark text so authors
+   don't need inline color overrides. This keeps `fundo claro => texto escuro`.
+   More specific per-page overrides (e.g., .login-page) still apply. */
+:not(.dark) .p-card:not(.cpo-text-on-dark):not(.cpo-surface-dark),
+:not(.dark) .card:not(.cpo-text-on-dark):not(.cpo-surface-dark),
+:not(.dark) .p-dialog,
+:not(.dark) .delete-dialog.p-dialog {
+  color: var(--cpo-color-black) !important;
+}
+
+:not(.dark) .p-card:not(.cpo-text-on-dark):not(.cpo-surface-dark) *,
+:not(.dark) .card:not(.cpo-text-on-dark):not(.cpo-surface-dark) *,
+:not(.dark) .p-dialog *,
+:not(.dark) .delete-dialog.p-dialog * {
+  color: var(--cpo-color-black) !important;
 }
 
 .p-dialog,
@@ -276,17 +371,78 @@ html.dark .p-button.p-button-outlined svg {
   stroke: #000000 !important;
 }
 
+/* Force all descendant text inside login card to black to avoid
+   inheritance from the dark page background or global dark rules */
+.login-page :is(.p-card, .card) * {
+  color: #000000 !important;
+}
+
+/* Ensure severity buttons (success / danger) use white labels and icons
+   when rendered as filled buttons. This fixes cases like "Criar" and
+   "Descartar" showing dark text on colored backgrounds. */
+.p-button.p-button-success,
+.p-button.p-button-danger {
+  color: #ffffff !important;
+}
+
+.p-button.p-button-success .p-button-label,
+.p-button.p-button-danger .p-button-label {
+  color: #ffffff !important;
+}
+
+.p-button.p-button-success svg,
+.p-button.p-button-danger svg,
+.p-button.p-button-success .material-symbols-outlined,
+.p-button.p-button-danger .material-symbols-outlined {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Hover/focus/active states should also preserve white label color */
+.p-button.p-button-success:not(:disabled):hover,
+.p-button.p-button-danger:not(:disabled):hover,
+.p-button.p-button-success:not(:disabled):focus,
+.p-button.p-button-danger:not(:disabled):focus,
+.p-button.p-button-success:not(:disabled):active,
+.p-button.p-button-danger:not(:disabled):active {
+  color: #ffffff !important;
+}
+
+
 .login-page .p-button,
 .verify-code-page .p-button {
   background: var(--brand-accent) !important;
   border-color: var(--brand-accent) !important;
   color: #121212 !important;
   font-weight: 700;
+  transition: background .18s, color .18s;
 }
 
 .login-page .p-button:not(:disabled):hover,
 .verify-code-page .p-button:not(:disabled):hover {
-  filter: brightness(0.96);
+  background: #121212 !important;
+  border-color: #121212 !important;
+  color: var(--brand-accent) !important;
+  filter: none !important;
+}
+
+/* Ensure button label and icons switch color on hover too */
+.login-page .p-button:not(:disabled):hover .p-button-label,
+.verify-code-page .p-button:not(:disabled):hover .p-button-label,
+.login-page .p-button:not(:disabled):hover .material-symbols-outlined,
+.verify-code-page .p-button:not(:disabled):hover .material-symbols-outlined,
+.login-page .p-button:not(:disabled):hover svg,
+.verify-code-page .p-button:not(:disabled):hover svg {
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* Also ensure the default label uses the button color property (in case components render label separately) */
+.login-page .p-button .p-button-label,
+.verify-code-page .p-button .p-button-label {
+  color: inherit !important;
 }
 
 .verify-code-page :is(.p-link, a) {
@@ -507,7 +663,7 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 .operation-dialog .p-autocomplete input::placeholder,
 .operation-dialog .p-calendar input::placeholder,
 .operation-dialog .p-inputnumber input::placeholder {
-  color: #6b7280 !important;
+  color: #334155 !important;
   opacity: 1;
 }
 
@@ -623,13 +779,17 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 }
 
 .target-sections-nav-button:not(:disabled):not(.target-sections-nav-button--active):hover {
+    /* Placeholder color (global, can be overridden per-page) */
+    --cpo-placeholder: #6b7280;
   background: #e2e8f0;
   color: #0f172a;
 }
 
-:is(.prontuario-target-page, .prontuario-target-dialog) :is(label, .p-card label, .p-inputwrapper label) {
-  color: #1f2937 !important;
-}
+  .login-page .p-inputtext::placeholder,
+  .login-page .p-password .p-inputtext::placeholder {
+    color: var(--cpo-placeholder) !important;
+    opacity: 1;
+  }
 
 :is(.prontuario-target-page, .prontuario-target-dialog) :is(
   .p-inputtext,
@@ -642,8 +802,8 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
   .p-inputwrapper .p-inputtext,
   .p-inputwrapper .p-inputtextarea
 ) {
-  background: #ffffff !important;
-  border-color: #cbd5e1 !important;
+    color: var(--cpo-placeholder) !important;
+    opacity: 1 !important;
   color: #0f172a !important;
 }
 
@@ -656,7 +816,7 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
   .p-calendar input::placeholder,
   .p-inputnumber input::placeholder
 ) {
-  color: #64748b !important;
+  color: #334155 !important;
   opacity: 1;
 }
 
@@ -722,6 +882,22 @@ html.dark .entity-action-trigger.p-button.p-button-outlined:hover {
 
 :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button :is(.material-symbols-outlined, svg, i) {
   color: #121212 !important;
+}
+
+/* Strong overrides to prevent global dark-mode hover/background rules from forcing black interiors */
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button:not(:disabled):hover {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button .p-button-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-primary-button.p-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: #121212 !important;
+  background: transparent !important;
+  fill: #121212 !important;
+  stroke: #121212 !important;
 }
 
 .prontuario-target-dialog.p-dialog,
@@ -992,6 +1168,18 @@ html.dark .operation-dialog .p-inputnumber input::placeholder {
   max-width: 28rem;
 }
 
+/* Force page titles/subtitles inside page content to use semantic tokens.
+   This prevents library or theme rules from making them white/invisible. */
+.page-content > section.mb-6 h1,
+.page-content > section.mb-6 .cpo-page-title {
+  color: var(--cpo-page-title-color) !important;
+}
+
+.page-content > section.mb-6 p,
+.page-content > section.mb-6 .cpo-page-subtitle {
+  color: var(--cpo-page-subtitle-color) !important;
+}
+
 /* Data table sizing rules */
 .table-list .p-datatable-table {
   width: 100%;
@@ -1148,6 +1336,20 @@ html.dark .operation-dialog .p-inputnumber input::placeholder {
   padding: 1rem;
 }
 
+/* Ensure prontuário cards use the light-card palette and dark text
+   to avoid theme inversion from global or component library styles. */
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-surface-card,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-surface-card:not(.cpo-text-on-dark) * {
+  background: var(--app-card-bg, #ffffff) !important;
+  color: var(--cpo-color-black, #0f172a) !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-instance-card,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-instance-card:not(.cpo-text-on-dark) * {
+  background: var(--app-card-bg, #f8fafc) !important;
+  color: var(--cpo-color-black, #0f172a) !important;
+}
+
 .prontuario-image-upload-row {
   display: flex;
   flex-wrap: wrap;
@@ -1196,9 +1398,11 @@ html.dark .operation-dialog .p-inputnumber input::placeholder {
 
 .prontuario-image-preview-button.p-button:not(:disabled):hover,
 .prontuario-image-preview-button.p-button-outlined:not(:disabled):hover {
-  background: #000000 !important;
-  border-color: #000000 !important;
-  color: var(--brand-accent) !important;
+  /* avoid forced-black hover; use slight dimming to match primary button behavior */
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  filter: brightness(0.96) !important;
 }
 
 .prontuario-image-preview-button.p-button:not(:disabled):hover :is(.p-button-label, .p-button-icon, .material-symbols-outlined, .fi, svg, i),
@@ -1211,6 +1415,155 @@ html.dark .operation-dialog .p-inputnumber input::placeholder {
 .prontuario-image-preview-dialog.p-dialog,
 .prontuario-image-preview-dialog .p-dialog {
   width: min(64rem, 96vw) !important;
+}
+
+/* Global button style overrides (reuse uigov Button) */
+/* Primary (default) buttons: gold bg, black text; hover swaps to black bg / gold text */
+.p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-danger):not(.p-button-success) {
+  background: var(--cpo-color-gold, #FFE57F) !important;
+  color: var(--cpo-color-black, #1D1D1D) !important;
+  border: 1px solid transparent !important;
+}
+.p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-danger):not(.p-button-success):not(:disabled):hover {
+  background: var(--cpo-color-black, #1D1D1D) !important;
+  color: var(--cpo-color-gold, #FFE57F) !important;
+}
+
+/* Final, high-specificity overrides for prontuário buttons to beat global primary rules */
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button.p-button:not(:disabled):hover,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button.p-button-outlined:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button.p-button:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button.p-button-outlined:not(:disabled):hover {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+  color: #121212 !important;
+  filter: brightness(0.96) !important;
+}
+
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined {
+  background: transparent !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button-outlined:not(:disabled):hover {
+  background: #0f172a !important;
+  border-color: #0f172a !important;
+  color: var(--brand-accent) !important;
+}
+
+/* Ensure icons/labels inside those buttons keep correct color */
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  color: inherit !important;
+  fill: inherit !important;
+  stroke: inherit !important;
+  background: transparent !important;
+}
+
+/* Explicitly remove any inner background on button labels/icons for preview & trash buttons */
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button .p-button-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button .p-button-label,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-image-preview-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  background: transparent !important;
+  color: #121212 !important;
+  fill: #121212 !important;
+  stroke: #121212 !important;
+}
+
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button .p-button-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i),
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button .p-button-label,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  background: transparent !important;
+  color: #000000 !important;
+  fill: #000000 !important;
+  stroke: #000000 !important;
+}
+
+/* Ensure trash button inside prontuário cards is gold */
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button .p-button-label,
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* In dark root also force gold color for trash button */
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button .p-button-label,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button :is(.p-button-icon, .material-symbols-outlined, .fi, svg, i) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--brand-accent) !important;
+  fill: var(--brand-accent) !important;
+  stroke: var(--brand-accent) !important;
+}
+
+/* Hover state: keep icon/text gold and avoid black fill */
+:is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover,
+html.dark :is(.prontuario-target-page, .prontuario-target-dialog) .prontuario-trash-button.p-button:not(:disabled):hover {
+  background: transparent !important;
+  color: var(--brand-accent) !important;
+}
+
+
+/* Danger / Cancel: red bg with white text; active/click => black bg, white text */
+.p-button.p-button-danger {
+  background: var(--cpo-color-danger, #d64550) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+.p-button.p-button-outlined.p-button-danger {
+  background: transparent !important;
+  color: #ffffff !important;
+  border-color: var(--cpo-color-danger, #d64550) !important;
+}
+.p-button.p-button-danger:not(:disabled):active,
+.p-button.p-button-danger:not(:disabled):focus,
+.p-button.p-button-outlined.p-button-danger:not(:disabled):active {
+  background: var(--cpo-color-black, #1D1D1D) !important;
+  color: #ffffff !important;
+}
+
+/* Success / Accept: green bg with white text; active/click => black bg, white text */
+.p-button.p-button-success {
+  background: var(--cpo-color-success, #2ea44f) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+.p-button.p-button-outlined.p-button-success {
+  background: transparent !important;
+  color: #ffffff !important;
+  border-color: var(--cpo-color-success, #2ea44f) !important;
+}
+.p-button.p-button-success:not(:disabled):active,
+.p-button.p-button-success:not(:disabled):focus,
+.p-button.p-button-outlined.p-button-success:not(:disabled):active {
+  background: var(--cpo-color-black, #1D1D1D) !important;
+  color: #ffffff !important;
+}
+
+/* Ensure outlined/default label/icon reuse the button coloring */
+.p-button .p-button-label,
+.p-button .material-symbols-outlined,
+.p-button svg,
+.p-button .fi {
+  color: inherit !important;
+  fill: inherit !important;
+  stroke: inherit !important;
 }
 
 .prontuario-image-preview-dialog-content {

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { BaseCreateDTO, BaseResponseDTO, BaseUpdateDTO } from "@/domain/types/base";
-import { departmentService } from "@/services/departmentService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
 
 interface DepartmentState {
     items: BaseResponseDTO[];
@@ -19,7 +19,7 @@ const initialState: DepartmentState = {
 export const fetchAllDepartments = createAsyncThunk<BaseResponseDTO[]>(
     "department/fetchAll",
     async () => {
-        const response = await departmentService.findAll();
+        const response = await domainDepartmentService.findAll();
         return response.data;
     }
 );
@@ -27,7 +27,7 @@ export const fetchAllDepartments = createAsyncThunk<BaseResponseDTO[]>(
 export const fetchDepartmentById = createAsyncThunk<BaseResponseDTO, number>(
     "department/fetchById",
     async (id: number) => {
-        const response = await departmentService.findById(id);
+        const response = await domainDepartmentService.findById(id);
         return response.data;
     }
 );
@@ -35,28 +35,28 @@ export const fetchDepartmentById = createAsyncThunk<BaseResponseDTO, number>(
 export const createDepartment = createAsyncThunk<void, BaseCreateDTO>(
     "department/create",
     async (payload: BaseCreateDTO) => {
-        await departmentService.create(payload);
+        await domainDepartmentService.create(payload);
     }
 );
 
 export const updateDepartment = createAsyncThunk<void, { id: number; payload: BaseUpdateDTO }>(
     "department/update",
     async ({ id, payload }: { id: number; payload: BaseUpdateDTO }) => {
-        await departmentService.update(id, payload);
+        await domainDepartmentService.update(id, payload);
     }
 );
 
 export const deleteDepartmentById = createAsyncThunk<void, number>(
     "department/deleteById",
     async (id: number) => {
-        await departmentService.deleteById(id);
+        await domainDepartmentService.deleteById(id);
     }
 );
 
 export const reactivateDepartmentById = createAsyncThunk<void, number>(
     "department/reactivateById",
     async (id: number) => {
-        await departmentService.reactivateById(id);
+        await domainDepartmentService.reactivateById(id);
     }
 );
 

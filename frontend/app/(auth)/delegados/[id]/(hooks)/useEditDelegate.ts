@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { delegateService } from "@/services/delagateService";
+import { domainDelegateService } from "@/services/domainDelagateService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DelegateFormErrors, DelegateFormState } from "@/app/(auth)/delegados/(types)/delegateForm";
@@ -30,7 +30,7 @@ export function useEditDelegate(delegateId: number) {
   const loadDelegate = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await delegateService.findById(delegateId);
+      const response = await domainDelegateService.findById(delegateId);
       const delegate = response.data;
 
       setForm({
@@ -75,19 +75,19 @@ export function useEditDelegate(delegateId: number) {
       const needsReactivateBefore = !originalIsActive && selectedIsActive;
 
       if (needsReactivateBefore) {
-        await delegateService.reactivateById(delegateId);
+        await domainDelegateService.reactivateById(delegateId);
         setOriginalIsActive(true);
       }
 
-      await delegateService.update(delegateId, {
+      await domainDelegateService.update(delegateId, {
         descName: form.descName.trim(),
       });
 
       if (hasStatusChange && !needsReactivateBefore) {
         if (selectedIsActive) {
-          await delegateService.reactivateById(delegateId);
+          await domainDelegateService.reactivateById(delegateId);
         } else {
-          await delegateService.deleteById(delegateId);
+          await domainDelegateService.deleteById(delegateId);
         }
         setOriginalIsActive(selectedIsActive);
       }

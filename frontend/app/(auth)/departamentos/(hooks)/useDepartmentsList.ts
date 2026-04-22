@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BaseResponseDTO } from "@/domain/types/base";
-import { departmentService } from "@/services/departmentService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
 
 export function useDepartmentsList() {
   const [departments, setDepartments] = useState<BaseResponseDTO[]>([]);
@@ -12,7 +12,7 @@ export function useDepartmentsList() {
   const fetchDepartments = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await departmentService.findAll();
+      const response = await domainDepartmentService.findAll();
       setDepartments(response.data);
     } finally {
       setLoading(false);

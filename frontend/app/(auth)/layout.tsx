@@ -81,13 +81,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Ações do menu do usuário (avatar)
   const userMenuActions: MenuAction = [
     {
-      label: 'Perfil',
-      icon: <Icon icon="account_circle" />,
-      command: () => {
-          alert("acessar página de perfil!")
-      }
-    },
-    {
       label: 'Sair',
       icon: <Icon icon="logout" />,
       command: () => {

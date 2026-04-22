@@ -23,3 +23,17 @@ export interface FieldValueUpdatePayload {
   groupInstanceId: string | null;
   valueContent: string;
 }
+
+export interface FieldValueMediaResponse {
+  fieldValueId: number;
+  mediaFileId: number;
+  mediaUrl: string;
+  storageKey: string;
+}
+
+export interface FieldValueMediaUploadPayload {
+  templateFieldId: number | null;
+  customFieldId: number | null;
+  groupInstanceId: string | null;
+  file: File;
+}

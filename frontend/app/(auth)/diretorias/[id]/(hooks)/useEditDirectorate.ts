@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { directorateService } from "@/services/directorateService";
+import { domainDirectorateService } from "@/services/domainDirectorateService";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { DirectorateFormErrors, DirectorateFormState } from "@/app/(auth)/diretorias/(types)/directorateForm";
@@ -30,7 +30,7 @@ export function useEditDirectorate(directorateId: number) {
   const loadDirectorate = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await directorateService.findById(directorateId);
+      const response = await domainDirectorateService.findById(directorateId);
       const directorate = response.data;
 
       setForm({
@@ -75,19 +75,19 @@ export function useEditDirectorate(directorateId: number) {
       const needsReactivateBefore = !originalIsActive && selectedIsActive;
 
       if (needsReactivateBefore) {
-        await directorateService.reactivateById(directorateId);
+        await domainDirectorateService.reactivateById(directorateId);
         setOriginalIsActive(true);
       }
 
-      await directorateService.update(directorateId, {
+      await domainDirectorateService.update(directorateId, {
         descName: form.descName.trim(),
       });
 
       if (hasStatusChange && !needsReactivateBefore) {
         if (selectedIsActive) {
-          await directorateService.reactivateById(directorateId);
+          await domainDirectorateService.reactivateById(directorateId);
         } else {
-          await directorateService.deleteById(directorateId);
+          await domainDirectorateService.deleteById(directorateId);
         }
         setOriginalIsActive(selectedIsActive);
       }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, InputText, Typography } from "@uigovpe/components";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { directorateService } from "@/services/directorateService";
+import { domainDirectorateService } from "@/services/domainDirectorateService";
 import DirectorateTable from "@/app/(auth)/diretorias/(components)/DirectorateTable";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useDirectoratesList } from "@/app/(auth)/diretorias/(hooks)/useDirectoratesList";
@@ -32,7 +32,7 @@ export default function DirectoratePage() {
 		setConfirmVisible(false);
 
 		try {
-			await directorateService.deleteById(targetId);
+			await domainDirectorateService.deleteById(targetId);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -58,7 +58,7 @@ export default function DirectoratePage() {
 	const handleReactivate = async (id: number) => {
 		setProcessingId(id);
 		try {
-			await directorateService.reactivateById(id);
+			await domainDirectorateService.reactivateById(id);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -92,7 +92,7 @@ export default function DirectoratePage() {
 				</Typography>
 			</section>
 
-			<Card title="Diretorias" elevation="low">
+			<Card title="Diretorias" elevation="low" className="cpo-text-on-dark">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
 						<div className="w-full md:max-w-sm">

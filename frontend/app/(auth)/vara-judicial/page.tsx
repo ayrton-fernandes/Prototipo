@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, InputText, Typography } from "@uigovpe/components";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
-import { courtService } from "@/services/courtService";
+import { domainCourtService } from "@/services/domainCourtService";
 import CourtTable from "@/app/(auth)/vara-judicial/(components)/CourtTable";
 import DeleteDialog from "@/components/DeleteDialog";
 import { useCourtsList } from "@/app/(auth)/vara-judicial/(hooks)/useCourtsList";
@@ -32,7 +32,7 @@ export default function CourtPage() {
 		setConfirmVisible(false);
 
 		try {
-			await courtService.deleteById(targetId);
+			await domainCourtService.deleteById(targetId);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -58,7 +58,7 @@ export default function CourtPage() {
 	const handleReactivate = async (id: number) => {
 		setProcessingId(id);
 		try {
-			await courtService.reactivateById(id);
+			await domainCourtService.reactivateById(id);
 			dispatch(
 				showToast({
 					severity: "success",
@@ -90,7 +90,7 @@ export default function CourtPage() {
 				<Typography variant="p" className="cpo-page-subtitle">Gerencie o domínio de varas judiciais do sistema.</Typography>
 			</section>
 
-			<Card title="Varas judiciais" elevation="low">
+			<Card title="Varas judiciais" elevation="low" className="cpo-text-on-dark">
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
 						<div className="w-full md:max-w-sm">

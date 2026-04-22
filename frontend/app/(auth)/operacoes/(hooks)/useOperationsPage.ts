@@ -4,11 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { operationService } from "@/services/operationService";
-import { courtService } from "@/services/courtService";
-import { departmentService } from "@/services/departmentService";
-import { delegateService } from "@/services/delagateService";
-import { directorateService } from "@/services/directorateService";
-import { stationService } from "@/services/stationService";
+import { domainCourtService } from "@/services/domainCourtService";
+import { domainDepartmentService } from "@/services/domainDepartmentService";
+import { domainDelegateService } from "@/services/domainDelagateService";
+import { domainDirectorateService } from "@/services/domainDirectorateService";
+import { domainStationService } from "@/services/domainStationService";
 import { userService } from "@/services/userService";
 import { OperationResponse, OperationPayload } from "@/domain/types/operation";
 import { UserListItem } from "@/domain/types/userManagement";
@@ -29,7 +29,29 @@ const buildDropdownOptions = (items: Array<{ id: number; descName: string }>): O
   }));
 };
 
-const hasProfile = (user: UserListItem, profileCode: string) => user.profileCodes.includes(profileCode);
+const normalizeProfileCode = (code: string) => code.trim().toUpperCase();
+
+const getUserProfileCodes = (user: UserListItem): string[] => {
+  return (user.profileCodes ?? [])
+    .map((code) => (typeof code === "string" ? code : String(code)))
+    .map(normalizeProfileCode)
+    .filter(Boolean);
+};
+
+const hasProfile = (user: UserListItem, profileCode: string) => {
+  const normalizedTarget = normalizeProfileCode(profileCode);
+  return getUserProfileCodes(user).includes(normalizedTarget);
+};
+
+const hasAnyProfile = (user: UserListItem, profileCodes: string[]) => {
+  const normalizedProfiles = getUserProfileCodes(user);
+  const normalizedTargets = profileCodes.map(normalizeProfileCode);
+  return normalizedTargets.some((target) => normalizedProfiles.includes(target));
+};
+
+const isAnalystUser = (user: UserListItem) => hasAnyProfile(user, ["INTELLIGENCE"]);
+
+const isInvestigatorUser = (user: UserListItem) => hasAnyProfile(user, ["INVESTIGATION"]);
 
 const initialOptionGroups: OperationOptionGroups = {
   departments: [],
@@ -115,11 +137,11 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
     try {
       const [departmentsResponse, delegatesResponse, directoratesResponse, stationsResponse, courtsResponse, usersResponse] =
         await Promise.all([
-          departmentService.findAll(),
-          delegateService.findAll(),
-          directorateService.findAll(),
-          stationService.findAll(),
-          courtService.findAll(),
+          domainDepartmentService.findAll(),
+          domainDelegateService.findAll(),
+          domainDirectorateService.findAll(),
+          domainStationService.findAll(),
+          domainCourtService.findAll(),
           userService.findAll(),
         ]);
 
@@ -131,11 +153,11 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
         directorates: buildDropdownOptions(directoratesResponse.data),
         stations: buildDropdownOptions(stationsResponse.data),
         courts: buildDropdownOptions(courtsResponse.data),
-        analystUsers: users.filter((user: UserListItem) => hasProfile(user, "INTELLIGENCE")).map((user: UserListItem) => ({
+        analystUsers: users.filter((user: UserListItem) => isAnalystUser(user)).map((user: UserListItem) => ({
           label: user.name,
           value: user.id,
         })),
-        investigatorUsers: users.filter((user: UserListItem) => hasProfile(user, "INVESTIGATION")).map((user: UserListItem) => ({
+        investigatorUsers: users.filter((user: UserListItem) => isInvestigatorUser(user)).map((user: UserListItem) => ({
           label: user.name,
           value: user.id,
         })),

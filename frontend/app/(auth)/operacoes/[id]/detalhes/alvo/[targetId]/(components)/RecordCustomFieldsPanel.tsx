@@ -14,7 +14,7 @@ interface ProntuarioCustomFieldsPanelProps {
   customFields: CustomFieldResponse[];
   drafts: Record<string, ProntuarioFieldDraft>;
   disabled?: boolean;
-  onFieldChange: (customField: CustomFieldResponse, nextValue: string) => void;
+  onFieldChange: (customField: CustomFieldResponse, nextValue: string, selectedFile?: File) => void;
   onRemoveField: (customField: CustomFieldResponse) => void;
 }
 
@@ -41,20 +41,20 @@ export default function ProntuarioCustomFieldsPanel({
   onRemoveField,
 }: ProntuarioCustomFieldsPanelProps) {
   return (
-    <Card className="prontuario-surface-card flex flex-col gap-5">
+    <Card className="prontuario-surface-card flex flex-col gap-5 text-white">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col gap-1">
-          <Typography variant="h4" className="text-slate-900">
+          <Typography variant="h4" className="text-white">
             Campos complementares
           </Typography>
-          <Typography variant="small" className="text-slate-500">
+          <Typography variant="small" className="text-white">
             Definições extras vinculadas ao registro selecionado.
           </Typography>
         </div>
       </div>
 
       {customFields.length === 0 ? (
-        <Typography variant="p" className="text-slate-500">
+        <Typography variant="p" className="text-white">
           Nenhum campo complementar cadastrado para esta seção.
         </Typography>
       ) : (
@@ -66,7 +66,7 @@ export default function ProntuarioCustomFieldsPanel({
             return (
               <div key={draftKey} className="prontuario-instance-card flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3">
-                  <Typography variant="small" className="text-slate-500">
+                  <Typography variant="small" className="text-white">
                     Campo complementar
                   </Typography>
 
@@ -85,7 +85,7 @@ export default function ProntuarioCustomFieldsPanel({
                   field={toSyntheticField(customField)}
                   value={draft?.valueContent ?? ""}
                   disabled={disabled}
-                  onChange={(nextValue) => onFieldChange(customField, nextValue)}
+                  onChange={(nextValue, selectedFile) => onFieldChange(customField, nextValue, selectedFile)}
                 />
               </div>
             );

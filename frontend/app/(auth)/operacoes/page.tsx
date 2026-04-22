@@ -51,7 +51,7 @@ export default function OperationsPage() {
         </div>
       </section>
 
-      <Card title="Operações" elevation="low">
+      <Card title="Operações" elevation="low" className="cpo-text-on-dark">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col md:flex-row gap-3 md:items-end md:justify-between">
             <div className="w-full md:max-w-sm">
@@ -104,6 +104,10 @@ export default function OperationsPage() {
         entity="ORQ"
         loading={deleteLoading}
         article="essa"
+        dialogClassName="operation-members-delete-dialog"
+        cancelButtonClassName="prontuario-dialog-cancel-button"
+        confirmButtonClassName="operation-members-submit-button"
+        confirmButtonDanger={false}
         onHide={closeDeleteDialog}
         onConfirm={confirmDelete}
       />

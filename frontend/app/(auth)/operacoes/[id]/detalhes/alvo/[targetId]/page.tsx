@@ -40,7 +40,7 @@ export default function TargetProntuarioPage() {
         <TargetSectionsHeader />
 
         <Card className="prontuario-surface-card">
-          <Typography variant="p" className="text-slate-600">
+          <Typography variant="p">
             Carregando prontuário do alvo...
           </Typography>
         </Card>
@@ -55,14 +55,14 @@ export default function TargetProntuarioPage() {
 
         <Card className="prontuario-surface-card">
           <div className="flex flex-col gap-4">
-            <Typography variant="h3" className="text-slate-900">
+            <Typography variant="h3">
               Prontuário do alvo
             </Typography>
-            <Typography variant="p" className="text-slate-500">
+            <Typography variant="p">
               {errorMessage ?? "Não foi possível carregar os dados do alvo."}
             </Typography>
             <div className="flex justify-end gap-2">
-              <Button label="Voltar para a operação" outlined icon={<Icon icon="arrow_back" />} onClick={goToOperationsDetails} />
+              <Button label="Voltar para a operação" outlined className="prontuario-dialog-cancel-button" icon={<Icon icon="arrow_back" />} onClick={goToOperationsDetails} />
             </div>
           </div>
         </Card>
@@ -93,34 +93,34 @@ export default function TargetProntuarioPage() {
     <>
       <TargetSectionsHeader />
 
-      <div className="prontuario-target-page grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
+      <div className="prontuario-target-page cpo-text-on-light grid gap-8 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
         <main className="flex min-w-0 flex-col gap-8">
         <section className="flex flex-col gap-2">
-          <Typography variant="h1" className="text-slate-900">
+          <Typography variant="h1">
             Prontuário do Alvo
           </Typography>
-          <Typography variant="p" className="max-w-3xl text-slate-500">
+          <Typography variant="p" className="max-w-3xl">
             Cadastre e visualize os dados do alvo em uma estrutura limpa, fiel ao fluxo de prontuário e conectada ao backend.
           </Typography>
         </section>
 
         {selectedEntryState ? (
           <div className="flex flex-col gap-8">
-            <Card className="prontuario-surface-card">
+            <Card className="prontuario-surface-card text-white">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <Typography variant="h4" className="text-slate-900">
+                  <Typography variant="h4">
                     Dados do Alvo
                   </Typography>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {immutableTargetInfo.map((item) => (
-                    <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                      <Typography variant="small" className="text-slate-500">
+                    <div key={item.label} className="rounded-xl border px-4 py-3">
+                      <Typography variant="small">
                         {item.label}
                       </Typography>
-                      <Typography variant="p" className="font-semibold text-slate-900">
+                      <Typography variant="p" className="font-semibold">
                         {item.value}
                       </Typography>
                     </div>
@@ -129,7 +129,7 @@ export default function TargetProntuarioPage() {
               </div>
             </Card>
 
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-8 ">
               {categoryGroups.map((groupNode) => (
                 <ProntuarioGroupSection
                   key={groupNode.group.id}
@@ -143,6 +143,17 @@ export default function TargetProntuarioPage() {
                 />
               ))}
             </div>
+
+            {selectedEntryState.customFields.length > 0 ? (
+              <ProntuarioCustomFieldsPanel
+                entryId={selectedEntryState.infoEntry.id}
+                customFields={selectedEntryState.customFields}
+                drafts={selectedEntryState.drafts}
+                disabled={saving}
+                onFieldChange={handleCustomFieldChange}
+                onRemoveField={handleRemoveCustomField}
+              />
+            ) : null}
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Button
@@ -158,21 +169,10 @@ export default function TargetProntuarioPage() {
                 loading={saving}
               />
             </div>
-
-            {selectedEntryState.customFields.length > 0 ? (
-              <ProntuarioCustomFieldsPanel
-                entryId={selectedEntryState.infoEntry.id}
-                customFields={selectedEntryState.customFields}
-                drafts={selectedEntryState.drafts}
-                disabled={saving}
-                onFieldChange={handleCustomFieldChange}
-                onRemoveField={handleRemoveCustomField}
-              />
-            ) : null}
           </div>
         ) : (
-          <Card className="prontuario-surface-card">
-            <Typography variant="p" className="text-slate-500">
+          <Card className="prontuario-surface-card text-white">
+            <Typography variant="p">
               Nenhum registro disponível para a seção selecionada.
             </Typography>
           </Card>
@@ -182,8 +182,8 @@ export default function TargetProntuarioPage() {
         <Dialog
           visible={customFieldDialogVisible}
           modal
-          header={<Typography variant="h4" className="text-black">Novo campo complementar</Typography>}
-          className="prontuario-target-dialog prontuario-target-dialog-wide"
+          header={<Typography variant="h4">Novo campo complementar</Typography>}
+          className="prontuario-target-dialog prontuario-target-dialog-wide cpo-text-on-light text-white"
           onHide={handleCloseCustomFieldDialog}
           footer={
             <div className="flex justify-end gap-2">

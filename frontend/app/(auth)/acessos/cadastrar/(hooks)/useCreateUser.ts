@@ -7,6 +7,7 @@ import { useAppDispatch } from "@/store/store";
 import { userService } from "@/services/userService";
 import { ProfileOption, UserFormErrors, UserFormState } from "@/app/(auth)/acessos/(types)/userForm";
 import { UserRole } from "@/domain/types/userManagement";
+import { domainProfileService } from "@/services/domainProfileService";
 
 const INITIAL_FORM: UserFormState = {
   name: "",
@@ -45,7 +46,7 @@ export function useCreateUser() {
   const loadProfiles = useCallback(async () => {
     setProfilesLoading(true);
     try {
-      const response = await userService.findAllProfiles();
+      const response = await domainProfileService.findAll()
       const mappedProfiles = response.data
         .filter((profile) => profile.active)
         .map((profile) => ({
