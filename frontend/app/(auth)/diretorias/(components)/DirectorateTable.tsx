@@ -31,7 +31,7 @@ export default function DirectorateTable({
     ...item,
     status: (
       <Tag
-        value={item.active ? "ATIVO" : "INATIVO"}
+        value={item.active ? "Ativo" : "Inativo"}
         severity={item.active ? "success" : "danger"}
       />
     ),

@@ -10,12 +10,9 @@ import {
   AdminUserBar, 
   Icon, 
   MenuAction, 
-  BreadcrumbProps, 
-  LayoutProvider, 
-  UiProvider,
-  SidebarSectionProps
+  SidebarSectionProps,
+  Loading
 } from '@uigovpe/components';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/userService';
@@ -73,9 +70,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // Logo principal exibida na barra lateral
   const sidebarLogo = {
     src: '/logos/logo-secretaria.png',
-    alt: 'Logo GovPE',
-    width: 220,
-    height: 110,
+    alt: 'Logo Polícia Civíl de Pernambuco',
+    width: 80,
+    height: 80,
   }
 
   // Ações do menu do usuário (avatar)
@@ -99,23 +96,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     profile: userData?.profiles?.[0]?.descName || ''
   }
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <GovBar showThemeController={false} />
-        <AppLayout.MainLayout>
-          <div className="app-loading-state">
-            Carregando...
-          </div>
-        </AppLayout.MainLayout>
-      </AppLayout>
-    );
-  }
-
   return (
     <AppLayout>
       {/* Barra superior do Governo de PE */}
-      <GovBar showThemeController={false} />
+      <GovBar
+        ui={{
+          container: {
+            className: 'bg-theme-default border-b border-gray-700',
+          },
+          fontSizeContainer: {
+            className: 'bg-theme-primary text-theme-default',
+          },
+        }}
+      />
+      {loading ? (
+        <div className="flex gap-2 justify-center items-center h-screen">
+          <Loading />
+          Carregando...
+        </div>
+      ) : (
       <AppLayout.MainLayout>
         {/* Barra lateral de navegação da área administrativa */}
         <AdminSideBar
@@ -125,6 +124,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           title="CPO Digital"
           footerSidebarLogo={undefined}
           logo={sidebarLogo}
+          ui={{
+            container: {
+              className: 'bg-[#18181A]',
+            },
+          }}
         />
 
         <AppLayout.ContentSection>
@@ -150,6 +154,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </AppLayout.MainContent>
         </AppLayout.ContentSection>
       </AppLayout.MainLayout>
+      )}
     </AppLayout>
   );
 }

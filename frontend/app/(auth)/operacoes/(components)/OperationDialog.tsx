@@ -52,8 +52,8 @@ export default function OperationDialog({
 
   const footerContent = (
     <div className="flex gap-2 justify-end">
-      <Button label="DESCARTAR" outlined severity="danger" className="operation-dialog-discard" disabled={submitting} onClick={onClose} />
-      <Button label={submitLabel} severity="success" className="operation-dialog-submit" loading={submitting} onClick={onSubmit} />
+      <Button label="Cancelar" outlined severity="danger" className="operation-dialog-discard" disabled={submitting} onClick={onClose} />
+      <Button label={submitLabel} className="operation-dialog-submit" loading={submitting} onClick={onSubmit} />
     </div>
   );
 

@@ -1,0 +1,17 @@
+:root {
+  /* BUTTON PRIMARY */
+  --btn-bg: #EACD61;
+  --btn-bg-focus: #b79d3f;
+  --btn-text-color: #28272c;
+  --btn-border-color: #EACD61;
+  --btn-hover-bg: #d4b84f;
+  --btn-hover-color: #3a2f00;
+  --btn-focused-bg: #d4b84f;
+}
+.p-button:not(:disabled):focus {
+  color: var(--color-text-default);
+}
+
+.p-button:not(:disabled):focus {
+    color: var(--btn-text-color);
+}

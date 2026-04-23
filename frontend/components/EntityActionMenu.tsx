@@ -69,14 +69,6 @@ export default function EntityActionMenu({
 				id={menuId}
 				popupAlignment="right"
 				className="entity-action-menu"
-				pt={{
-					menu: { className: "entity-action-menu-list" },
-					menuitem: { className: "entity-action-menu-item" },
-					content: { className: "entity-action-menu-content" },
-					action: { className: "entity-action-menu-link" },
-					icon: { className: "entity-action-menu-icon" },
-					label: { className: "entity-action-menu-label" },
-				}}
 			/>
 			<Button
 				icon={<Icon icon="more_vert" />}

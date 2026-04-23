@@ -90,7 +90,7 @@ export default function OperationsPage() {
         loading={optionLoading}
         submitting={submitting}
         title={editingOperation ? "Editar ORQ" : "Criar Nova ORQ"}
-        submitLabel={editingOperation ? "SALVAR" : "CRIAR"}
+        submitLabel={editingOperation ? "Salvar" : "Criar"}
         form={form}
         errors={errors}
         optionGroups={optionGroups}

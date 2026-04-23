@@ -45,7 +45,7 @@ export default function RootLayout({
   `;
 
     return (
-        <html lang="pt-BR" suppressHydrationWarning className={`${SIDEBAR_THEME} dark`}>
+        <html lang="pt-BR" suppressHydrationWarning className={`${SIDEBAR_THEME}`}>
             <head>
                 <script dangerouslySetInnerHTML={{ __html: envScript }} />
                 <script dangerouslySetInnerHTML={{ __html: script }} />

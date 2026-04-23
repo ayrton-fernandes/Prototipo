@@ -218,7 +218,7 @@ export const logoPrograma: Logo = {
  * Sidebar theme options ["theme-default", "theme-primary"]
  */
 export type SidebarTheme = 'theme-default' | 'theme-primary';
-export const SIDEBAR_THEME = 'theme-primary'; // Tema padrão da sidebar
+export const SIDEBAR_THEME = 'theme-default'; // Tema padrão da sidebar
 
 /**
  * Função para alterar o src da logo da sidebar com base no tema

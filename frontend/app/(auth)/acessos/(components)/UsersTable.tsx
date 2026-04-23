@@ -32,7 +32,7 @@ export default function UsersTable({
   const tableData = users.map((user) => ({
     ...user,
     status: (
-      <Tag value={user.active ? "ATIVO" : "INATIVO"} severity={user.active ? "success" : "danger"} />
+      <Tag value={user.active ? "Ativo" : "Inativo"} severity={user.active ? "success" : "danger"} />
     ),
     perfis: user.profileCodes
       .map((code) => profileDescriptionByCode[code] ?? code)

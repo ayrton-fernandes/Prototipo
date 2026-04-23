@@ -41,7 +41,7 @@ export default function EntityTable({
 		...item,
 		status: (
 			<Tag
-				value={item.active ? "ATIVO" : "INATIVO"}
+				value={item.active ? "Ativo" : "Inativo"}
 				severity={item.active ? "success" : "danger"}
 			/>
 		),
