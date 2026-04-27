@@ -23,7 +23,7 @@ export default function TargetForm({ title, submitLabel, form, errors, loading, 
   return (
     <div className="flex flex-col gap-4">
       {title ? (
-        <Typography variant="h4" className="text-white">
+        <Typography variant="h4">
           {title}
         </Typography>
       ) : null}

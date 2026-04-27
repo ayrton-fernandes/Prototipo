@@ -11,7 +11,9 @@ import {
   Icon, 
   MenuAction, 
   SidebarSectionProps,
-  Loading
+  Loading,
+  UiProvider,
+  Typography
 } from '@uigovpe/components';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -112,7 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {loading ? (
         <div className="flex gap-2 justify-center items-center h-screen">
           <Loading />
-          Carregando...
+          <Typography variant="span">Carregando...</Typography>
         </div>
       ) : (
       <AppLayout.MainLayout>
@@ -133,11 +135,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <AppLayout.ContentSection>
           {/* Barra do usuário com breadcrumb e ações */}
-          <AdminUserBar 
-            user={user}
-            menuActions={userMenuActions}
-            breadcrumb={breadcrumb}
-          />
+          <UiProvider hideOverlaysOnDocumentScrolling>
+            <AdminUserBar 
+              user={user}
+              menuActions={userMenuActions}
+              breadcrumb={breadcrumb}
+            />
+          </UiProvider>
           <AppLayout.MainContent>
             {/* Trilha de navegação (breadcrumb) */}
             <AppLayout.BreadCrumbSection>
@@ -148,7 +152,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </AppLayout.BreadCrumbSection>
 
             <AppLayout.PageContent>
-              {children}
+              <UiProvider hideOverlaysOnDocumentScrolling={false}>
+                {children}
+              </UiProvider>
             </AppLayout.PageContent>
             
           </AppLayout.MainContent>

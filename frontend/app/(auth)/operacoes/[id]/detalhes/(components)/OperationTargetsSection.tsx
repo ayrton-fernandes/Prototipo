@@ -63,7 +63,7 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <Typography variant="h2" className="text-black">
+          <Typography variant="h2">
             Alvos da operação
           </Typography>
           <Typography variant="p" className="text-slate-500">
@@ -86,8 +86,8 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
       ) : (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {targets.map((target) => (
-            <Card key={target.id} className="target-card">
-              <div className="absolute top-4 right-4 z-10">
+            <Card key={target.id} className="target-card relative">
+              <div className="absolute top-4 right-4">
                 <EntityActionMenu
                   active={true}
                   onEdit={() => router.push(`/operacoes/${params?.id}/detalhes/alvo/${target.id}/editar`)}
@@ -113,7 +113,7 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
                     <Typography variant="small" className="text-slate-400">
                       Nome do Alvo:
                     </Typography>
-                    <Typography variant="p" className="font-semibold text-white md:text-2xl text-xl break-words">
+                    <Typography variant="p" className="font-semibold md:text-2xl text-xl break-words">
                       {target.fullName}
                     </Typography>
                   </div>

@@ -106,7 +106,7 @@ export default function TargetProntuarioPage() {
 
         {selectedEntryState ? (
           <div className="flex flex-col gap-8">
-            <Card className="prontuario-surface-card text-white">
+            <Card className="prontuario-surface-card">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
                   <Typography variant="h4">
@@ -171,7 +171,7 @@ export default function TargetProntuarioPage() {
             </div>
           </div>
         ) : (
-          <Card className="prontuario-surface-card text-white">
+          <Card className="prontuario-surface-card">
             <Typography variant="p">
               Nenhum registro disponível para a seção selecionada.
             </Typography>
@@ -183,7 +183,7 @@ export default function TargetProntuarioPage() {
           visible={customFieldDialogVisible}
           modal
           header={<Typography variant="h4">Novo campo complementar</Typography>}
-          className="prontuario-target-dialog prontuario-target-dialog-wide cpo-text-on-light text-white"
+          className="prontuario-target-dialog prontuario-target-dialog-wide cpo-text-on-light"
           onHide={handleCloseCustomFieldDialog}
           footer={
             <div className="flex justify-end gap-2">

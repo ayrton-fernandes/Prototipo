@@ -21,7 +21,7 @@ export default function CreateTargetPage() {
         </Typography>
       </section>
 
-      <Card title="Novo alvo" className="text-white" elevation="low">
+      <Card title="Novo alvo" elevation="low">
         <TargetForm
           title="Dados do alvo"
           submitLabel="Avançar"

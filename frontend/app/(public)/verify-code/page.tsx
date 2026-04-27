@@ -87,7 +87,7 @@ export default function VerifyCode() {
     <>
       <div className="auth-page-shell verify-code-page">
         <div className="auth-page-panel">
-          <Card className="text-black" title="Verificar código">
+          <Card title="Verificar código">
             <form onSubmit={handleSubmit(onSubmit)}>
               <FlexContainer
                 direction="col"

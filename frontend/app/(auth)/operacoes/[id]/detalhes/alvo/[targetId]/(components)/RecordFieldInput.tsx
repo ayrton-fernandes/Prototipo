@@ -113,7 +113,7 @@ export default function ProntuarioFieldInput({
 
     return (
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-white">{fieldLabel}</label>
+        <label className="text-sm font-medium">{fieldLabel}</label>
 
         <input
           ref={fileInputRef}
@@ -149,7 +149,7 @@ export default function ProntuarioFieldInput({
           ) : null}
         </div>
 
-        <Typography variant="small" className="text-white">
+        <Typography variant="small">
           Envie uma imagem do dispositivo (PNG, JPG, WEBP ou GIF, até 5 MB).
         </Typography>
 
@@ -160,7 +160,7 @@ export default function ProntuarioFieldInput({
         ) : null}
 
         {hasImageValue ? (
-          <Typography variant="small" className="text-white">
+          <Typography variant="small">
             Imagem pronta para salvar nesta seção.
           </Typography>
         ) : null}

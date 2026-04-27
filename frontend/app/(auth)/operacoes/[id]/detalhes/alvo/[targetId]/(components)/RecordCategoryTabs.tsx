@@ -21,7 +21,7 @@ interface ProntuarioCategoryTabsProps {
 export default function ProntuarioCategoryTabs({ items, selectedCode, onSelect }: ProntuarioCategoryTabsProps) {
   return (
     <div className="flex flex-col gap-3">
-      <Typography variant="small" className="text-white uppercase tracking-[0.2em]">
+      <Typography variant="small" className="uppercase tracking-[0.2em]">
         Seções do prontuário
       </Typography>
 

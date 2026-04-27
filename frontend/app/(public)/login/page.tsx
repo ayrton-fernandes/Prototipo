@@ -121,75 +121,78 @@ export default function Login() {
   };
 
   return (
-    <>
-      <div className="auth-page-shell login-page">
-        <div className="auth-page-panel p-6 md:p-10">
-          <Card>
+    <div className="w-full h-full flex justify-center items-center">
+      <section className="p-8 md:p-12 max-w-lg m-auto">
+
+        <FlexContainer
+          direction="col"
+          gap="2"
+          align='center'
+          className="w-full mb-8"
+        >
+          <Typography variant="span" fontWeight="bold">
+            CPO DIGITAL
+          </Typography>
+          <Typography variant="span" className="text-sm" textAlign="center">
+            Controle de Operações Policiais - Governo de Pernambuco
+          </Typography>
+        </FlexContainer>
+        
+        <Card title="Login">
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FlexContainer
               direction="col"
-              gap="2"
-              align='center'
-              className="w-full"
+              gap="4"
+              justify="center"
+              align="start"
             >
-              <Typography variant="span" className="text-black" fontWeight="bold">
-                CPO DIGITAL
-              </Typography>
-              <Typography variant="span" className="text-sm text-black" textAlign="center">
-                Controle de Operações Policiais - Governo de Pernambuco
-              </Typography>
-            </FlexContainer>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <FlexContainer
-                direction="col"
-                gap="4"
-                justify="center"
-                align="start"
-              >
-                <div className="w-full text-black">
-                  <Controller
-                    name="email"
-                    control={control}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <InputText
-                        {...field}
-                        label="E-mail"
-                        invalid={!!errors.email}
-                        placeholder="Ex: exemplo@gmail.com"
-                        supportText={errors.email?.message}
-                      />
-                    )}
-                  />
-                </div>
-
-                <div className="w-full">
-                  <Controller
-                    name="senha"
-                    control={control}
-                    defaultValue=""
-                    render={({ field }) => (
-                      <InputPassword
-                        {...field}
-                        label="Senha"
-                        placeholder="Digite sua senha"
-                        invalid={!!errors.senha}
-                        supportText={errors.senha?.message}
-                        keyfilter={/^\S+$/}
-                      />
-                    )}
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  label="Entrar"
-                  className="w-full"
-                  loading={isLoading}
+              <div className="w-full">
+                <Controller
+                  name="email"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <InputText
+                      {...field}
+                      label="E-mail"
+                      invalid={!!errors.email}
+                      placeholder="Ex: exemplo@gmail.com"
+                      supportText={errors.email?.message}
+                    />
+                  )}
                 />
-              </FlexContainer>
-            </form>
-          </Card>
-        </div>
-      </div>
-    </>
+              </div>
+
+              <div className="w-full">
+                <Controller
+                  name="senha"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <InputPassword
+                      {...field}
+                      label="Senha"
+                      placeholder="Digite sua senha"
+                      invalid={!!errors.senha}
+                      supportText={errors.senha?.message}
+                      keyfilter={/^\S+$/}
+                    />
+                  )}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                label="Entrar"
+                className="w-full"
+                loading={isLoading}
+              />
+
+            </FlexContainer>
+
+          </form>
+        </Card>
+      </section>
+    </div>
   );
 }

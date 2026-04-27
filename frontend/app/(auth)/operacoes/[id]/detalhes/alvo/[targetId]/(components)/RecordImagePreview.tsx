@@ -68,12 +68,13 @@ export default function ProntuarioImagePreview({ imageUrl, alt }: ProntuarioImag
         icon={<Icon icon="visibility" outline />}
         label="Preview da imagem"
         className="prontuario-image-preview-button"
+        outlined
       />
 
       <Dialog
         modal
         className="prontuario-target-dialog prontuario-image-preview-dialog"
-        header={<Typography variant="h4" className="text-black">Preview da imagem</Typography>}
+        header={<Typography variant="h4">Preview da imagem</Typography>}
         visible={previewVisible}
         onHide={closePreview}
         footer={

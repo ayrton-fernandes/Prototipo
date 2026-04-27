@@ -46,13 +46,19 @@ export default function RootLayout({
 
     return (
         <html lang="pt-BR" suppressHydrationWarning className={`${SIDEBAR_THEME}`}>
-            <head>
-                <script dangerouslySetInnerHTML={{ __html: envScript }} />
-                <script dangerouslySetInnerHTML={{ __html: script }} />
-            </head>
-            <body className={`${inter.className} antialiased`}>
-                <Providers>{children}</Providers>
-            </body>
+          <head>
+              <script dangerouslySetInnerHTML={{ __html: envScript }} />
+              <script dangerouslySetInnerHTML={{ __html: script }} />
+          </head>
+          <body className={`${inter.className} antialiased`}>
+            <div className="h-screen">
+              <main className="flex h-full flex-col">
+                <div className="flex-1">
+                  <Providers>{children}</Providers>
+                </div>
+              </main>
+            </div>
+          </body>
         </html>
     );
 }

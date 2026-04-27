@@ -14,9 +14,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Provider store={store}>
             <ToastProvider>
                 <LayoutProvider breakpoint={900} template="backoffice">
-                    <UiProvider>
-                        <PageProvider>{children}</PageProvider>
-                    </UiProvider>
+                    <PageProvider>{children}</PageProvider>
                 </LayoutProvider>
             </ToastProvider>
         </Provider>

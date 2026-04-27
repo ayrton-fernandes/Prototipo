@@ -41,20 +41,20 @@ export default function ProntuarioCustomFieldsPanel({
   onRemoveField,
 }: ProntuarioCustomFieldsPanelProps) {
   return (
-    <Card className="prontuario-surface-card flex flex-col gap-5 text-white">
+    <Card className="prontuario-surface-card flex flex-col gap-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div className="flex flex-col gap-1">
-          <Typography variant="h4" className="text-white">
+          <Typography variant="h4">
             Campos complementares
           </Typography>
-          <Typography variant="small" className="text-white">
+          <Typography variant="small">
             Definições extras vinculadas ao registro selecionado.
           </Typography>
         </div>
       </div>
 
       {customFields.length === 0 ? (
-        <Typography variant="p" className="text-white">
+        <Typography variant="p">
           Nenhum campo complementar cadastrado para esta seção.
         </Typography>
       ) : (
@@ -66,7 +66,7 @@ export default function ProntuarioCustomFieldsPanel({
             return (
               <div key={draftKey} className="prontuario-instance-card flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3">
-                  <Typography variant="small" className="text-white">
+                  <Typography variant="small">
                     Campo complementar
                   </Typography>
 

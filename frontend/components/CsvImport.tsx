@@ -102,7 +102,7 @@ export default function CsvImport({ operationId, uploadUrl, initialType = "targe
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-black text-white p-4 rounded">
+    <div className="flex flex-col gap-3 bg-black p-4 rounded">
       <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onFileChange} className="hidden" />
 
       <div className="flex items-center gap-3">
@@ -125,13 +125,13 @@ export default function CsvImport({ operationId, uploadUrl, initialType = "targe
           <table className="min-w-full text-left">
             <thead className="bg-gray-800">
               <tr>
-                {headers.map((h, i) => <th key={i} className="px-2 py-1 text-sm font-medium text-white">{h}</th>)}
+                {headers.map((h, i) => <th key={i} className="px-2 py-1 text-sm font-medium">{h}</th>)}
               </tr>
             </thead>
             <tbody>
               {rows.map((r, ri) => (
                 <tr key={ri} className={ri % 2 === 0 ? "bg-gray-900" : "bg-black"}>
-                  {r.map((c, ci) => <td key={ci} className="px-2 py-1 text-sm text-white">{c}</td>)}
+                  {r.map((c, ci) => <td key={ci} className="px-2 py-1 text-sm">{c}</td>)}
                 </tr>
               ))}
             </tbody>

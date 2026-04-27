@@ -41,7 +41,7 @@ export default function DeleteDialog({
 
   const headerElement = (
     <div className="flex items-center justify-center gap-2">
-      <Typography fontWeight="bold" className="text-black">Deseja inativar {article} {entity}?</Typography>
+      <Typography fontWeight="bold">Deseja inativar {article} {entity}?</Typography>
     </div>
   );
 
@@ -72,8 +72,8 @@ export default function DeleteDialog({
         onHide();
       }}
     >
-      <Typography size="sm" className="text-black">Essa ação não poderá ser desfeita.</Typography>
-      <Typography size="sm" className="text-black">Tem certeza de que deseja continuar?</Typography>
+      <Typography size="sm">Essa ação não poderá ser desfeita.</Typography>
+      <Typography size="sm">Tem certeza de que deseja continuar?</Typography>
     </Dialog>
   );
 }

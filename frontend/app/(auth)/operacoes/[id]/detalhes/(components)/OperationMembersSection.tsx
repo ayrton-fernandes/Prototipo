@@ -199,7 +199,7 @@ export default function OperationMembersSection({
       <section className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <Typography variant="h2" className="text-black">
+            <Typography variant="h2">
               Membros da operação
             </Typography>
             <Typography variant="p" className="text-slate-500">
@@ -252,7 +252,7 @@ export default function OperationMembersSection({
         modal
         className="operation-dialog operation-dialog--wide operation-members-dialog"
         header={
-          <Typography variant="h4" className="text-black">
+          <Typography variant="h4">
             {memberUnderEdit ? "Editar permissão do membro" : "Cadastrar membro da operação"}
           </Typography>
         }
