@@ -21,6 +21,7 @@ export interface OperationResponse {
   operationCode: string;
   description: string | null;
   active: boolean;
+  status?: OperationDomainReference | null;
   department: OperationDomainReference | null;
   delegate: OperationDomainReference | null;
   directorate: OperationDomainReference | null;

@@ -220,7 +220,11 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
   const filteredOperations = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    let result = operations;
+    const planningOperations = isPlanning
+      ? operations.filter((operation) => operation.status?.codeName === "IN_PLANNING")
+      : operations;
+
+    let result = planningOperations;
 
     if (!term) {
       return result;
@@ -239,7 +243,7 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
         .filter((value): value is string => Boolean(value))
         .some((value) => value.toLowerCase().includes(term));
     });
-  }, [operations, search]);
+  }, [isPlanning, operations, search]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredOperations.length / PAGE_SIZE)), [filteredOperations.length]);
 
