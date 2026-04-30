@@ -202,6 +202,7 @@ export default function OperationDetailsPage() {
           showSendToPlanning={isCurrentUserCoordinator}
           onSendToPlanning={sendToPlanning}
           canEdit={!isPlanning}
+          canDelete={!isPlanning}
         />
 
         <OperationTargetsSection 

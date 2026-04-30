@@ -51,6 +51,11 @@ const ADDITIONAL_TRASH_GROUPS = new Set([
   "endereço",
 ].map(normalizeFiliacaoValue));
 
+const NESTED_GROUPS_WITHOUT_ADD_BUTTON = new Set([
+  "endereço",
+  "imagens do local do endereço",
+].map(normalizeFiliacaoValue));
+
 const shouldShowTrashOnRight = (label: string): boolean => {
   const normalized = normalizeFiliacaoValue(label);
   return (
@@ -146,6 +151,7 @@ export default function ProntuarioGroupSection({
       const subgroupFields = subgroup.children.filter((field) => !isImmutableTargetRegistrationField(field));
       const repeatableSubgroup = isRepeatableGroup(subgroup.group.label);
       const subgroupDisplayLabel = getDisplayGroupLabel(subgroup.group.label);
+      const showNestedAddButton = repeatableSubgroup && !NESTED_GROUPS_WITHOUT_ADD_BUTTON.has(normalizeFiliacaoValue(subgroup.group.label));
 
       if (subgroupFields.length === 0 && subgroup.subgroups.length === 0) {
         return null;
@@ -157,7 +163,7 @@ export default function ProntuarioGroupSection({
         <div key={`${subgroup.group.id}-${renderInstanceId ?? "single"}`} className="rounded-xl border border-dashed border-slate-300/70 bg-white/60 p-4">
           <div className="flex items-center justify-between gap-3">
             <Typography variant="h5">{subgroupDisplayLabel}</Typography>
-            {!disabled && repeatableSubgroup ? (
+            {!disabled && showNestedAddButton ? (
               <Button
                 label="Adicionar item"
                 icon={<Icon icon="add" />}

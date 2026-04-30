@@ -77,33 +77,36 @@ const getRecordTemplate = (templates: TemplateResponse[]): TemplateResponse | nu
 };
 
 const getRecordPhotoFieldIds = (templateFields: TemplateFieldResponse[]): Set<number> => {
+  const photoGroupLabels = new Set(["fotos do alvo", "imagem do alvo", "imagens do alvo"]);
+  const fieldsById = new Map(templateFields.map((field) => [field.id, field]));
+
   const photoGroupIds = templateFields
     .filter(
       (field) =>
         normalizeInputType(field.inputType) === "GROUP" &&
-        normalizeText(field.label) === "fotos do alvo"
+        photoGroupLabels.has(normalizeText(field.label))
     )
     .map((field) => field.id);
 
-  const photoGroupIdSet = new Set(photoGroupIds);
+  const isDescendantOfPhotoGroup = (field: TemplateFieldResponse): boolean => {
+    let parentFieldId = field.parentFieldId;
 
-  const photoFieldIds = templateFields
-    .filter((field) => {
-      const isInputField = normalizeInputType(field.inputType) === "INPUT";
-
-      if (!isInputField) {
-        return false;
-      }
-
-      if (field.parentFieldId != null && photoGroupIdSet.has(field.parentFieldId)) {
+    while (parentFieldId != null) {
+      if (photoGroupIds.includes(parentFieldId)) {
         return true;
       }
 
-      return normalizeText(field.label).includes("foto");
-    })
-    .map((field) => field.id);
+      parentFieldId = fieldsById.get(parentFieldId)?.parentFieldId ?? null;
+    }
 
-  return new Set(photoFieldIds);
+    return false;
+  };
+
+  return new Set(
+    templateFields
+      .filter((field) => normalizeInputType(field.inputType) === "INPUT" && isDescendantOfPhotoGroup(field))
+      .map((field) => field.id)
+  );
 };
 
 const getLatestImageValueContent = (fieldValues: FieldValueResponse[]): string | undefined => {
