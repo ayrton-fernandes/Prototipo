@@ -69,6 +69,13 @@ const IMMUTABLE_TARGET_FIELD_LABELS = new Set([
   "data de nascimento",
 ]);
 
+const ADDRESS_FIELDS_TO_HIDE = new Set([
+  "imagem local",
+  "imagem do local",
+  "link do maps",
+  "link mapa",
+].map(normalizeFiliacaoValue));
+
 const isImmutableTargetRegistrationField = (field: TemplateFieldResponse): boolean =>
   IMMUTABLE_TARGET_FIELD_LABELS.has(normalizeFiliacaoValue(field.label));
 
@@ -87,6 +94,7 @@ export default function ProntuarioGroupSection({
     const repeatable = isRepeatableGroup(node.group.label);
     const filiacaoGroup = isFiliacaoGroup(node.group.label);
     const targetImagesGroup = isTargetImagesGroup(node.group.label);
+    const isEnderecoGroup = normalizeFiliacaoValue(node.group.label) === "endereco";
     const showTrashOnRight = shouldShowTrashOnRight(node.group.label);
     const rawEditableGroupFields = node.children.filter((field) => !isImmutableTargetRegistrationField(field));
     // If this group has a nested "Imagens do Local do Endereço" subgroup, avoid showing
@@ -94,6 +102,10 @@ export default function ProntuarioGroupSection({
     const hasImageLocalSubgroup = node.subgroups.some((s) => normalizeFiliacaoValue(s.group.label) === normalizeFiliacaoValue("Imagens do Local do Endereço") || isTargetImagesGroup(s.group.label));
 
     const editableGroupFields = rawEditableGroupFields.filter((field) => {
+      if (isEnderecoGroup && ADDRESS_FIELDS_TO_HIDE.has(normalizeFiliacaoValue(field.label))) {
+        return false;
+      }
+
       if (hasImageLocalSubgroup && normalizeInputType(field.inputType) === "INPUT") {
         const normalizedFieldLabel = normalizeFiliacaoValue(field.label);
         if (normalizedFieldLabel.includes("imagem") || normalizedFieldLabel.includes("foto")) {
@@ -106,8 +118,12 @@ export default function ProntuarioGroupSection({
     const nestedGroupFields = node.subgroups.flatMap((subgroup) => getGroupNodeFieldIds(subgroup));
     const allFieldIds = new Set([...editableGroupFields.map((field) => field.id), ...nestedGroupFields]);
 
-    const renderField = (field: TemplateFieldResponse, rightAction: ReactNode = null) => {
-      const draftKey = buildTemplateFieldDraftKey(entryId, field.id, renderInstanceId);
+    const renderField = (
+      field: TemplateFieldResponse,
+      rightAction: ReactNode = null,
+      instanceId: string | null = renderInstanceId
+    ) => {
+      const draftKey = buildTemplateFieldDraftKey(entryId, field.id, instanceId);
       const draft = drafts[draftKey];
       const fieldIndex = editableGroupFields.findIndex((candidateField) => candidateField.id === field.id);
       const presentation = getFieldPresentationForGroup(node.group.label, field, fieldIndex);
@@ -121,7 +137,7 @@ export default function ProntuarioGroupSection({
           value={draft?.valueContent ?? ""}
           disabled={disabled}
           rightAction={rightAction}
-          onChange={(nextValue, selectedFile) => onFieldChange(field, renderInstanceId, nextValue, entryId, selectedFile)}
+          onChange={(nextValue, selectedFile) => onFieldChange(field, instanceId, nextValue, entryId, selectedFile)}
         />
       );
     };
@@ -327,15 +343,16 @@ export default function ProntuarioGroupSection({
                                   imageUrl={imagePreviewValue}
                                   alt={`Pré-visualização da imagem ${currentInstanceIndex + 1}`}
                                 />
-                              ) : null
+                              ) : null,
+                              groupInstanceId
                             )
                           : null}
-                        {imageDateField ? renderField(imageDateField) : null}
+                        {imageDateField ? renderField(imageDateField, null, groupInstanceId) : null}
                       </div>
 
                       {remainingFields.length > 0 ? (
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                          {remainingFields.map((field) => renderField(field))}
+                          {remainingFields.map((field) => renderField(field, null, groupInstanceId))}
                         </div>
                       ) : null}
 

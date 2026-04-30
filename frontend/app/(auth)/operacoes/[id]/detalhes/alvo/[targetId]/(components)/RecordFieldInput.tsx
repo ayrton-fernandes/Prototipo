@@ -174,14 +174,21 @@ export default function ProntuarioFieldInput({
         ? "Digite apenas números"
         : fieldLabel;
 
+  const inputTypeAttr = inputType === "NUMBER" ? "tel" : undefined;
+
   return (
     <InputText
       label={fieldLabel}
       value={value}
       placeholder={placeholder}
+      type={inputTypeAttr}
       inputMode={inputType === "NUMBER" || inputType === "DATE" ? "numeric" : undefined}
       onChange={(event: ChangeEvent<HTMLInputElement>) => {
-        const nextValue = inputType === "DATE" ? maskDateInput(event.target.value) : event.target.value;
+        const nextValue = inputType === "DATE"
+          ? maskDateInput(event.target.value)
+          : inputType === "NUMBER"
+            ? event.target.value.replace(/\D/g, "")
+            : event.target.value;
         onChange(nextValue);
       }}
       disabled={disabled}
