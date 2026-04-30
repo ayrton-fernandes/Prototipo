@@ -1,55 +1,50 @@
 "use client";
 
-interface TargetSectionItem {
-  label: string;
-  enabled: boolean;
-  active?: boolean;
+import { useCurrentOperationMember } from "@/app/(auth)/operacoes/[id]/detalhes/(hooks)/useCurrentOperationMember";
+import { useTargetTabs } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(hooks)/useTargetTabs";
+import { useTargetTabNavigation } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(hooks)/useTargetTabNavigation";
+import { TargetTabType } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(types)/targetTab";
+
+interface TargetSectionProps {
+  /**
+   * ID da aba atualmente ativa (usado para renderizar o header com a aba correta marcada)
+   * Se não fornecido, será detectado automaticamente pela URL
+   */
+  activeTabId?: TargetTabType;
 }
 
-const TARGET_SECTIONS: TargetSectionItem[] = [
-  {
-    label: "DOCUMENTOS GENERICOS",
-    enabled: false,
-  },
-  {
-    label: "PRONTUARIO DO ALVO",
-    enabled: true,
-    active: true,
-  },
-  {
-    label: "CORROBORACAO JURIDICA",
-    enabled: false,
-  },
-  {
-    label: "INTERROGATORIO",
-    enabled: false,
-  },
-  {
-    label: "DOCUMENTACAO DA OPERACAO",
-    enabled: false,
-  },
-];
+export default function TargetSectionsHeader({ activeTabId }: TargetSectionProps) {
+  const { permission, loading } = useCurrentOperationMember();
+  const { currentTabId, navigateToTab } = useTargetTabNavigation();
+  const { tabs } = useTargetTabs({
+    permission,
+    currentTabId: activeTabId ?? currentTabId,
+  });
 
-export default function TargetSectionsHeader() {
+  const handleTabClick = (tabId: TargetTabType) => {
+    navigateToTab(tabId);
+  };
+
   return (
-    <nav className="target-sections-nav" aria-label="Sections do alvo">
-      {TARGET_SECTIONS.map((section) => {
+    <nav className="target-sections-nav" aria-label="Abas do alvo">
+      {tabs.map((tab) => {
         const buttonClassName = [
           "target-sections-nav-button",
-          section.active ? "target-sections-nav-button--active" : "",
+          tab.active ? "target-sections-nav-button--active" : "",
         ]
           .filter(Boolean)
           .join(" ");
 
         return (
           <button
-            key={section.label}
+            key={tab.id}
             type="button"
             className={buttonClassName}
-            disabled={!section.enabled}
-            aria-current={section.active ? "page" : undefined}
+            disabled={!tab.enabled || loading}
+            aria-current={tab.active ? "page" : undefined}
+            onClick={() => handleTabClick(tab.id)}
           >
-            {section.label}
+            {tab.label}
           </button>
         );
       })}

@@ -10,12 +10,16 @@ interface EntityActionMenuProps {
 	onViewDetails?: () => void;
 	onDelete: () => void;
 	onReactivate: () => void;
+	onSendToPlanning?: () => void;
 	editLabel?: string;
 	viewDetailsLabel?: string;
 	deleteLabel?: string;
 	reactivateLabel?: string;
+	sendToPlanningLabel?: string;
 	showEdit?: boolean;
 	showViewDetails?: boolean;
+	showDelete?: boolean;
+	showReactivate?: boolean;
 }
 
 export default function EntityActionMenu({
@@ -24,12 +28,16 @@ export default function EntityActionMenu({
 	onViewDetails,
 	onDelete,
 	onReactivate,
+	onSendToPlanning,
 	editLabel = "Editar",
 	viewDetailsLabel = "Visualizar detalhes",
 	deleteLabel = "Excluir",
 	reactivateLabel = "Reativar",
+	sendToPlanningLabel = "Enviar para planejamento",
 	showEdit = true,
 	showViewDetails = false,
+	showDelete = true,
+	showReactivate = false,
 }: EntityActionMenuProps) {
 	const menu = useRef<Menu>(null);
 	const menuId = useId();
@@ -53,12 +61,38 @@ export default function EntityActionMenu({
 				},
 			]
 			: []),
-		{
-			label: active ? deleteLabel : reactivateLabel,
-			icon: <Icon icon={active ? "delete" : "restart_alt"} outline />,
-			command: active ? onDelete : onReactivate,
-		},
+		...(onSendToPlanning && active
+			? [
+				{
+					label: sendToPlanningLabel,
+					icon: <Icon icon="assignment" outline />,
+					command: onSendToPlanning,
+				},
+			]
+			: []),
+		...(active && showDelete
+			? [
+				{
+					label: deleteLabel,
+					icon: <Icon icon="delete" outline />,
+					command: onDelete,
+				},
+			]
+			: []),
+		...(!active && showReactivate
+			? [
+				{
+					label: reactivateLabel,
+					icon: <Icon icon="restart_alt" outline />,
+					command: onReactivate,
+				},
+			]
+			: []),
 	];
+
+	if (items.length === 0) {
+		return null;
+	}
 
 	return (
 		<>

@@ -12,6 +12,7 @@ import { maskCpf, formatDateToDisplay } from "@/utils/formatters";
 interface OperationTargetsSectionProps {
   targets: OperationTarget[];
   onDelete?: (targetId: number) => void;
+  canEdit?: boolean;
 }
 
 interface TargetImageProps {
@@ -44,7 +45,7 @@ function TargetImage({ imageUrl, alt }: TargetImageProps) {
   );
 }
 
-export default function OperationTargetsSection({ targets, onDelete }: OperationTargetsSectionProps) {
+export default function OperationTargetsSection({ targets, onDelete, canEdit = true }: OperationTargetsSectionProps) {
   const router = useRouter();
   const params = useParams() as { id?: string };
 
@@ -71,10 +72,12 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
           </Typography>
         </div>
 
-        <div className="flex items-center gap-3">
-          <CsvImportDialog operationId={params?.id ?? ''} />
-          <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} onClick={handleCreate} />
-        </div>
+        {canEdit && (
+          <div className="flex items-center gap-3">
+            <CsvImportDialog operationId={params?.id ?? ''} />
+            <Button label="Cadastrar novo alvo" icon={<Icon icon="add" />} onClick={handleCreate} />
+          </div>
+        )}
       </div>
 
       {targets.length === 0 ? (
@@ -100,6 +103,9 @@ export default function OperationTargetsSection({ targets, onDelete }: Operation
                   onReactivate={() => {}}
                   editLabel="Editar alvo"
                   showViewDetails
+                  showEdit={canEdit}
+                  showDelete={canEdit}
+                  showReactivate={false}
                 />
               </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { useParams, useRouter } from "next/navigation";
 import { showToast } from "@/store/slices/toastSlice";
-import { useAppDispatch } from "@/store/store";
 import { operationService } from "@/services/operationService";
 import { operationMemberService } from "@/services/operationMemberService";
 import { targetService } from "@/services/targetService";
@@ -22,14 +23,17 @@ import { TargetResponse } from "@/domain/types/target";
 import { DomainProfile, UserListItem } from "@/domain/types/userManagement";
 import { OperationMemberRow, OperationTarget } from "@/app/(auth)/operacoes/[id]/detalhes/(types)/operationDetails";
 import { domainProfileService } from "@/services/domainProfileService";
+import { useAppDispatch } from "@/store/store";
+import { hasAnyProfile } from "@/utils/userProfiles";
 
 const MEMBER_PERMISSION_LABEL: Record<OperationMemberPermission, string> = {
   READER: "Leitor",
   EDITOR: "Editor",
   COORDINATOR: "Coordenador",
+  PLANNING: "Planejamento"
 };
 
-const EXCLUDED_MEMBER_PROFILE_CODES = new Set(["COOR_INTELLIGENCE", "PLANNING"]);
+const EXCLUDED_MEMBER_PROFILE_CODES = new Set([""]);
 
 const hasExcludedMemberProfile = (user: UserListItem): boolean => {
   return user.profileCodes.some((profileCode) => EXCLUDED_MEMBER_PROFILE_CODES.has(profileCode));
@@ -324,6 +328,42 @@ export function useOperationDetailsPage() {
     }
   }, [operationId]);
 
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+
+  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
+
+  const isCurrentUserCoordinator = useMemo(() => {
+    return Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"]));
+  }, [currentUser]);
+
+  const sendToPlanning = useCallback(async () => {
+    if (operationId == null) return false;
+    setProcessingAction(true);
+    try {
+      await operationService.inPlanningById(operationId);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Encaminhada para planejamento",
+          detail: "A operação foi encaminhada para o planejamento com sucesso.",
+        })
+      );
+      await loadOperation();
+      return true;
+    } catch (err) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Falha ao encaminhar",
+          detail: "Não foi possível encaminhar a operação para o planejamento.",
+        })
+      );
+      return false;
+    } finally {
+      setProcessingAction(false);
+    }
+  }, [dispatch, loadOperation, operationId]);
+
   const createMember = useCallback(
     async (userId: number, permission: Extract<OperationMemberPermission, "READER" | "EDITOR">) => {
       if (operationId == null) {
@@ -545,5 +585,8 @@ export function useOperationDetailsPage() {
     reload: loadOperation,
     reloadTargets: loadTargets,
     deleteTarget: deleteTargetById,
+    isCurrentUserCoordinator,
+    isPlanning,
+    sendToPlanning,
   };
 }

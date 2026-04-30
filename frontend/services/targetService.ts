@@ -4,13 +4,19 @@ import { TargetPayload, TargetResponse } from "@/domain/types/target";
 
 const baseUrl = "/operation";
 
+export interface TargetListParams {
+  page?: number;
+  size?: number;
+  sort?: string | string[];
+}
+
 export const targetService = {
   create(operationId: number, payload: TargetPayload) {
     return api.post<void>(`${baseUrl}/${operationId}/target`, payload);
   },
 
-  findAllByOperation(operationId: number) {
-    return api.get<PaginatedResponse<TargetResponse>>(`${baseUrl}/${operationId}/target`);
+  findAllByOperation(operationId: number, params?: TargetListParams) {
+    return api.get<PaginatedResponse<TargetResponse>>(`${baseUrl}/${operationId}/target`, { params });
   },
 
   findById(operationId: number, targetId: number) {

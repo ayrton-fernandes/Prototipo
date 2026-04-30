@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { showToast } from "@/store/slices/toastSlice";
+import { RootState } from "@/store/store";
 import { useAppDispatch } from "@/store/store";
 import { targetService } from "@/services/targetService";
 import { templateService } from "@/services/templateService";
@@ -30,6 +32,7 @@ import {
   buildTemplateGroups,
   buildTemplateFieldDraftKey,
   countFilledDrafts,
+  getGroupNodeFieldIds,
   getCategoryConfig,
   getOrderedCategories,
   hasVisibleDraftValue,
@@ -43,6 +46,7 @@ import {
   TemplateGroupNode,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/[targetId]/(utils)/record";
 import { infoEntryService as infoEntryApi } from "@/services/infoEntryService";
+import { hasAnyProfile } from "@/utils/userProfiles";
 
 export type ProntuarioCustomFieldInputType = Exclude<CanonicalInputType, "GROUP">;
 
@@ -126,7 +130,7 @@ const buildCategoryTabItem = (
   groups: TemplateGroupNode[]
 ): ProntuarioCategoryTabItem => {
   const categoryGroups = buildCategoryTemplateGroups(groups, category.codeName);
-  const visibleFieldIds = categoryGroups.flatMap((group) => group.children.map((field) => field.id));
+  const visibleFieldIds = categoryGroups.flatMap((group) => getGroupNodeFieldIds(group));
 
   if (!entryState) {
     return {
@@ -261,10 +265,20 @@ const getDraftFieldLabel = (
   return "campo desconhecido";
 };
 
-const getSelectedTemplate = (templates: TemplateResponse[]): TemplateResponse | null => {
-  const prontuarioTemplate = templates.find((template) => template.active && template.name.toLowerCase() === "prontuário do alvo");
+const normalizeTemplateName = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 
-  return prontuarioTemplate ?? templates.find((template) => template.active) ?? null;
+const getSelectedTemplate = (templates: TemplateResponse[], templateName: string): TemplateResponse | null => {
+  const normalizedTemplateName = normalizeTemplateName(templateName);
+  const matchedTemplate = templates.find(
+    (template) => template.active && normalizeTemplateName(template.name) === normalizedTemplateName
+  );
+
+  return matchedTemplate ?? templates.find((template) => template.active) ?? null;
 };
 
 const buildEntryState = async (
@@ -296,7 +310,20 @@ const buildEntryState = async (
   };
 };
 
-export function useTargetProntuario() {
+interface UseTargetProntuarioOptions {
+  templateName?: string;
+  sectionLabel?: string;
+}
+
+export interface ProntuarioSection {
+  category: BaseResponseDTO;
+  config: ProntuarioCategoryConfig;
+  entryState: ProntuarioEntryState;
+  groups: TemplateGroupNode[];
+}
+
+export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
+  const { templateName = "Prontuário do Alvo", sectionLabel = "Prontuário do Alvo" } = options;
   const params = useParams() as { id: string; targetId: string };
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -319,6 +346,8 @@ export function useTargetProntuario() {
   const [selectedCategoryCode, setSelectedCategoryCode] = useState<ProntuarioCategoryCode>("IDENTIFICACAO");
   const [customFieldDialogVisible, setCustomFieldDialogVisible] = useState(false);
   const [customFieldForm, setCustomFieldForm] = useState<ProntuarioCustomFieldFormState>(DEFAULT_CUSTOM_FIELD_FORM);
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const canEdit = useMemo(() => Boolean(currentUser && !hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
 
   const clearPendingImageUploads = useCallback(() => {
     setPendingImageUploadsByDraftKey((current) => {
@@ -397,6 +426,24 @@ export function useTargetProntuario() {
 
   const selectedEntryState = useMemo(() => entryStates[selectedCategoryCode], [entryStates, selectedCategoryCode]);
 
+  const sections = useMemo<ProntuarioSection[]>(() => {
+    const groupedTemplateFields = buildTemplateGroups(templateFields);
+    return categories
+      .map((category) => {
+        const code = category.codeName as ProntuarioCategoryCode;
+        const config = getCategoryConfig(category);
+        const entryState = entryStates[code];
+
+        if (!config || !entryState) {
+          return null;
+        }
+
+        const groups = buildCategoryTemplateGroups(groupedTemplateFields, code);
+        return { category, config, entryState, groups };
+      })
+      .filter((s): s is ProntuarioSection => s !== null);
+  }, [categories, entryStates, templateFields]);
+
   const refreshEntryState = useCallback(
     async (categoryCode: ProntuarioCategoryCode, entry: InfoEntryResponse) => {
       const category = categories.find((item) => item.codeName === categoryCode);
@@ -434,10 +481,10 @@ export function useTargetProntuario() {
         domainInfoCategoryService.findAll(),
       ]);
 
-      const selectedTemplate = getSelectedTemplate(templatesResponse.data);
+      const selectedTemplate = getSelectedTemplate(templatesResponse.data, templateName);
 
       if (!selectedTemplate) {
-        throw new Error("Template do prontuário não encontrado.");
+        throw new Error(`Template de ${sectionLabel.toLowerCase()} não encontrado.`);
       }
 
       const templateFieldsResponse = await templateFieldService.findAll(selectedTemplate.id);
@@ -446,7 +493,7 @@ export function useTargetProntuario() {
         .filter((category): category is BaseResponseDTO => category != null);
 
       if (orderedCategories.length === 0) {
-        throw new Error("Categorias do prontuário não encontradas.");
+        throw new Error(`Categorias de ${sectionLabel.toLowerCase()} não encontradas.`);
       }
 
       const existingEntriesResponse = await infoEntryApi.findAllByTarget(operationId, targetId);
@@ -499,9 +546,15 @@ export function useTargetProntuario() {
       setEntryStates(nextEntryStates);
       setPendingFieldValueDeleteIdsByEntry({});
       clearPendingImageUploads();
-      setSelectedCategoryCode((current) => (nextEntryStates[current] ? current : orderedCategories[0].codeName as ProntuarioCategoryCode));
+
+      // Escolhe a categoria padrão como a primeira que contenha grupos do template.
+      const groupedTemplateFields = buildTemplateGroups(templateFieldsResponse.data);
+      const preferred = orderedCategories.find((cat) => buildCategoryTemplateGroups(groupedTemplateFields, cat.codeName).length > 0);
+      const defaultCategory = (preferred ?? orderedCategories[0]).codeName as ProntuarioCategoryCode;
+
+      setSelectedCategoryCode(defaultCategory);
     } catch (loadError) {
-      setErrorMessage(loadError instanceof Error ? loadError.message : "Não foi possível carregar o prontuário do alvo.");
+      setErrorMessage(loadError instanceof Error ? loadError.message : `Não foi possível carregar ${sectionLabel.toLowerCase()}.`);
       setTarget(null);
       setTemplate(null);
       setCategories([]);
@@ -512,41 +565,40 @@ export function useTargetProntuario() {
     } finally {
       setLoading(false);
     }
-  }, [clearPendingImageUploads, operationId, targetId]);
+  }, [clearPendingImageUploads, operationId, sectionLabel, targetId, templateName]);
 
   useEffect(() => {
     void loadProntuario();
   }, [loadProntuario]);
 
-  const updateSelectedEntryState = useCallback(
-    (updater: (current: ProntuarioEntryState) => ProntuarioEntryState) => {
+  const updateEntryStateById = useCallback(
+    (entryId: number, updater: (current: ProntuarioEntryState) => ProntuarioEntryState) => {
       setEntryStates((current) => {
-        const activeEntry = current[selectedCategoryCode];
+        const next = { ...current };
+        let updated = false;
 
-        if (!activeEntry) {
-          return current;
-        }
+        Object.entries(current).forEach(([code, state]) => {
+          if (state?.infoEntry.id === entryId) {
+            next[code as ProntuarioCategoryCode] = updater(state);
+            updated = true;
+          }
+        });
 
-        return {
-          ...current,
-          [selectedCategoryCode]: updater(activeEntry),
-        };
+        return updated ? next : current;
       });
     },
-    [selectedCategoryCode]
+    []
   );
 
   const handleTemplateFieldChange = useCallback(
-    (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string, selectedFile?: File) => {
-      const activeEntry = selectedEntryState;
-
-      if (!activeEntry) {
+    (field: TemplateFieldResponse, groupInstanceId: string | null, nextValue: string, entryId: number, selectedFile?: File) => {
+      if (!canEdit) {
         return;
       }
 
-      const draftKey = buildTemplateFieldDraftKey(activeEntry.infoEntry.id, field.id, groupInstanceId);
+      const draftKey = buildTemplateFieldDraftKey(entryId, field.id, groupInstanceId);
 
-      updateSelectedEntryState((entryState) => {
+      updateEntryStateById(entryId, (entryState) => {
         const currentDraft = entryState.drafts[draftKey] ?? {
           fieldValueId: null,
           templateFieldId: field.id,
@@ -590,20 +642,18 @@ export function useTargetProntuario() {
         };
       });
     },
-    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
+    [canEdit, removePendingImageUploads, updateEntryStateById]
   );
 
   const handleCustomFieldChange = useCallback(
-    (customField: CustomFieldResponse, nextValue: string, selectedFile?: File) => {
-      const activeEntry = selectedEntryState;
-
-      if (!activeEntry) {
+    (customField: CustomFieldResponse, nextValue: string, entryId: number, selectedFile?: File) => {
+      if (!canEdit) {
         return;
       }
 
-      const draftKey = buildCustomFieldDraftKey(activeEntry.infoEntry.id, customField.id);
+      const draftKey = buildCustomFieldDraftKey(entryId, customField.id);
 
-      updateSelectedEntryState((entryState) => {
+      updateEntryStateById(entryId, (entryState) => {
         const currentDraft = entryState.drafts[draftKey] ?? {
           fieldValueId: null,
           templateFieldId: null,
@@ -647,12 +697,16 @@ export function useTargetProntuario() {
         };
       });
     },
-    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
+    [canEdit, removePendingImageUploads, updateEntryStateById]
   );
 
   const handleAddGroupInstance = useCallback(
-    (groupNode: TemplateGroupNode) => {
-      updateSelectedEntryState((entryState) => {
+    (groupNode: TemplateGroupNode, entryId: number) => {
+      if (!canEdit) {
+        return;
+      }
+
+      updateEntryStateById(entryId, (entryState) => {
         const instanceId = crypto.randomUUID();
 
         return {
@@ -661,43 +715,20 @@ export function useTargetProntuario() {
         };
       });
     },
-    [updateSelectedEntryState]
+    [canEdit, updateEntryStateById]
   );
 
   const handleRemoveGroupInstance = useCallback(
-    (groupNode: TemplateGroupNode, groupInstanceId: string | null) => {
-      const activeEntry = selectedEntryState;
-      const normalizedGroupInstanceId = normalizeGroupInstanceId(groupInstanceId);
-
-      if (!activeEntry) {
+    (groupNode: TemplateGroupNode, groupInstanceId: string | null, entryId: number) => {
+      if (!canEdit) {
         return;
       }
 
-      const removableFieldIds = new Set(groupNode.children.map((field) => field.id));
-      const draftKeysToRemove = Object.entries(activeEntry.drafts)
-        .filter(([, draft]) => {
-          const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
-          return (
-            draftGroupInstanceId === normalizedGroupInstanceId &&
-            draft.templateFieldId != null &&
-            removableFieldIds.has(draft.templateFieldId)
-          );
-        })
-        .map(([draftKey]) => draftKey);
+      const normalizedGroupInstanceId = normalizeGroupInstanceId(groupInstanceId);
 
-      const fieldValueIdsToDelete = Object.values(activeEntry.drafts)
-        .filter((draft) => {
-          const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
-          return (
-            draftGroupInstanceId === normalizedGroupInstanceId &&
-            draft.templateFieldId != null &&
-            removableFieldIds.has(draft.templateFieldId)
-          );
-        })
-        .map((draft) => draft.fieldValueId)
-        .filter((fieldValueId): fieldValueId is number => fieldValueId != null);
+      const removableFieldIds = new Set(getGroupNodeFieldIds(groupNode));
 
-      updateSelectedEntryState((entryState) => {
+      updateEntryStateById(entryId, (entryState) => {
         const nextDraftEntries = Object.entries(entryState.drafts).filter(([, draft]) => {
           const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
 
@@ -708,31 +739,58 @@ export function useTargetProntuario() {
           );
         });
 
+        const fieldValueIdsToDelete = Object.values(entryState.drafts)
+          .filter((draft) => {
+            const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+            return (
+              draftGroupInstanceId === normalizedGroupInstanceId &&
+              draft.templateFieldId != null &&
+              removableFieldIds.has(draft.templateFieldId)
+            );
+          })
+          .map((draft) => draft.fieldValueId)
+          .filter((fieldValueId): fieldValueId is number => fieldValueId != null);
+
+        if (fieldValueIdsToDelete.length > 0) {
+          setPendingFieldValueDeleteIdsByEntry((current) => {
+            const currentEntryDeletes = current[entryId] ?? [];
+
+            return {
+              ...current,
+              [entryId]: Array.from(new Set([...currentEntryDeletes, ...fieldValueIdsToDelete])),
+            };
+          });
+        }
+
+        const draftKeysToRemove = Object.entries(entryState.drafts)
+          .filter(([, draft]) => {
+            const draftGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+            return (
+              draftGroupInstanceId === normalizedGroupInstanceId &&
+              draft.templateFieldId != null &&
+              removableFieldIds.has(draft.templateFieldId)
+            );
+          })
+          .map(([draftKey]) => draftKey);
+
+        removePendingImageUploads(draftKeysToRemove);
+
         return {
           ...entryState,
           drafts: Object.fromEntries(nextDraftEntries),
         };
       });
-
-      if (fieldValueIdsToDelete.length > 0) {
-        setPendingFieldValueDeleteIdsByEntry((current) => {
-          const currentEntryDeletes = current[activeEntry.infoEntry.id] ?? [];
-
-          return {
-            ...current,
-            [activeEntry.infoEntry.id]: Array.from(new Set([...currentEntryDeletes, ...fieldValueIdsToDelete])),
-          };
-        });
-      }
-
-      removePendingImageUploads(draftKeysToRemove);
     },
-    [removePendingImageUploads, selectedEntryState, updateSelectedEntryState]
+    [canEdit, removePendingImageUploads, updateEntryStateById]
   );
 
   const handleOpenCustomFieldDialog = useCallback(() => {
+    if (!canEdit) {
+      return;
+    }
+
     setCustomFieldDialogVisible(true);
-  }, []);
+  }, [canEdit]);
 
   const handleCloseCustomFieldDialog = useCallback(() => {
     setCustomFieldDialogVisible(false);
@@ -763,24 +821,43 @@ export function useTargetProntuario() {
     removePendingImageUploadsByEntry(activeEntry.infoEntry.id);
   }, [refreshEntryState, removePendingImageUploadsByEntry, selectedCategoryCode, selectedEntryState]);
 
-  const handleRemoveCustomField = useCallback(async (customField: CustomFieldResponse) => {
-    const activeEntry = selectedEntryState;
+  const reloadEntryById = useCallback(async (entryId: number) => {
+    let categoryCode: ProntuarioCategoryCode | null = null;
+    let entry: InfoEntryResponse | null = null;
 
-    if (!activeEntry) {
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: "Seção indisponível",
-          detail: "Selecione uma seção válida do prontuário.",
-        })
-      );
+    Object.entries(entryStates).forEach(([code, state]) => {
+      if (state?.infoEntry.id === entryId) {
+        categoryCode = code as ProntuarioCategoryCode;
+        entry = state.infoEntry;
+      }
+    });
+
+    if (!categoryCode || !entry) {
+      return;
+    }
+
+    const refreshedEntry = await refreshEntryState(categoryCode, entry);
+
+    if (!refreshedEntry) {
+      return;
+    }
+
+    setEntryStates((current) => ({
+      ...current,
+      [categoryCode as ProntuarioCategoryCode]: refreshedEntry,
+    }));
+    removePendingImageUploadsByEntry(entryId);
+  }, [entryStates, refreshEntryState, removePendingImageUploadsByEntry]);
+
+  const handleRemoveCustomField = useCallback(async (customField: CustomFieldResponse, entryId: number) => {
+    if (!canEdit) {
       return;
     }
 
     setSaving(true);
     try {
-      await customFieldService.delete(operationId, targetId, activeEntry.infoEntry.id, customField.id);
-      await reloadSelectedEntry();
+      await customFieldService.delete(operationId, targetId, entryId, customField.id);
+      await reloadEntryById(entryId);
 
       dispatch(
         showToast({
@@ -800,9 +877,16 @@ export function useTargetProntuario() {
     } finally {
       setSaving(false);
     }
-  }, [dispatch, operationId, reloadSelectedEntry, selectedEntryState, targetId]);
+  }, [canEdit, dispatch, operationId, reloadEntryById, targetId]);
 
   const handleCreateCustomField = useCallback(async () => {
+    if (!canEdit) {
+      return;
+    }
+
+    // Default to selected category if not specified? 
+    // Or maybe we should specify which section to add to.
+    // For now, let's keep it simple and add to the first section if not selected.
     const activeEntry = selectedEntryState;
 
     if (!activeEntry) {
@@ -834,7 +918,7 @@ export function useTargetProntuario() {
         inputType: normalizeCustomFieldInputType(customFieldForm.inputType),
       });
 
-      await reloadSelectedEntry();
+      await reloadEntryById(activeEntry.infoEntry.id);
 
       dispatch(
         showToast({
@@ -855,116 +939,124 @@ export function useTargetProntuario() {
     } finally {
       setSaving(false);
     }
-  }, [customFieldForm.inputType, customFieldForm.label, dispatch, handleCloseCustomFieldDialog, operationId, reloadSelectedEntry, selectedEntryState, targetId]);
+  }, [canEdit, customFieldForm.inputType, customFieldForm.label, dispatch, handleCloseCustomFieldDialog, operationId, reloadEntryById, selectedEntryState, targetId]);
 
-  const handleSaveSelectedCategory = useCallback(async () => {
-    const activeEntry = selectedEntryState;
-
-    if (!activeEntry) {
+  const handleSaveAllCategories = useCallback(async () => {
+    if (!canEdit) {
       return;
     }
-
-    const draftEntriesToPersist = Object.entries(activeEntry.drafts)
-      .filter(([, draft]) => draft.valueContent.trim().length > 0);
-    const invalidGroupInstanceDrafts = draftEntriesToPersist
-      .map(([, draft]) => draft)
-      .filter((draft) => {
-        const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
-        return normalizedGroupInstanceId != null && !isValidUuid(normalizedGroupInstanceId);
-      });
-
-    if (invalidGroupInstanceDrafts.length > 0) {
-      const templateLabelById = new Map(templateFields.map((field) => [field.id, field.label]));
-      const customLabelById = new Map(activeEntry.customFields.map((field) => [field.id, field.label]));
-      const invalidFieldLabels = Array.from(
-        new Set(invalidGroupInstanceDrafts.map((draft) => getDraftFieldLabel(draft, templateLabelById, customLabelById)))
-      );
-      const detail = invalidFieldLabels.length > 0
-        ? `Identificador inválido de agrupamento nos campos: ${invalidFieldLabels.join(", ")}. Recarregue a página e tente novamente.`
-        : "Identificador inválido de agrupamento detectado. Recarregue a página e tente novamente.";
-
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: "Falha de validação",
-          detail,
-        })
-      );
-      return;
-    }
-
-    const pendingDeleteIds = pendingFieldValueDeleteIdsByEntry[activeEntry.infoEntry.id] ?? [];
 
     setSaving(true);
     try {
       const templateInputTypeById = new Map(
         templateFields.map((field) => [field.id, normalizeInputType(field.inputType)])
       );
-      const customInputTypeById = new Map(
-        activeEntry.customFields.map((field) => [field.id, normalizeInputType(field.inputType)])
-      );
-      const upsertOperations: Array<Promise<unknown>> = [];
+      
+      const allUpsertOperations: Array<Promise<unknown>> = [];
+      const allDeleteOperations: Array<Promise<unknown>> = [];
 
-      draftEntriesToPersist.forEach(([draftKey, draft]) => {
-        const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
-        const isTemplateImageField =
-          draft.templateFieldId != null &&
-          templateInputTypeById.get(draft.templateFieldId) === "INPUT";
-        const isCustomImageField =
-          draft.customFieldId != null &&
-          customInputTypeById.get(draft.customFieldId) === "INPUT";
-        const isImageField = isTemplateImageField || isCustomImageField;
+      for (const state of Object.values(entryStates)) {
+        if (!state) continue;
 
-        if (isImageField) {
-          const pendingImageUpload = pendingImageUploadsByDraftKey[draftKey];
+        const entryId = state.infoEntry.id;
+        const customFields = state.customFields;
+        const drafts = state.drafts;
 
-          if (!pendingImageUpload) {
+        const draftEntriesToPersist = Object.entries(drafts)
+          .filter(([, draft]) => draft.valueContent.trim().length > 0);
+
+        const invalidGroupInstanceDrafts = draftEntriesToPersist
+          .map(([, draft]) => draft)
+          .filter((draft) => {
+            const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+            return normalizedGroupInstanceId != null && !isValidUuid(normalizedGroupInstanceId);
+          });
+
+        if (invalidGroupInstanceDrafts.length > 0) {
+          const templateLabelById = new Map(templateFields.map((field) => [field.id, field.label]));
+          const customLabelById = new Map(customFields.map((field) => [field.id, field.label]));
+          const invalidFieldLabels = Array.from(
+            new Set(invalidGroupInstanceDrafts.map((draft) => getDraftFieldLabel(draft, templateLabelById, customLabelById)))
+          );
+          const detail = invalidFieldLabels.length > 0
+            ? `Identificador inválido de agrupamento nos campos: ${invalidFieldLabels.join(", ")}. Recarregue a página e tente novamente.`
+            : "Identificador inválido de agrupamento detectado. Recarregue a página e tente novamente.";
+
+          dispatch(
+            showToast({
+              severity: "error",
+              summary: "Falha de validação",
+              detail,
+            })
+          );
+          setSaving(false);
+          return;
+        }
+
+        const customInputTypeById = new Map(
+          customFields.map((field) => [field.id, normalizeInputType(field.inputType)])
+        );
+
+        draftEntriesToPersist.forEach(([draftKey, draft]) => {
+          const normalizedGroupInstanceId = normalizeGroupInstanceId(draft.groupInstanceId);
+          const isTemplateImageField =
+            draft.templateFieldId != null &&
+            templateInputTypeById.get(draft.templateFieldId) === "INPUT";
+          const isCustomImageField =
+            draft.customFieldId != null &&
+            customInputTypeById.get(draft.customFieldId) === "INPUT";
+          const isImageField = isTemplateImageField || isCustomImageField;
+
+          if (isImageField) {
+            const pendingImageUpload = pendingImageUploadsByDraftKey[draftKey];
+
+            if (!pendingImageUpload) {
+              return;
+            }
+
+            allUpsertOperations.push(
+              fieldValueService.uploadMedia(operationId, targetId, entryId, {
+                templateFieldId: draft.templateFieldId,
+                customFieldId: draft.customFieldId,
+                groupInstanceId: normalizedGroupInstanceId,
+                file: pendingImageUpload.file,
+              })
+            );
             return;
           }
 
-          upsertOperations.push(
-            fieldValueService.uploadMedia(operationId, targetId, activeEntry.infoEntry.id, {
-              templateFieldId: draft.templateFieldId,
-              customFieldId: draft.customFieldId,
-              groupInstanceId: normalizedGroupInstanceId,
-              file: pendingImageUpload.file,
-            })
-          );
-          return;
-        }
+          const payload = buildDraftValuePayload(draft, templateInputTypeById, customInputTypeById);
 
-        const payload = buildDraftValuePayload(draft, templateInputTypeById, customInputTypeById);
+          if (draft.fieldValueId != null) {
+            allUpsertOperations.push(fieldValueService.update(operationId, targetId, entryId, draft.fieldValueId, payload));
+            return;
+          }
 
-        if (draft.fieldValueId != null) {
-          upsertOperations.push(fieldValueService.update(operationId, targetId, activeEntry.infoEntry.id, draft.fieldValueId, payload));
-          return;
-        }
+          allUpsertOperations.push(fieldValueService.create(operationId, targetId, entryId, payload));
+        });
 
-        upsertOperations.push(fieldValueService.create(operationId, targetId, activeEntry.infoEntry.id, payload));
+        const pendingDeleteIds = pendingFieldValueDeleteIdsByEntry[entryId] ?? [];
+        pendingDeleteIds.forEach((fieldValueId) => {
+          allDeleteOperations.push(fieldValueService.delete(operationId, targetId, entryId, fieldValueId));
+        });
+      }
+
+      await Promise.all([...allDeleteOperations, ...allUpsertOperations]);
+      
+      // Cleanup
+      Object.values(entryStates).forEach(state => {
+        if (state) removePendingImageUploadsByEntry(state.infoEntry.id);
       });
-
-      const deleteOperations = pendingDeleteIds.map((fieldValueId) =>
-        fieldValueService.delete(operationId, targetId, activeEntry.infoEntry.id, fieldValueId)
-      );
-
-      await Promise.all([...deleteOperations, ...upsertOperations]);
-      removePendingImageUploadsByEntry(activeEntry.infoEntry.id);
-      setPendingFieldValueDeleteIdsByEntry((current) => {
-        if (!(activeEntry.infoEntry.id in current)) {
-          return current;
-        }
-
-        const next = { ...current };
-        delete next[activeEntry.infoEntry.id];
-        return next;
-      });
-      await reloadSelectedEntry();
+      setPendingFieldValueDeleteIdsByEntry({});
+      
+      // Reload all
+      await loadProntuario();
 
       dispatch(
         showToast({
           severity: "success",
           summary: "Prontuário salvo",
-          detail: "Os dados da seção foram atualizados.",
+          detail: "Todos os dados do prontuário foram atualizados.",
         })
       );
     } catch (saveError) {
@@ -972,24 +1064,13 @@ export function useTargetProntuario() {
         showToast({
           severity: "error",
           summary: "Falha ao salvar",
-          detail: extractSaveErrorMessage(saveError, "Não foi possível salvar os dados da seção."),
+          detail: extractSaveErrorMessage(saveError, "Não foi possível salvar os dados do prontuário."),
         })
       );
     } finally {
       setSaving(false);
     }
-  }, [
-    dispatch,
-    goToOperationsDetails,
-    operationId,
-    pendingFieldValueDeleteIdsByEntry,
-    pendingImageUploadsByDraftKey,
-    reloadSelectedEntry,
-    removePendingImageUploadsByEntry,
-    selectedEntryState,
-    targetId,
-    templateFields,
-  ]);
+  }, [canEdit, entryStates, templateFields, pendingImageUploadsByDraftKey, operationId, targetId, pendingFieldValueDeleteIdsByEntry, removePendingImageUploadsByEntry, loadProntuario, dispatch]);
 
   const categoryGroups = useMemo(() => {
     if (!templateFields.length) {
@@ -1016,6 +1097,7 @@ export function useTargetProntuario() {
     selectedEntryState,
     categoryTabs,
     categoryGroups,
+    sections,
     customFieldDialogVisible,
     customFieldForm,
     goToOperationsDetails,
@@ -1028,8 +1110,9 @@ export function useTargetProntuario() {
     handleCloseCustomFieldDialog,
     handleCreateCustomField,
     handleRemoveCustomField,
-    handleSaveSelectedCategory,
+    handleSaveSelectedCategory: handleSaveAllCategories,
     setSelectedCategoryCode,
     setCustomFieldForm,
+    canEdit,
   };
 }

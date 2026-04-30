@@ -8,6 +8,8 @@ export interface OperationFormState {
   courtId: number | null;
   analystIntelligenceId: number | null;
   investigatorId: number | null;
+  operationPlanningId: number | null;
+  planningMemberId: number | null;
 }
 
 export interface OperationFormErrors {
@@ -20,6 +22,8 @@ export interface OperationFormErrors {
   courtId?: string;
   analystIntelligenceId?: string;
   investigatorId?: string;
+  operationPlanningId?: string;
+  planningMemberId?: string;
 }
 
 export interface OperationDropdownOption {
@@ -35,6 +39,8 @@ export interface OperationOptionGroups {
   courts: OperationDropdownOption[];
   analystUsers: OperationDropdownOption[];
   investigatorUsers: OperationDropdownOption[];
+  plannings: OperationDropdownOption[];
+  planningUsers: OperationDropdownOption[];
 }
 
 export const emptyOperationFormState = (): OperationFormState => ({
@@ -47,4 +53,6 @@ export const emptyOperationFormState = (): OperationFormState => ({
   courtId: null,
   analystIntelligenceId: null,
   investigatorId: null,
+  operationPlanningId: null,
+  planningMemberId: null,
 });

@@ -20,6 +20,7 @@ export interface ProntuarioCategoryConfig {
 export interface TemplateGroupNode {
   group: TemplateFieldResponse;
   children: TemplateFieldResponse[];
+  subgroups: TemplateGroupNode[];
 }
 
 export interface ProntuarioFieldDraft {
@@ -73,6 +74,7 @@ const REPEATABLE_GROUPS = new Set([
   "imagens do local do endereço",
   "hospitais / upas",
   "endereço hospitais / upas",
+  "endereço",
 ]);
 
 const FILIACAO_GROUP_KEY = "filiacao";
@@ -126,7 +128,40 @@ const ESTADO_CIVIL_OPTIONS: DropdownOption[] = [
   "Outro",
 ].map((value) => ({ label: value, value }));
 
-const NACIONALIDADE_OPTIONS: DropdownOption[] = ["Brasileira", "Estrangeira", "Outra"].map((value) => ({ label: value, value }));
+const NACIONALIDADE_OPTIONS: DropdownOption[] = [
+  "Brasileira",
+  "Argentina",
+  "Uruguaia",
+  "Paraguaia",
+  "Chilena",
+  "Boliviana",
+  "Peruana",
+  "Colombiana",
+  "Venezuelana",
+  "Equatoriana",
+  "Norte-americana",
+  "Portuguesa",
+  "Espanhola",
+  "Italiana",
+  "Alemã",
+  "Francesa",
+  "Chinesa",
+  "Japonesa",
+  "Outra",
+].map((value) => ({ label: value, value }));
+
+const ESTA_PRESO_OPTIONS: DropdownOption[] = ["Sim", "Não"].map((value) => ({
+  label: value,
+  value,
+}));
+
+const RG_ORGAO_OPTIONS: DropdownOption[] = [
+  "SDS",
+  "SSP",
+  "DIC",
+  "IFP",
+  "OUTROS",
+].map((value) => ({ label: value, value }));
 
 const VINCULO_OPTIONS: DropdownOption[] = [
   FILIACAO_MOTHER_KINSHIP,
@@ -231,29 +266,98 @@ export const getCategoryConfig = (category: BaseResponseDTO): ProntuarioCategory
 };
 
 export const buildTemplateGroups = (fields: TemplateFieldResponse[]): TemplateGroupNode[] => {
-  const groups = fields
-    .filter((field) => normalizeInputType(field.inputType) === "GROUP" && field.active)
+  const activeFields = fields
+    .filter((field) => field.active)
     .sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER));
+
   const childrenByParent = new Map<number, TemplateFieldResponse[]>();
+  const groupsByParent = new Map<number, TemplateFieldResponse[]>();
 
-  fields
-    .filter((field) => normalizeInputType(field.inputType) !== "GROUP" && field.active)
-    .sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER))
-    .forEach((field) => {
-      if (field.parentFieldId == null) {
-        return;
-      }
+  activeFields.forEach((field) => {
+    if (field.parentFieldId == null) {
+      return;
+    }
 
-      const currentChildren = childrenByParent.get(field.parentFieldId) ?? [];
-      currentChildren.push(field);
-      childrenByParent.set(field.parentFieldId, currentChildren);
-    });
+    const isGroup = normalizeInputType(field.inputType) === "GROUP";
+    const currentChildren = isGroup
+      ? (groupsByParent.get(field.parentFieldId) ?? [])
+      : (childrenByParent.get(field.parentFieldId) ?? []);
 
-  return groups.map((group) => ({
+    currentChildren.push(field);
+
+    if (isGroup) {
+      groupsByParent.set(field.parentFieldId, currentChildren);
+      return;
+    }
+
+    childrenByParent.set(field.parentFieldId, currentChildren);
+  });
+
+  const buildGroupNode = (group: TemplateFieldResponse): TemplateGroupNode => ({
     group,
     children: (childrenByParent.get(group.id) ?? []).sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER)),
-  }));
+    subgroups: (groupsByParent.get(group.id) ?? [])
+      .sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER))
+      .map(buildGroupNode),
+  });
+
+  const rootNodes = activeFields
+    .filter((field) => normalizeInputType(field.inputType) === "GROUP" && field.parentFieldId == null)
+    .map(buildGroupNode);
+
+  // Virtual Hierarchy Hacks: nest groups that are top-level in template but logically subgroups
+  const findAndRemove = (nodes: TemplateGroupNode[], label: string): TemplateGroupNode | null => {
+    const normalized = normalizeText(label);
+    const index = nodes.findIndex((n) => normalizeText(n.group.label) === normalized);
+    if (index !== -1) {
+      return nodes.splice(index, 1)[0];
+    }
+    for (const node of nodes) {
+      const found = findAndRemove(node.subgroups, label);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const findNode = (nodes: TemplateGroupNode[], label: string): TemplateGroupNode | null => {
+    const normalized = normalizeText(label);
+    for (const node of nodes) {
+      if (normalizeText(node.group.label) === normalized) return node;
+      const found = findNode(node.subgroups, label);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  // Move "Imagens do Local do Endereço" inside "Endereço"
+  const imgsLocal = findAndRemove(rootNodes, "Imagens do Local do Endereço");
+  if (imgsLocal) {
+    const endereco = findNode(rootNodes, "Endereço");
+    if (endereco) {
+      endereco.subgroups.push(imgsLocal);
+    } else {
+      rootNodes.push(imgsLocal);
+    }
+  }
+
+  // Move "Endereço Hospitais / UPAs" inside "Hospitais / UPAs"
+  const endHosp = findAndRemove(rootNodes, "Endereço Hospitais / UPAs");
+  if (endHosp) {
+    const hosp = findNode(rootNodes, "Hospitais / UPAs");
+    if (hosp) {
+      hosp.subgroups.push(endHosp);
+    } else {
+      rootNodes.push(endHosp);
+    }
+  }
+
+  return rootNodes;
 };
+
+export const getGroupNodeFieldIds = (groupNode: TemplateGroupNode): number[] => [
+  ...groupNode.children.map((field) => field.id),
+  ...groupNode.subgroups.flatMap((subgroup) => getGroupNodeFieldIds(subgroup)),
+];
 
 export const buildCategoryTemplateGroups = (groups: TemplateGroupNode[], categoryCode: string): TemplateGroupNode[] => {
   const config = PRONTUARIO_CATEGORY_CONFIGS[categoryCode as ProntuarioCategoryCode];
@@ -274,9 +378,9 @@ export const getFieldPresentationForGroup = (
   field: TemplateFieldResponse,
   _fieldIndex: number
 ): ProntuarioFieldPresentation => {
-  if (isFiliacaoGroup(groupLabel)) {
-    const normalizedFieldLabel = normalizeText(field.label);
+  const normalizedFieldLabel = normalizeText(field.label);
 
+  if (isFiliacaoGroup(groupLabel)) {
     if (normalizedFieldLabel === "nome") {
       return {
         label: "Nome",
@@ -290,6 +394,13 @@ export const getFieldPresentationForGroup = (
         inputTypeOverride: "DROPDOWN",
       };
     }
+  }
+
+  if (normalizedFieldLabel === "orgao emissor rg" || normalizedFieldLabel === "estado emissor rg") {
+    return {
+      label: field.label,
+      inputTypeOverride: "DROPDOWN",
+    };
   }
 
   return {
@@ -444,11 +555,11 @@ export const buildEntryDraftForNewGroupInstance = (
 ): Record<string, ProntuarioFieldDraft> => {
   const nextDrafts = { ...existingDrafts };
 
-  groupNode.children.forEach((field) => {
-    const draftKey = buildTemplateFieldDraftKey(entryId, field.id, instanceId);
+  getGroupNodeFieldIds(groupNode).forEach((fieldId) => {
+    const draftKey = buildTemplateFieldDraftKey(entryId, fieldId, instanceId);
     nextDrafts[draftKey] = {
       fieldValueId: null,
-      templateFieldId: field.id,
+      templateFieldId: fieldId,
       customFieldId: null,
       groupInstanceId: instanceId,
       valueContent: "",
@@ -540,8 +651,20 @@ export const getDropdownOptionsForField = (label: string): DropdownOption[] | nu
     return VINCULO_OPTIONS;
   }
 
-  if (normalizedLabel === "estado" || normalizedLabel === "uf do estado") {
+  if (
+    normalizedLabel === "estado" ||
+    normalizedLabel === "uf do estado" ||
+    normalizedLabel === "estado emissor rg"
+  ) {
     return UF_OPTIONS;
+  }
+
+  if (normalizedLabel === "orgao emissor rg") {
+    return RG_ORGAO_OPTIONS;
+  }
+
+  if (normalizedLabel === "esta preso?" || normalizedLabel === "esta preso") {
+    return ESTA_PRESO_OPTIONS;
   }
 
   return null;

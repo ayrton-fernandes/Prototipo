@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { showToast } from "@/store/slices/toastSlice";
 import { useAppDispatch } from "@/store/store";
 import { operationService } from "@/services/operationService";
@@ -12,6 +14,7 @@ import { domainStationService } from "@/services/domainStationService";
 import { userService } from "@/services/userService";
 import { OperationResponse, OperationPayload } from "@/domain/types/operation";
 import { UserListItem } from "@/domain/types/userManagement";
+import { hasAnyProfile } from "@/utils/userProfiles";
 import {
   emptyOperationFormState,
   OperationDropdownOption,
@@ -29,29 +32,13 @@ const buildDropdownOptions = (items: Array<{ id: number; descName: string }>): O
   }));
 };
 
-const normalizeProfileCode = (code: string) => code.trim().toUpperCase();
-
-const getUserProfileCodes = (user: UserListItem): string[] => {
-  return (user.profileCodes ?? [])
-    .map((code) => (typeof code === "string" ? code : String(code)))
-    .map(normalizeProfileCode)
-    .filter(Boolean);
-};
-
-const hasProfile = (user: UserListItem, profileCode: string) => {
-  const normalizedTarget = normalizeProfileCode(profileCode);
-  return getUserProfileCodes(user).includes(normalizedTarget);
-};
-
-const hasAnyProfile = (user: UserListItem, profileCodes: string[]) => {
-  const normalizedProfiles = getUserProfileCodes(user);
-  const normalizedTargets = profileCodes.map(normalizeProfileCode);
-  return normalizedTargets.some((target) => normalizedProfiles.includes(target));
-};
-
 const isAnalystUser = (user: UserListItem) => hasAnyProfile(user, ["INTELLIGENCE"]);
 
 const isInvestigatorUser = (user: UserListItem) => hasAnyProfile(user, ["INVESTIGATION"]);
+
+const isPlanningUser = (user: UserListItem) => hasAnyProfile(user, ["PLANNING"]);
+
+const isCoordinatorUser = (user: UserListItem) => hasAnyProfile(user, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"]);
 
 const initialOptionGroups: OperationOptionGroups = {
   departments: [],
@@ -61,6 +48,8 @@ const initialOptionGroups: OperationOptionGroups = {
   courts: [],
   analystUsers: [],
   investigatorUsers: [],
+  plannings: [],
+  planningUsers: [],
 };
 
 const mapOperationToForm = (operation: OperationResponse): OperationFormState => ({
@@ -73,6 +62,8 @@ const mapOperationToForm = (operation: OperationResponse): OperationFormState =>
   courtId: operation.court?.id ?? null,
   analystIntelligenceId: operation.analystIntelligence?.id ?? null,
   investigatorId: operation.investigator?.id ?? null,
+  operationPlanningId: operation.operationPlanning?.id ?? null,
+  planningMemberId: null,
 });
 
 const mapFormToPayload = (form: OperationFormState): OperationPayload => ({
@@ -85,6 +76,10 @@ const mapFormToPayload = (form: OperationFormState): OperationPayload => ({
   courtId: form.courtId,
   analystIntelligenceId: form.analystIntelligenceId,
   investigatorId: form.investigatorId,
+  // backend expects operationPlanningId — if we only have a planning user selected,
+  // send that id as operationPlanningId so the server receives the planner reference.
+  operationPlanningId: form.operationPlanningId ?? form.planningMemberId,
+  planningMemberId: form.planningMemberId,
 });
 
 const validateForm = (form: OperationFormState): OperationFormErrors => {
@@ -101,12 +96,14 @@ const validateForm = (form: OperationFormState): OperationFormErrors => {
   if (!form.courtId) nextErrors.courtId = "Selecione a vara judicial.";
   if (!form.analystIntelligenceId) nextErrors.analystIntelligenceId = "Selecione o analista.";
   if (!form.investigatorId) nextErrors.investigatorId = "Selecione o investigador.";
+  if (!form.planningMemberId) nextErrors.planningMemberId = "Selecione o planejador.";
 
   return nextErrors;
 };
 
 export function useOperationsPage(initialEditOperationId: number | null = null) {
   const dispatch = useAppDispatch();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
   const [operations, setOperations] = useState<OperationResponse[]>([]);
   const [operationLoading, setOperationLoading] = useState(true);
   const [optionLoading, setOptionLoading] = useState(true);
@@ -122,28 +119,64 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [handledInitialEditId, setHandledInitialEditId] = useState<number | null>(null);
 
+  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
+  const isCoordinator = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"])), [currentUser]);
+
   const fetchOperations = useCallback(async () => {
     setOperationLoading(true);
     try {
       const response = await operationService.findAll();
-      setOperations(response.data);
+      // Exibe apenas operações ativas (soft-deleted não devem aparecer)
+      setOperations(response.data.filter((op: any) => op.active));
     } finally {
       setOperationLoading(false);
     }
   }, []);
 
+  const sendToPlanning = useCallback(async (operationId: number) => {
+    setSubmitting(true);
+    try {
+      await operationService.inPlanningById(operationId);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Encaminhada para planejamento",
+          detail: "A operação foi encaminhada para o planejamento com sucesso.",
+        })
+      );
+      await fetchOperations();
+    } catch {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Falha ao encaminhar",
+          detail: "Não foi possível encaminhar a operação para o planejamento.",
+        })
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }, [dispatch, fetchOperations]);
+
   const fetchOptionGroups = useCallback(async () => {
     setOptionLoading(true);
     try {
-      const [departmentsResponse, delegatesResponse, directoratesResponse, stationsResponse, courtsResponse, usersResponse] =
-        await Promise.all([
-          domainDepartmentService.findAll(),
-          domainDelegateService.findAll(),
-          domainDirectorateService.findAll(),
-          domainStationService.findAll(),
-          domainCourtService.findAll(),
-          userService.findAll(),
-        ]);
+      const [
+        departmentsResponse,
+        delegatesResponse,
+        directoratesResponse,
+        stationsResponse,
+        courtsResponse,
+        usersResponse,
+      ] = await Promise.all([
+        domainDepartmentService.findAll(),
+        domainDelegateService.findAll(),
+        domainDirectorateService.findAll(),
+        domainStationService.findAll(),
+        domainCourtService.findAll(),
+        userService.findAll(),
+      ]);
+
 
       const users = usersResponse.data as UserListItem[];
 
@@ -158,6 +191,14 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
           value: user.id,
         })),
         investigatorUsers: users.filter((user: UserListItem) => isInvestigatorUser(user)).map((user: UserListItem) => ({
+          label: user.name,
+          value: user.id,
+        })),
+        plannings: users.filter((user: UserListItem) => isPlanningUser(user)).map((user: UserListItem) => ({
+          label: user.name,
+          value: user.id,
+        })),
+        planningUsers: users.filter((user: UserListItem) => isPlanningUser(user)).map((user: UserListItem) => ({
           label: user.name,
           value: user.id,
         })),
@@ -179,11 +220,13 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
   const filteredOperations = useMemo(() => {
     const term = search.trim().toLowerCase();
 
+    let result = operations;
+
     if (!term) {
-      return operations;
+      return result;
     }
 
-    return operations.filter((operation) => {
+    return result.filter((operation) => {
       return [
         operation.name,
         operation.operationCode,
@@ -403,5 +446,8 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
     confirmDelete,
     reactivateOperation,
     refreshOperations: fetchOperations,
+    sendToPlanning,
+    isPlanning,
+    isCoordinator,
   };
 }

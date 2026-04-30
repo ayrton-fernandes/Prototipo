@@ -28,6 +28,10 @@ export interface OperationResponse {
   court: OperationDomainReference | null;
   analystIntelligence: OperationUserReference | null;
   investigator: OperationUserReference | null;
+  operationPlanning?: OperationDomainReference | null;
+  sharedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface OperationPayload {
@@ -40,4 +44,6 @@ export interface OperationPayload {
   courtId: number | null;
   analystIntelligenceId: number | null;
   investigatorId: number | null;
+  operationPlanningId?: number | null;
+  planningMemberId?: number | null;
 }

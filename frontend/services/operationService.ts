@@ -27,4 +27,7 @@ export const operationService = {
   reactivateById(id: number) {
     return api.put<void>(`${baseUrl}/${id}/activation`);
   },
+  inPlanningById(id: number) {
+    return api.put<void>(`${baseUrl}/${id}/in-planning`);
+  },
 };

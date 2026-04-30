@@ -19,6 +19,7 @@ interface OperationDialogProps {
     courts: OperationDropdownOption[];
     analystUsers: OperationDropdownOption[];
     investigatorUsers: OperationDropdownOption[];
+    plannings: OperationDropdownOption[];
   };
   onChange: <K extends keyof OperationFormState>(field: K, value: OperationFormState[K]) => void;
   onClose: () => void;
@@ -93,6 +94,8 @@ export default function OperationDialog({
             disabled={loading || submitting}
           />
         </div>
+
+        {/* Planejamento: removed duplicate list — use Planejador (planning user) dropdown instead */}
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <div className="flex flex-col gap-1">
@@ -179,6 +182,25 @@ export default function OperationDialog({
             />
             <Typography variant="small" className={textSupportClass(errors.analystIntelligenceId)}>
               {errors.analystIntelligenceId || ""}
+            </Typography>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="flex flex-col gap-1">
+            <Dropdown
+              className={selectClassName}
+              label="Planejador"
+              placeholder="Selecione o Planejador"
+              options={optionGroups.plannings}
+              value={form.planningMemberId}
+              onChange={(event) => onChange("planningMemberId", mapValue(event.value))}
+              invalid={!!errors.planningMemberId}
+              loading={loading}
+              disabled={loading || submitting}
+            />
+            <Typography variant="small" className={textSupportClass(errors.planningMemberId)}>
+              {errors.planningMemberId || ""}
             </Typography>
           </div>
         </div>

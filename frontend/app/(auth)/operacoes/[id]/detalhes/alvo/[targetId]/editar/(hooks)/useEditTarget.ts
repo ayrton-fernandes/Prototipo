@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { targetService } from "@/services/targetService";
 import { showToast } from "@/store/slices/toastSlice";
+import { RootState } from "@/store/store";
 import { useAppDispatch } from "@/store/store";
 import {
   TargetFormErrors,
@@ -15,11 +17,13 @@ import {
   normalizeTargetResponseToForm,
   validateTargetForm,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(utils)/targetForm";
+import { hasAnyProfile } from "@/utils/userProfiles";
 
 export function useEditTarget() {
   const params = useParams() as { id: string; targetId: string };
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const operationId = Number(params.id);
   const targetId = Number(params.targetId);
@@ -27,6 +31,7 @@ export function useEditTarget() {
   const [form, setForm] = useState<TargetFormState>(createEmptyTargetForm);
   const [errors, setErrors] = useState<TargetFormErrors>({});
   const [loading, setLoading] = useState(false);
+  const canEdit = Boolean(currentUser && !hasAnyProfile(currentUser, ["PLANNING"]));
 
   const load = useCallback(async () => {
     if (!operationId || !targetId) return;
@@ -56,6 +61,17 @@ export function useEditTarget() {
   }, []);
 
   const submit = useCallback(async () => {
+    if (!canEdit) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Acesso restrito",
+          detail: "Seu perfil permite apenas visualização deste alvo.",
+        })
+      );
+      return;
+    }
+
     if (!Number.isFinite(operationId) || !Number.isFinite(targetId)) {
       dispatch(
         showToast({
@@ -95,7 +111,7 @@ export function useEditTarget() {
     } finally {
       setLoading(false);
     }
-  }, [dispatch, form, operationId, router, targetId]);
+  }, [canEdit, dispatch, form, operationId, router, targetId]);
 
-  return { form, errors, loading, handleChange, submit };
+  return { form, errors, loading, handleChange, submit, canEdit };
 }

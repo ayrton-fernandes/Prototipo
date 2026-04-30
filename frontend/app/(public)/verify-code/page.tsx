@@ -68,7 +68,8 @@ export default function VerifyCode() {
         })
       );
 
-      router.push(redirectTo);
+      // Use full navigation to ensure cookies are sent to the server and middleware
+      window.location.assign(redirectTo);
     } catch (error) {
       dispatch(
         showToast({
@@ -84,55 +85,37 @@ export default function VerifyCode() {
   };
 
   return (
-    <>
-      <div className="auth-page-shell verify-code-page">
-        <div className="auth-page-panel">
-          <Card title="Verificar código">
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <FlexContainer
-                direction="col"
-                gap="4"
-                justify="center"
-                align="start"
-              >
-                <div className="w-full">
-                  <Controller
-                    name="otpCode"
-                    control={control}
-                    rules={{ required: "Código OTP é obrigatório" }}
-                    render={({ field }) => (
-                      <InputText
-                        {...field}
-                        label="Código OTP"
-                        invalid={!!errors.otpCode}
-                        placeholder="Ex.: 957242"
-                        supportText={errors.otpCode?.message}
-                      />
-                    )}
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  label="Validar código"
-                  className="w-full"
-                  loading={isLoading}
+    <div className="w-full h-full">
+      <section className="p-8 md:p-12 max-w-lg m-auto">
+        <Card title="Verificar código">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <FlexContainer direction="col" gap="4" justify="center" align="start">
+              <div className="w-full">
+                <Controller
+                  name="otpCode"
+                  control={control}
+                  rules={{ required: "Código OTP é obrigatório" }}
+                  render={({ field }) => (
+                    <InputText
+                      {...field}
+                      label="Código OTP"
+                      invalid={!!errors.otpCode}
+                      placeholder="Ex.: 957242"
+                      supportText={errors.otpCode?.message}
+                    />
+                  )}
                 />
+              </div>
 
-                <Typography
-                  variant="div"
-                  textAlign="center"
-                  className="w-full flex-1"
-                >
-                  <TextLink onClick={() => router.push('/login')}>
-                    Voltar para o login
-                  </TextLink>
-                </Typography>
-              </FlexContainer>
-            </form>
-          </Card>
-        </div>
-      </div>
-    </>
+              <Button type="submit" label="Validar código" className="w-full" loading={isLoading} />
+
+              <Typography variant="div" textAlign="center" className="w-full flex-1">
+                <TextLink onClick={() => router.push("/login")}>Voltar para o login</TextLink>
+              </Typography>
+            </FlexContainer>
+          </form>
+        </Card>
+      </section>
+    </div>
   );
 }

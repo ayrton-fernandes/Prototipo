@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Typography } from "@uigovpe/components";
+import { Card, Typography, Button } from "@uigovpe/components";
 import EntityActionMenu from "@/components/EntityActionMenu";
 import { OperationResponse } from "@/domain/types/operation";
 
@@ -9,6 +9,10 @@ interface OperationOverviewCardProps {
   processingAction: boolean;
   onEdit: () => void;
   onDeleteOrReactivate: () => void;
+  showSendToPlanning?: boolean;
+  onSendToPlanning?: () => Promise<boolean> | void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function OperationOverviewCard({
@@ -16,7 +20,13 @@ export default function OperationOverviewCard({
   processingAction,
   onEdit,
   onDeleteOrReactivate,
+  showSendToPlanning = false,
+  onSendToPlanning = () => undefined,
+  canEdit = true,
+  canDelete = true,
 }: OperationOverviewCardProps) {
+  const hasActionMenu = canEdit || canDelete;
+
   return (
     <Card className="cpo-text-on-dark">
       <div className="flex flex-col gap-5">
@@ -28,15 +38,22 @@ export default function OperationOverviewCard({
             </Typography>
           </div>
 
-          <EntityActionMenu
-            active={operation.active}
-            onEdit={onEdit}
-            onDelete={onDeleteOrReactivate}
-            onReactivate={onDeleteOrReactivate}
-            showViewDetails={false}
-            deleteLabel="Excluir ORQ"
-            reactivateLabel="Reativar ORQ"
-          />
+          <div className="flex items-center gap-2">
+            {hasActionMenu ? (
+              <EntityActionMenu
+                active={operation.active}
+                onEdit={onEdit}
+                onDelete={onDeleteOrReactivate}
+                onReactivate={onDeleteOrReactivate}
+                onSendToPlanning={showSendToPlanning ? onSendToPlanning : undefined}
+                showViewDetails={false}
+                showEdit={canEdit}
+                showDelete={canDelete}
+                showReactivate={false}
+                deleteLabel="Excluir ORQ"
+              />
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">

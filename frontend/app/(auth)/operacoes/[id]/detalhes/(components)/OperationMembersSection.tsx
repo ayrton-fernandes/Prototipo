@@ -30,6 +30,7 @@ interface OperationMembersSectionProps {
   onCreate: (userId: number, permission: EditableMemberPermission) => Promise<boolean>;
   onUpdatePermission: (userId: number, permission: EditableMemberPermission) => Promise<boolean>;
   onDelete: (userId: number) => Promise<boolean>;
+  canEdit?: boolean;
 }
 
 const DEFAULT_MEMBER_FORM_STATE: MemberFormState = {
@@ -59,6 +60,7 @@ export default function OperationMembersSection({
   onCreate,
   onUpdatePermission,
   onDelete,
+  canEdit = true,
 }: OperationMembersSectionProps) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -104,7 +106,7 @@ export default function OperationMembersSection({
   };
 
   const openEditDialog = (member: OperationMemberRow) => {
-    if (member.permission === "COORDINATOR") {
+    if (member.permission === "COORDINATOR" || member.permission === "PLANNING") {
       return;
     }
 
@@ -178,11 +180,11 @@ export default function OperationMembersSection({
   const tableData = members.map((member) => ({
     ...member,
     action:
-      member.permission === "COORDINATOR" ? (
+      member.permission === "COORDINATOR" || member.permission === "PLANNING" ? (
         <Typography variant="small" className="text-slate-400">
           Gerenciado pelo sistema
         </Typography>
-      ) : (
+      ) : canEdit ? (
         <EntityActionMenu
           active
           editLabel="Editar permissão"
@@ -191,6 +193,10 @@ export default function OperationMembersSection({
           onDelete={() => openDeleteDialog(member)}
           onReactivate={noop}
         />
+      ) : (
+        <Typography variant="small" className="text-slate-400">
+          Apenas visualização
+        </Typography>
       ),
   }));
 
@@ -207,7 +213,9 @@ export default function OperationMembersSection({
             </Typography>
           </div>
 
-          <Button label="Cadastrar membro" icon={<Icon icon="add" />} onClick={openCreateDialog} disabled={processing || loading} />
+          {canEdit && (
+            <Button label="Cadastrar membro" icon={<Icon icon="add" />} onClick={openCreateDialog} disabled={processing || loading} />
+          )}
         </div>
 
         {errorMessage ? (

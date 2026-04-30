@@ -37,9 +37,14 @@ export function middleware(request: NextRequest) {
         return response;
     }
 
-    // Se tiver token e estiver na página de login, redireciona para home
+    // Se tiver token e estiver na página de login/verify-code, redireciona para o path salvo
     if (token && (isLoginPage || isVerifyCodePage)) {
-        const redirectTo = normalizeRedirectPath(request.cookies.get("redirectTo")?.value || "/general");
+        // Prefer query param over cookie (verify-code uses query param)
+        const queryRedirect = request.nextUrl.searchParams.get("redirectTo");
+        const cookieRedirect = request.cookies.get("redirectTo")?.value;
+        const rawRedirect = queryRedirect || cookieRedirect || "/home";
+        const redirectTo = normalizeRedirectPath(rawRedirect);
+
         const response = NextResponse.redirect(new URL(redirectTo, request.url));
         response.cookies.delete("redirectTo");
         return response;

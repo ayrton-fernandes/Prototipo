@@ -3,6 +3,7 @@
 import { Column, Table, Typography } from "@uigovpe/components";
 import { OperationResponse } from "@/domain/types/operation";
 import EntityActionMenu from "@/components/EntityActionMenu";
+import { formatDateToDisplay } from "@/utils/formatters";
 
 interface OperationTableProps {
   operations: OperationResponse[];
@@ -12,8 +13,11 @@ interface OperationTableProps {
   onEdit: (operation: OperationResponse) => void;
   onViewDetails: (operation: OperationResponse) => void;
   onDelete: (operation: OperationResponse) => void;
-  onReactivate: (operation: OperationResponse) => void;
+  onReactivate?: (operation: OperationResponse) => void;
   onPageChange: (page: number) => void;
+  onSendToPlanning: (operationId: number) => void;
+  isPlanning?: boolean;
+  isCoordinator?: boolean;
 }
 
 const formatPageLabel = (page: number) => page.toString().padStart(2, "0");
@@ -28,6 +32,9 @@ export default function OperationTable({
   onDelete,
   onReactivate,
   onPageChange,
+  onSendToPlanning,
+  isPlanning = false,
+  isCoordinator = false,
 }: OperationTableProps) {
   if (!loading && operations.length === 0) {
     return (
@@ -44,14 +51,19 @@ export default function OperationTable({
     code: operation.operationCode ?? "-",
     stationName: operation.station?.descName ?? "-",
     delegateName: operation.delegate?.descName ?? "-",
+    sharedAt: operation.sharedAt ? formatDateToDisplay(operation.sharedAt) : "-",
     action: (
-      <EntityActionMenu
+        <EntityActionMenu
         active={operation.active}
         onEdit={() => onEdit(operation)}
         onViewDetails={() => onViewDetails(operation)}
         onDelete={() => onDelete(operation)}
-        onReactivate={() => onReactivate(operation)}
+        onReactivate={() => onReactivate?.(operation)}
+        onSendToPlanning={isCoordinator ? () => onSendToPlanning(operation.id) : undefined}
         showViewDetails
+        viewDetailsLabel={isPlanning ? "Visualizar" : undefined}
+        showEdit={!isPlanning}
+        showDelete={!isPlanning}
       />
     ),
   }));
@@ -87,6 +99,7 @@ export default function OperationTable({
         <Column field="code" header="Código" />
         <Column field="stationName" header="Delegacia responsável" />
         <Column field="delegateName" header="Delegado responsável" />
+        {isPlanning && <Column field="sharedAt" header="Data do compartilhamento" />}
         <Column field="action" header="Ação" />
       </Table>
 

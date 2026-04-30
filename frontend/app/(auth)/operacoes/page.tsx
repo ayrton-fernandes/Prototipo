@@ -35,6 +35,9 @@ export default function OperationsPage() {
     closeDeleteDialog,
     confirmDelete,
     reactivateOperation,
+    sendToPlanning,
+    isPlanning,
+    isCoordinator,
   } = useOperationsPage();
 
   return (
@@ -63,12 +66,14 @@ export default function OperationsPage() {
               />
             </div>
 
-            <Button
-              label="CRIAR NOVA ORQ"
-              icon={<Icon icon="add" />}
-              onClick={openCreateDialog}
-              disabled={operationLoading || optionLoading || submitting}
-            />
+            {!isPlanning ? (
+              <Button
+                label="CRIAR NOVA ORQ"
+                icon={<Icon icon="add" />}
+                onClick={openCreateDialog}
+                disabled={operationLoading || optionLoading || submitting}
+              />
+            ) : null}
           </div>
 
           <OperationTable
@@ -81,6 +86,9 @@ export default function OperationsPage() {
             onDelete={requestDelete}
             onReactivate={reactivateOperation}
             onPageChange={setCurrentPage}
+            onSendToPlanning={sendToPlanning}
+            isPlanning={isPlanning}
+            isCoordinator={isCoordinator}
           />
         </div>
       </Card>

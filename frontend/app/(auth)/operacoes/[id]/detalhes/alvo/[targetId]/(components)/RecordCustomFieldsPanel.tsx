@@ -10,12 +10,12 @@ import {
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/[targetId]/(utils)/record";
 
 interface ProntuarioCustomFieldsPanelProps {
-  entryId: number;
+  // Removido: entryId: number; (Não precisamos mais dele aqui)
   customFields: CustomFieldResponse[];
   drafts: Record<string, ProntuarioFieldDraft>;
   disabled?: boolean;
-  onFieldChange: (customField: CustomFieldResponse, nextValue: string, selectedFile?: File) => void;
-  onRemoveField: (customField: CustomFieldResponse) => void;
+  onFieldChange: (customField: CustomFieldResponse, nextValue: string, entryId: number, selectedFile?: File) => void;
+  onRemoveField: (customField: CustomFieldResponse, entryId: number) => void;
 }
 
 const toSyntheticField = (customField: CustomFieldResponse): TemplateFieldResponse => ({
@@ -33,13 +33,15 @@ const toSyntheticField = (customField: CustomFieldResponse): TemplateFieldRespon
 });
 
 export default function ProntuarioCustomFieldsPanel({
-  entryId,
   customFields,
   drafts,
   disabled = false,
   onFieldChange,
   onRemoveField,
 }: ProntuarioCustomFieldsPanelProps) {
+  // Se não houver campos, não renderiza nada (garantia de segurança)
+  if (customFields.length === 0) return null;
+
   return (
     <Card className="prontuario-surface-card flex flex-col gap-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
@@ -53,45 +55,43 @@ export default function ProntuarioCustomFieldsPanel({
         </div>
       </div>
 
-      {customFields.length === 0 ? (
-        <Typography variant="p">
-          Nenhum campo complementar cadastrado para esta seção.
-        </Typography>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {customFields.map((customField) => {
-            const draftKey = buildCustomFieldDraftKey(entryId, customField.id);
-            const draft = drafts[draftKey];
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {customFields.map((customField) => {
+          // Usa o entryId específico do próprio campo
+          const fieldEntryId = customField.entryId;
+          const draftKey = buildCustomFieldDraftKey(fieldEntryId, customField.id);
+          const draft = drafts[draftKey];
 
-            return (
-              <div key={draftKey} className="prontuario-instance-card flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <Typography variant="small">
-                    Campo complementar
-                  </Typography>
+          return (
+            <div key={draftKey} className="prontuario-instance-card flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <Typography variant="small">
+                  Campo complementar
+                </Typography>
 
+                {!disabled ? (
                   <Button
                     icon={<Icon icon="delete" />}
                     rounded
                     outlined
                     className="prontuario-trash-button"
-                    onClick={() => onRemoveField(customField)}
+                    onClick={() => onRemoveField(customField, fieldEntryId)}
                     disabled={disabled}
                     aria-label={`Remover campo complementar ${customField.label}`}
                   />
-                </div>
-
-                <ProntuarioFieldInput
-                  field={toSyntheticField(customField)}
-                  value={draft?.valueContent ?? ""}
-                  disabled={disabled}
-                  onChange={(nextValue, selectedFile) => onFieldChange(customField, nextValue, selectedFile)}
-                />
+                ) : null}
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              <ProntuarioFieldInput
+                field={toSyntheticField(customField)}
+                value={draft?.valueContent ?? ""}
+                disabled={disabled}
+                onChange={(nextValue, selectedFile) => onFieldChange(customField, nextValue, fieldEntryId, selectedFile)}
+              />
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }

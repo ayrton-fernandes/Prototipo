@@ -1,4 +1,4 @@
-export type OperationMemberPermission = "READER" | "COORDINATOR" | "EDITOR";
+export type OperationMemberPermission = "READER" | "COORDINATOR" | "EDITOR" | "PLANNING";
 
 export interface OperationMemberResponse {
   operationId: number;
