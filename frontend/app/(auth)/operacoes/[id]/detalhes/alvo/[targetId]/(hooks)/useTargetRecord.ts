@@ -348,6 +348,7 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
   const [customFieldDialogVisible, setCustomFieldDialogVisible] = useState(false);
   const [customFieldForm, setCustomFieldForm] = useState<ProntuarioCustomFieldFormState>(DEFAULT_CUSTOM_FIELD_FORM);
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
   const canEdit = useMemo(
     () => Boolean(currentUser && (allowPlanningEditing || !hasAnyProfile(currentUser, ["PLANNING"]))),
     [allowPlanningEditing, currentUser]
@@ -524,6 +525,10 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
         }
 
         if (!entry) {
+          if (isPlanning) {
+            continue;
+          }
+
           await infoEntryService.create(operationId, targetId, {
             templateId: selectedTemplate.id,
             categoryId: category.id,
