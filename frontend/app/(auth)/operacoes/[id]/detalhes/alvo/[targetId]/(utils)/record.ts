@@ -369,7 +369,13 @@ export const buildCategoryTemplateGroups = (groups: TemplateGroupNode[], categor
   return groups.filter((group) => config.groupLabels.includes(group.group.label));
 };
 
-export const isRepeatableGroup = (label: string): boolean => REPEATABLE_GROUPS.has(normalizeText(label));
+export const isRepeatableGroup = (label: string): boolean => {
+  const normalized = normalizeText(label);
+  for (const item of REPEATABLE_GROUPS) {
+    if (normalizeText(item) === normalized) return true;
+  }
+  return false;
+};
 
 export const isFiliacaoGroup = (label: string): boolean => normalizeText(label) === FILIACAO_GROUP_KEY;
 
@@ -379,6 +385,8 @@ export const getFieldPresentationForGroup = (
   _fieldIndex: number
 ): ProntuarioFieldPresentation => {
   const normalizedFieldLabel = normalizeText(field.label);
+
+  const normalizedGroupLabel = normalizeText(groupLabel);
 
   if (isFiliacaoGroup(groupLabel)) {
     if (normalizedFieldLabel === "nome") {
@@ -403,6 +411,17 @@ export const getFieldPresentationForGroup = (
     };
   }
 
+  // For hospital/UPA related groups, ensure the 'número' field is numeric
+  if (
+    (normalizedGroupLabel.includes("hospitais") || normalizedGroupLabel.includes("upa") || normalizedGroupLabel.includes("upas")) &&
+    (normalizedFieldLabel === "numero" || normalizedFieldLabel.includes("numero") || normalizedFieldLabel.includes("número"))
+  ) {
+    return {
+      label: field.label,
+      inputTypeOverride: "NUMBER",
+    };
+  }
+
   return {
     label: field.label,
     inputTypeOverride: null,
@@ -422,6 +441,8 @@ export const buildEntryDraftMap = (
   customFields: CustomFieldResponse[]
 ): Record<string, ProntuarioFieldDraft> => {
   const drafts: Record<string, ProntuarioFieldDraft> = {};
+  const normalizeValueForDisplay = (field: TemplateFieldResponse, valueContent: string): string =>
+    normalizeInputType(field.inputType) === "DATE" ? formatDateToDisplay(valueContent) : valueContent;
 
   templateFields
     .filter((field) => normalizeInputType(field.inputType) !== "GROUP")
@@ -446,7 +467,7 @@ export const buildEntryDraftMap = (
           templateFieldId: field.id,
           customFieldId: null,
           groupInstanceId: normalizedGroupInstanceId,
-          valueContent: value.valueContent,
+          valueContent: normalizeValueForDisplay(field, value.valueContent),
         };
       });
     });
@@ -454,12 +475,16 @@ export const buildEntryDraftMap = (
   customFields.forEach((customField) => {
     const value = fieldValues.find((item) => item.customFieldId === customField.id);
     const normalizedGroupInstanceId = normalizeGroupInstanceId(value?.groupInstanceId ? String(value.groupInstanceId) : null);
+    const customFieldInputType = normalizeInputType(customField.inputType);
     drafts[buildCustomFieldDraftKey(entryId, customField.id)] = {
       fieldValueId: value?.id ?? null,
       templateFieldId: null,
       customFieldId: customField.id,
       groupInstanceId: normalizedGroupInstanceId,
-      valueContent: value?.valueContent ?? "",
+      valueContent:
+        value != null && customFieldInputType === "DATE"
+          ? formatDateToDisplay(value.valueContent)
+          : value?.valueContent ?? "",
     };
   });
 

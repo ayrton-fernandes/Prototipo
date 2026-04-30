@@ -313,6 +313,7 @@ const buildEntryState = async (
 interface UseTargetProntuarioOptions {
   templateName?: string;
   sectionLabel?: string;
+  allowPlanningEditing?: boolean;
 }
 
 export interface ProntuarioSection {
@@ -323,7 +324,7 @@ export interface ProntuarioSection {
 }
 
 export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
-  const { templateName = "Prontuário do Alvo", sectionLabel = "Prontuário do Alvo" } = options;
+  const { templateName = "Prontuário do Alvo", sectionLabel = "Prontuário do Alvo", allowPlanningEditing = false } = options;
   const params = useParams() as { id: string; targetId: string };
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -347,7 +348,10 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
   const [customFieldDialogVisible, setCustomFieldDialogVisible] = useState(false);
   const [customFieldForm, setCustomFieldForm] = useState<ProntuarioCustomFieldFormState>(DEFAULT_CUSTOM_FIELD_FORM);
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const canEdit = useMemo(() => Boolean(currentUser && !hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
+  const canEdit = useMemo(
+    () => Boolean(currentUser && (allowPlanningEditing || !hasAnyProfile(currentUser, ["PLANNING"]))),
+    [allowPlanningEditing, currentUser]
+  );
 
   const clearPendingImageUploads = useCallback(() => {
     setPendingImageUploadsByDraftKey((current) => {

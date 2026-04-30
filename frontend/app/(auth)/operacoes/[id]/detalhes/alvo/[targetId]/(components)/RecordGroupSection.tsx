@@ -39,7 +39,7 @@ const normalizeFiliacaoValue = (value: string) =>
 const hasVisibleDraftValue = (draft?: ProntuarioFieldDraft): boolean =>
   Boolean(draft && (draft.fieldValueId != null || draft.valueContent.trim().length > 0));
 
-const TARGET_IMAGES_GROUP_LABELS = new Set(["fotos do alvo", "imagem do alvo", "imagens do alvo"]);
+const TARGET_IMAGES_GROUP_LABELS = new Set(["fotos do alvo", "imagem do alvo", "imagens do alvo"].map(normalizeFiliacaoValue));
 
 const isTargetImagesGroup = (label: string): boolean => TARGET_IMAGES_GROUP_LABELS.has(normalizeFiliacaoValue(label));
 
@@ -49,7 +49,7 @@ const ADDITIONAL_TRASH_GROUPS = new Set([
   "endereços do alvo",
   "endereço hospitais / upas",
   "endereço",
-]);
+].map(normalizeFiliacaoValue));
 
 const shouldShowTrashOnRight = (label: string): boolean => {
   const normalized = normalizeFiliacaoValue(label);
@@ -88,7 +88,21 @@ export default function ProntuarioGroupSection({
     const filiacaoGroup = isFiliacaoGroup(node.group.label);
     const targetImagesGroup = isTargetImagesGroup(node.group.label);
     const showTrashOnRight = shouldShowTrashOnRight(node.group.label);
-    const editableGroupFields = node.children.filter((field) => !isImmutableTargetRegistrationField(field));
+    const rawEditableGroupFields = node.children.filter((field) => !isImmutableTargetRegistrationField(field));
+    // If this group has a nested "Imagens do Local do Endereço" subgroup, avoid showing
+    // duplicate single-image fields at the parent level (they will be handled in the subgroup).
+    const hasImageLocalSubgroup = node.subgroups.some((s) => normalizeFiliacaoValue(s.group.label) === normalizeFiliacaoValue("Imagens do Local do Endereço") || isTargetImagesGroup(s.group.label));
+
+    const editableGroupFields = rawEditableGroupFields.filter((field) => {
+      if (hasImageLocalSubgroup && normalizeInputType(field.inputType) === "INPUT") {
+        const normalizedFieldLabel = normalizeFiliacaoValue(field.label);
+        if (normalizedFieldLabel.includes("imagem") || normalizedFieldLabel.includes("foto")) {
+          return false;
+        }
+      }
+
+      return true;
+    });
     const nestedGroupFields = node.subgroups.flatMap((subgroup) => getGroupNodeFieldIds(subgroup));
     const allFieldIds = new Set([...editableGroupFields.map((field) => field.id), ...nestedGroupFields]);
 
@@ -265,7 +279,7 @@ export default function ProntuarioGroupSection({
           ) : null}
 
           {instancesToRender.map((groupInstanceId, currentInstanceIndex) => (
-            <div key={groupInstanceId ?? `${node.group.id}-single`} className="prontuario-instance-card">
+            <div key={`${groupInstanceId ?? `${node.group.id}-single`}-${currentInstanceIndex}`} className="prontuario-instance-card">
               {repeatable ? (
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <Typography variant="small">

@@ -46,6 +46,7 @@ export default function TargetJuridicalCorroborationPage() {
   } = useTargetProntuario({
     templateName: "Corroboração Jurídica",
     sectionLabel: "Corroboração Jurídica",
+    allowPlanningEditing: true,
   });
 
   if (!loading && !hasAccessToTab("CORROBORACAO_JURIDICA")) {

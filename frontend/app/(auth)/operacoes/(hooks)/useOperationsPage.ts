@@ -127,7 +127,16 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
     try {
       const response = await operationService.findAll();
       // Exibe apenas operações ativas (soft-deleted não devem aparecer)
-      setOperations(response.data.filter((op: any) => op.active));
+      setOperations((current) => {
+        const sharedAtById = new Map(current.map((operation) => [operation.id, operation.sharedAt ?? null]));
+
+        return response.data
+          .filter((op) => op.active)
+          .map((op) => ({
+            ...op,
+            sharedAt: op.sharedAt ?? sharedAtById.get(op.id) ?? null,
+          }));
+      });
     } finally {
       setOperationLoading(false);
     }
@@ -137,6 +146,16 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
     setSubmitting(true);
     try {
       await operationService.inPlanningById(operationId);
+      setOperations((current) =>
+        current.map((operation) =>
+          operation.id === operationId
+            ? {
+                ...operation,
+                sharedAt: operation.sharedAt ?? new Date().toISOString(),
+              }
+            : operation
+        )
+      );
       dispatch(
         showToast({
           severity: "success",

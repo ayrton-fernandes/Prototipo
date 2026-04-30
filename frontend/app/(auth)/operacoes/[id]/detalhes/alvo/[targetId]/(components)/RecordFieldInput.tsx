@@ -179,7 +179,7 @@ export default function ProntuarioFieldInput({
       label={fieldLabel}
       value={value}
       placeholder={placeholder}
-      inputMode={inputType === "NUMBER" ? "numeric" : undefined}
+      inputMode={inputType === "NUMBER" || inputType === "DATE" ? "numeric" : undefined}
       onChange={(event: ChangeEvent<HTMLInputElement>) => {
         const nextValue = inputType === "DATE" ? maskDateInput(event.target.value) : event.target.value;
         onChange(nextValue);
