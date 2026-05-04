@@ -45,7 +45,6 @@ import {
   ProntuarioFieldDraft,
   TemplateGroupNode,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/[targetId]/(utils)/record";
-import { infoEntryService as infoEntryApi } from "@/services/infoEntryService";
 import { hasAnyProfile } from "@/utils/userProfiles";
 
 export type ProntuarioCustomFieldInputType = Exclude<CanonicalInputType, "GROUP">;
@@ -121,7 +120,7 @@ export const CUSTOM_FIELD_INPUT_TYPE_OPTIONS: Array<{ label: string; value: Pron
   { label: "Número", value: "NUMBER" },
   { label: "Data", value: "DATE" },
   { label: "Lista", value: "DROPDOWN" },
-  { label: "Arquivo ou link", value: "INPUT" },
+  { label: "Arquivo", value: "INPUT" },
 ];
 
 const buildCategoryTabItem = (
@@ -314,6 +313,7 @@ interface UseTargetProntuarioOptions {
   templateName?: string;
   sectionLabel?: string;
   allowPlanningEditing?: boolean;
+  canEditOverride?: boolean;
 }
 
 export interface ProntuarioSection {
@@ -324,7 +324,12 @@ export interface ProntuarioSection {
 }
 
 export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
-  const { templateName = "Prontuário do Alvo", sectionLabel = "Prontuário do Alvo", allowPlanningEditing = false } = options;
+  const {
+    templateName = "Prontuário do Alvo",
+    sectionLabel = "Prontuário do Alvo",
+    allowPlanningEditing = false,
+    canEditOverride = true,
+  } = options;
   const params = useParams() as { id: string; targetId: string };
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -348,10 +353,12 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
   const [customFieldDialogVisible, setCustomFieldDialogVisible] = useState(false);
   const [customFieldForm, setCustomFieldForm] = useState<ProntuarioCustomFieldFormState>(DEFAULT_CUSTOM_FIELD_FORM);
   const currentUser = useSelector((state: RootState) => state.auth.user);
-  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
+  const isCoordinatorUser = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"])), [currentUser]);
   const canEdit = useMemo(
-    () => Boolean(currentUser && (allowPlanningEditing || !hasAnyProfile(currentUser, ["PLANNING"]))),
-    [allowPlanningEditing, currentUser]
+    () =>
+      canEditOverride &&
+      Boolean(currentUser && (isCoordinatorUser || allowPlanningEditing || !hasAnyProfile(currentUser, ["PLANNING"]))),
+    [allowPlanningEditing, canEditOverride, currentUser, isCoordinatorUser]
   );
 
   const clearPendingImageUploads = useCallback(() => {
@@ -501,10 +508,11 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
         throw new Error(`Categorias de ${sectionLabel.toLowerCase()} não encontradas.`);
       }
 
-      const existingEntriesResponse = await infoEntryApi.findAllByTarget(operationId, targetId);
+      const existingEntriesResponse = await infoEntryService.findAllByTarget(operationId, targetId);
       let currentEntries = existingEntriesResponse.data;
-      const uncategorizedEntry = currentEntries.find((entry) => entry.templateId === selectedTemplate.id && entry.categoryId == null) ?? null;
-      let uncategorizedUsed = false;
+      const entriesForTemplate = currentEntries.filter((entry) => entry.templateId === selectedTemplate.id);
+      const uncategorizedEntry = entriesForTemplate.find((entry) => entry.categoryId == null) ?? null;
+      const fallbackEntry = entriesForTemplate[0] ?? null;
 
       const nextEntryStates = EMPTY_ENTRY_STATES();
 
@@ -519,29 +527,17 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
           (entry) => entry.templateId === selectedTemplate.id && entry.categoryId === category.id
         ) ?? null;
 
-        if (!entry && uncategorizedEntry && !uncategorizedUsed) {
+        if (!entry && uncategorizedEntry) {
           entry = uncategorizedEntry;
-          uncategorizedUsed = true;
         }
 
         if (!entry) {
-          if (isPlanning) {
-            continue;
-          }
-
-          await infoEntryService.create(operationId, targetId, {
-            templateId: selectedTemplate.id,
-            categoryId: category.id,
-          });
-
-          currentEntries = (await infoEntryApi.findAllByTarget(operationId, targetId)).data;
-          entry = currentEntries.find(
-            (item) => item.templateId === selectedTemplate.id && item.categoryId === category.id
-          ) ?? null;
+          entry = fallbackEntry;
         }
 
         if (!entry) {
-          throw new Error("Não foi possível localizar o registro de informação da categoria.");
+          nextEntryStates[config.codeName] = null;
+          continue;
         }
 
         const entryState = await buildEntryState(operationId, targetId, config, entry, templateFieldsResponse.data, targetResponse.data);
@@ -864,8 +860,35 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
     }
 
     setSaving(true);
+
+    // 1. ATUALIZAÇÃO OTIMISTA: Removemos do estado local imediatamente para feedback instantâneo na UI
+    setEntryStates((current) => {
+      const next = { ...current };
+      Object.entries(next).forEach(([code, state]) => {
+        if (state && state.infoEntry.id === entryId) {
+          // Remove o campo do array de campos complementares
+          const nextCustomFields = state.customFields.filter((f) => f.id !== customField.id);
+          
+          // Remove qualquer rascunho (draft) associado a esse campo para não vazar dados
+          const draftKeyToRemove = buildCustomFieldDraftKey(entryId, customField.id);
+          const nextDrafts = { ...state.drafts };
+          delete nextDrafts[draftKeyToRemove];
+
+          next[code as ProntuarioCategoryCode] = {
+            ...state,
+            customFields: nextCustomFields,
+            drafts: nextDrafts,
+          };
+        }
+      });
+      return next;
+    });
+
     try {
+      // 2. Envia o comando de exclusão para o backend
       await customFieldService.delete(operationId, targetId, entryId, customField.id);
+      
+      // 3. Sincroniza silenciosamente para garantir que a UI e o banco estão com os mesmos dados
       await reloadEntryById(entryId);
 
       dispatch(
@@ -876,6 +899,8 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
         })
       );
     } catch {
+      // Se houver erro de rede/banco, nós recarregamos do servidor para devolver o campo à tela
+      await reloadEntryById(entryId);
       dispatch(
         showToast({
           severity: "error",
@@ -964,10 +989,17 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
       const allUpsertOperations: Array<Promise<unknown>> = [];
       const allDeleteOperations: Array<Promise<unknown>> = [];
 
+      const processedEntryIds = new Set<number>();
+
       for (const state of Object.values(entryStates)) {
         if (!state) continue;
 
         const entryId = state.infoEntry.id;
+        if (processedEntryIds.has(entryId)) {
+          continue;
+        }
+        processedEntryIds.add(entryId);
+
         const customFields = state.customFields;
         const drafts = state.drafts;
 

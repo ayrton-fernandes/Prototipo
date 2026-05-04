@@ -119,8 +119,8 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [handledInitialEditId, setHandledInitialEditId] = useState<number | null>(null);
 
-  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
   const isCoordinator = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"])), [currentUser]);
+  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"]) && !isCoordinator), [currentUser, isCoordinator]);
 
   const fetchOperations = useCallback(async () => {
     setOperationLoading(true);
@@ -332,6 +332,17 @@ export function useOperationsPage(initialEditOperationId: number | null = null) 
   };
 
   const submitDialog = async () => {
+    if (!isCoordinator) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Acesso restrito",
+          detail: "Apenas coordenadores de inteligência podem criar ou editar operações.",
+        })
+      );
+      return;
+    }
+
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
 

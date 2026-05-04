@@ -62,8 +62,8 @@ export default function OperationTable({
         onSendToPlanning={isCoordinator ? () => onSendToPlanning(operation.id) : undefined}
         showViewDetails
         viewDetailsLabel={isPlanning ? "Visualizar" : undefined}
-        showEdit={!isPlanning}
-        showDelete={!isPlanning}
+        showEdit={isCoordinator}
+        showDelete={isCoordinator}
       />
     ),
   }));

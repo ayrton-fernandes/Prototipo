@@ -332,7 +332,7 @@ export const buildTemplateGroups = (fields: TemplateFieldResponse[]): TemplateGr
   // Move "Imagens do Local do Endereço" inside "Endereço"
   const imgsLocal = findAndRemove(rootNodes, "Imagens do Local do Endereço");
   if (imgsLocal) {
-    const endereco = findNode(rootNodes, "Endereço");
+    const endereco = findNode(rootNodes, "Endereços do Alvo");
     if (endereco) {
       endereco.subgroups.push(imgsLocal);
     } else {

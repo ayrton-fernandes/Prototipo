@@ -11,11 +11,10 @@ import { TARGET_TABS, TargetTab, TargetTabType } from "@/app/(auth)/operacoes/[i
  * Determina quais abas devem estar habilitadas baseado no perfil do usuário e sua permissão na operação.
  *
  * Regras de negócio:
- * - PLANNING: Acesso a TODAS as abas mas visualização apenas (não edita prontuário)
+ * - PLANNING: Acesso a TODAS as abas (acesso global). Pode editar em todas EXCETO PRONTUARIO_DO_ALVO (apenas visualização)
  * - INTELLIGENCE, INVESTIGATION, COOR_INTELLIGENCE: Acesso a PRONTUARIO_DO_ALVO e CORROBORACAO_JURIDICA
- * - Permissão EDITOR: Pode editar
- * - Permissão READER: Pode apenas ler
- * - Permissão PLANNING: Pode apenas ler
+ * - Para perfis de investigação/inteligência, edição depende da permissão na operação:
+ * COORDINATOR ou EDITOR edita; READER apenas visualiza.
  */
 interface UseTargetTabsParams {
   permission?: OperationMemberPermission | null;
@@ -35,47 +34,46 @@ export function useTargetTabs({
   const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const { tabs, canEditContent, hasAccessToTab } = useMemo(() => {
-    const isPlanning = Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"]));
-    const isAnalyst = Boolean(currentUser && hasAnyProfile(currentUser, ["INTELLIGENCE"]));
-    const isInvestigator = Boolean(currentUser && hasAnyProfile(currentUser, ["INVESTIGATION"]));
     const isCoordinator = Boolean(
       currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"])
     );
+    const isPlanning = Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"]) && !isCoordinator);
+    const isAnalyst = Boolean(currentUser && hasAnyProfile(currentUser, ["INTELLIGENCE"]));
+    const isInvestigator = Boolean(currentUser && hasAnyProfile(currentUser, ["INVESTIGATION"]));
+    const isOperationMember = permission != null || isCoordinator;
+    const effectivePermission: OperationMemberPermission | null = isCoordinator ? "COORDINATOR" : permission ?? null;
 
     const canEditForTab = (tabId: TargetTabType): boolean => {
       if (!currentUser) return false;
 
-      // PLANNING users are read-only for most sections, but
-      // they are allowed to add custom fields in Corroboração Jurídica.
+      // PLANNING users can edit all tabs except PRONTUARIO_DO_ALVO. (Ignora se é membro da operação ou não)
       if (isPlanning) {
-        return tabId === "CORROBORACAO_JURIDICA";
+        return tabId !== "PRONTUARIO_DO_ALVO";
       }
 
-      // Prontuário do Alvo: EDITOR or Coordinator can edit (planning already handled)
-      if (tabId === "PRONTUARIO_DO_ALVO") {
-        return permission === "EDITOR" || isCoordinator;
+      // Para os demais perfis, é obrigatório ser membro da operação
+      if (!isOperationMember) return false;
+
+      // Perfis de investigação/inteligência editam apenas com COORDINATOR/EDITOR.
+      if (tabId === "PRONTUARIO_DO_ALVO" || tabId === "CORROBORACAO_JURIDICA") {
+        return effectivePermission === "COORDINATOR" || effectivePermission === "EDITOR";
       }
 
-      // Corroboração Jurídica: EDITOR and Coordinator can edit; planning allowed above
-      if (tabId === "CORROBORACAO_JURIDICA") {
-        return permission === "EDITOR" || isCoordinator;
-      }
-
-      // Default: only explicit EDITOR permission
-      return permission === "EDITOR";
+      // Demais abas não são editáveis para esses perfis.
+      return effectivePermission === "EDITOR";
     };
 
     // Determina quais abas devem estar habilitadas
     const enabledTabIds = new Set<TargetTabType>();
 
     if (isPlanning) {
-      // Planejamento acessa todas as abas
+      // Planejamento acessa todas as abas globalmente, independente do `isOperationMember`
       enabledTabIds.add("PRONTUARIO_DO_ALVO");
       enabledTabIds.add("CORROBORACAO_JURIDICA");
       enabledTabIds.add("INTERROGATORIO");
       enabledTabIds.add("DOCUMENTACAO_DA_OPERACAO");
       enabledTabIds.add("DOCUMENTOS_GENERICOS");
-    } else if (isAnalyst || isInvestigator || isCoordinator) {
+    } else if (isOperationMember && (isAnalyst || isInvestigator || isCoordinator)) {
       // Analista, Investigador e Coordenador acessam prontuário e corroboração jurídica
       enabledTabIds.add("PRONTUARIO_DO_ALVO");
       enabledTabIds.add("CORROBORACAO_JURIDICA");

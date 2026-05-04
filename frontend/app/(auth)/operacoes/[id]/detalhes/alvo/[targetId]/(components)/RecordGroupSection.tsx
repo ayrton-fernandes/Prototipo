@@ -74,15 +74,55 @@ const IMMUTABLE_TARGET_FIELD_LABELS = new Set([
   "data de nascimento",
 ]);
 
-const ADDRESS_FIELDS_TO_HIDE = new Set([
+const ADDRESS_MEDIA_FIELDS_TO_HIDE = new Set([
   "imagem local",
   "imagem do local",
+].map(normalizeFiliacaoValue));
+
+const ADDRESS_LINK_FIELDS_TO_HIDE = new Set([
   "link do maps",
   "link mapa",
 ].map(normalizeFiliacaoValue));
 
 const isImmutableTargetRegistrationField = (field: TemplateFieldResponse): boolean =>
   IMMUTABLE_TARGET_FIELD_LABELS.has(normalizeFiliacaoValue(field.label));
+
+const hasSubgroupWithLabel = (subgroups: TemplateGroupNode[], expectedLabel: string): boolean =>
+  subgroups.some((subgroup) => normalizeFiliacaoValue(subgroup.group.label) === normalizeFiliacaoValue(expectedLabel));
+
+const filterRenderableGroupFields = (node: TemplateGroupNode): TemplateFieldResponse[] => {
+  const normalizedGroupLabel = normalizeFiliacaoValue(node.group.label);
+  const hasEnderecoSubgroup = hasSubgroupWithLabel(node.subgroups, "Endereço");
+  const hasImageLocalSubgroup = node.subgroups.some(
+    (subgroup) =>
+      normalizeFiliacaoValue(subgroup.group.label) === normalizeFiliacaoValue("Imagens do Local do Endereço") ||
+      isTargetImagesGroup(subgroup.group.label)
+  );
+
+  return node.children.filter((field) => {
+    if (isImmutableTargetRegistrationField(field)) {
+      return false;
+    }
+
+    const normalizedFieldLabel = normalizeFiliacaoValue(field.label);
+
+    // Root address container and nested address group can both carry legacy fields.
+    // Keep only the canonical source to avoid duplicated inputs.
+    if (normalizedGroupLabel === normalizeFiliacaoValue("Endereços do Alvo") && hasEnderecoSubgroup) {
+      if (ADDRESS_LINK_FIELDS_TO_HIDE.has(normalizedFieldLabel) || ADDRESS_MEDIA_FIELDS_TO_HIDE.has(normalizedFieldLabel)) {
+        return false;
+      }
+    }
+
+    if (normalizedGroupLabel === normalizeFiliacaoValue("Endereço") && hasImageLocalSubgroup) {
+      if (ADDRESS_MEDIA_FIELDS_TO_HIDE.has(normalizedFieldLabel)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+};
 
 export default function ProntuarioGroupSection({
   entryId,
@@ -99,27 +139,8 @@ export default function ProntuarioGroupSection({
     const repeatable = isRepeatableGroup(node.group.label);
     const filiacaoGroup = isFiliacaoGroup(node.group.label);
     const targetImagesGroup = isTargetImagesGroup(node.group.label);
-    const isEnderecoGroup = normalizeFiliacaoValue(node.group.label) === "endereco";
     const showTrashOnRight = shouldShowTrashOnRight(node.group.label);
-    const rawEditableGroupFields = node.children.filter((field) => !isImmutableTargetRegistrationField(field));
-    // If this group has a nested "Imagens do Local do Endereço" subgroup, avoid showing
-    // duplicate single-image fields at the parent level (they will be handled in the subgroup).
-    const hasImageLocalSubgroup = node.subgroups.some((s) => normalizeFiliacaoValue(s.group.label) === normalizeFiliacaoValue("Imagens do Local do Endereço") || isTargetImagesGroup(s.group.label));
-
-    const editableGroupFields = rawEditableGroupFields.filter((field) => {
-      if (isEnderecoGroup && ADDRESS_FIELDS_TO_HIDE.has(normalizeFiliacaoValue(field.label))) {
-        return false;
-      }
-
-      if (hasImageLocalSubgroup && normalizeInputType(field.inputType) === "INPUT") {
-        const normalizedFieldLabel = normalizeFiliacaoValue(field.label);
-        if (normalizedFieldLabel.includes("imagem") || normalizedFieldLabel.includes("foto")) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    const editableGroupFields = filterRenderableGroupFields(node);
     const nestedGroupFields = node.subgroups.flatMap((subgroup) => getGroupNodeFieldIds(subgroup));
     const allFieldIds = new Set([...editableGroupFields.map((field) => field.id), ...nestedGroupFields]);
 
@@ -148,7 +169,7 @@ export default function ProntuarioGroupSection({
     };
 
     const renderNestedGroup = (subgroup: TemplateGroupNode) => {
-      const subgroupFields = subgroup.children.filter((field) => !isImmutableTargetRegistrationField(field));
+      const subgroupFields = filterRenderableGroupFields(subgroup);
       const repeatableSubgroup = isRepeatableGroup(subgroup.group.label);
       const subgroupDisplayLabel = getDisplayGroupLabel(subgroup.group.label);
       const showNestedAddButton = repeatableSubgroup && !NESTED_GROUPS_WITHOUT_ADD_BUTTON.has(normalizeFiliacaoValue(subgroup.group.label));

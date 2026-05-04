@@ -18,12 +18,15 @@ import {
   validateTargetForm,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(utils)/targetForm";
 import { hasAnyProfile } from "@/utils/userProfiles";
+import { OperationMemberPermission } from "@/domain/types/operationMember";
+import { useCurrentOperationMember } from "@/app/(auth)/operacoes/[id]/detalhes/(hooks)/useCurrentOperationMember";
 
 export function useEditTarget() {
   const params = useParams() as { id: string; targetId: string };
   const router = useRouter();
   const dispatch = useAppDispatch();
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const { permission } = useCurrentOperationMember();
 
   const operationId = Number(params.id);
   const targetId = Number(params.targetId);
@@ -31,7 +34,9 @@ export function useEditTarget() {
   const [form, setForm] = useState<TargetFormState>(createEmptyTargetForm);
   const [errors, setErrors] = useState<TargetFormErrors>({});
   const [loading, setLoading] = useState(false);
-  const canEdit = Boolean(currentUser && !hasAnyProfile(currentUser, ["PLANNING"]));
+  const isCoordinatorUser = Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"]));
+  const effectivePermission: OperationMemberPermission | null = isCoordinatorUser ? "COORDINATOR" : permission ?? null;
+  const canEdit = Boolean(currentUser && (isCoordinatorUser || !hasAnyProfile(currentUser, ["PLANNING"]))) && (effectivePermission === "COORDINATOR" || effectivePermission === "EDITOR");
 
   const load = useCallback(async () => {
     if (!operationId || !targetId) return;

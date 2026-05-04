@@ -66,7 +66,7 @@ export default function OperationsPage() {
               />
             </div>
 
-            {!isPlanning ? (
+            {isCoordinator ? (
               <Button
                 label="CRIAR NOVA ORQ"
                 icon={<Icon icon="add" />}

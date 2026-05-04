@@ -46,6 +46,8 @@ export default function TargetOperationDocumentationPage() {
   } = useTargetProntuario({
     templateName: "Documentação da Operação",
     sectionLabel: "Documentação da Operação",
+    allowPlanningEditing: true,
+    canEditOverride: canEditContent,
   });
 
   if (!loading && !hasAccessToTab("DOCUMENTACAO_DA_OPERACAO")) {
@@ -160,20 +162,27 @@ export default function TargetOperationDocumentationPage() {
                 ))}
 
                 {/* Campos complementares consolidados no final da página */}
-                {(() => {
-                  const allCustomFields = sections.flatMap((s) => s.entryState.customFields || []);
-                  const allDrafts = sections.reduce((acc, s) => ({ ...acc, ...(s.entryState.drafts || {}) }), {} as Record<string, any>);
-
-                  return allCustomFields.length > 0 ? (
-                    <ProntuarioCustomFieldsPanel
-                      customFields={allCustomFields}
-                      drafts={allDrafts}
-                      disabled={saving || !canEditContent}
-                      onFieldChange={handleCustomFieldChange}
-                      onRemoveField={handleRemoveCustomField}
-                    />
-                  ) : null;
-                })()}
+                                {(() => {
+                                  // Correção: Map utilizado para deduplicar os campos caso o mesmo entryId de fallback esteja em múltiplas seções
+                                  const allCustomFields = Array.from(
+                                    new Map(
+                                      sections
+                                        .flatMap((s) => s.entryState.customFields || [])
+                                        .map((field) => [field.id, field])
+                                    ).values()
+                                  );
+                                  const allDrafts = sections.reduce((acc, s) => ({ ...acc, ...(s.entryState.drafts || {}) }), {} as Record<string, any>);
+                
+                                  return allCustomFields.length > 0 ? (
+                                    <ProntuarioCustomFieldsPanel
+                                      customFields={allCustomFields}
+                                      drafts={allDrafts}
+                                      disabled={saving || !canEditContent}
+                                      onFieldChange={handleCustomFieldChange}
+                                      onRemoveField={handleRemoveCustomField}
+                                    />
+                                  ) : null;
+                                })()}
 
                 {canEditContent ? (
                   <div className="flex flex-wrap items-center gap-3 pt-2">

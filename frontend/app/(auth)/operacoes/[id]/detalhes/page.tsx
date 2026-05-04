@@ -46,6 +46,9 @@ export default function OperationDetailsPage() {
     reload,
     isCurrentUserCoordinator,
     isPlanning,
+    canManageTargets,
+    canManageMembers,
+    canManageOperation,
     sendToPlanning,
   } = useOperationDetailsPage();
 
@@ -98,7 +101,7 @@ export default function OperationDetailsPage() {
   }, [fetchOptionGroups]);
 
   const openEditDialog = () => {
-    if (!operation) return;
+    if (!operation || !canManageOperation) return;
     setForm({
       name: operation.name ?? "",
       description: operation.description ?? "",
@@ -121,7 +124,7 @@ export default function OperationDetailsPage() {
   };
 
   const submitDialog = async () => {
-    if (!operation) return;
+    if (!operation || !canManageOperation) return;
     setSubmitting(true);
     try {
       await operationService.update(operation.id, {
@@ -150,7 +153,7 @@ export default function OperationDetailsPage() {
   const requestDelete = () => setDeleteDialogVisible(true);
 
   const confirmDelete = async () => {
-    if (!operation) return;
+    if (!operation || !canManageOperation) return;
     try {
       await operationService.deleteById(operation.id);
       // redirect to operations list
@@ -201,8 +204,8 @@ export default function OperationDetailsPage() {
           onDeleteOrReactivate={requestDelete}
           showSendToPlanning={isCurrentUserCoordinator}
           onSendToPlanning={sendToPlanning}
-          canEdit={!isPlanning}
-          canDelete={!isPlanning}
+          canEdit={canManageOperation && !isPlanning}
+          canDelete={canManageOperation && !isPlanning}
         />
 
         <OperationTargetsSection 
@@ -213,7 +216,7 @@ export default function OperationDetailsPage() {
               if (reloadTargets) reloadTargets();
             }
           }} 
-          canEdit={!isPlanning}
+          canEdit={canManageTargets && !isPlanning}
         />
 
         <OperationMembersSection
@@ -226,11 +229,11 @@ export default function OperationDetailsPage() {
           onCreate={createMember}
           onUpdatePermission={updateMemberPermission}
           onDelete={deleteMember}
-          canEdit={!isPlanning}
+          canEdit={canManageMembers && !isPlanning}
         />
       </div>
       <OperationDialog
-        visible={dialogVisible}
+        visible={dialogVisible && canManageOperation}
         loading={optionLoading}
         submitting={submitting}
         title={"Editar ORQ"}
@@ -244,7 +247,7 @@ export default function OperationDetailsPage() {
       />
 
       <DeleteDialog
-        visible={deleteDialogVisible}
+        visible={deleteDialogVisible && canManageOperation}
         entity="ORQ"
         loading={processingAction}
         article="essa"

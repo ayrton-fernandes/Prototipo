@@ -182,6 +182,7 @@ export function useOperationDetailsPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useParams<{ id: string }>();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const operationId = useMemo(() => {
     const parsed = Number(params.id);
@@ -202,6 +203,7 @@ export function useOperationDetailsPage() {
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersProcessing, setMembersProcessing] = useState(false);
   const [membersErrorMessage, setMembersErrorMessage] = useState<string | null>(null);
+  const [currentMemberPermission, setCurrentMemberPermission] = useState<OperationMemberPermission | null>(null);
 
   const loadOperation = useCallback(async () => {
     if (operationId == null) {
@@ -302,6 +304,7 @@ export function useOperationDetailsPage() {
       setMembers([]);
       setMemberUsers([]);
       setMemberProfileDescriptionByCode({});
+      setCurrentMemberPermission(null);
       setMembersErrorMessage("Operação inválida.");
       return;
     }
@@ -317,27 +320,45 @@ export function useOperationDetailsPage() {
       ]);
 
       const allowedUsers = usersResponse.data.filter((user) => !hasExcludedMemberProfile(user));
+      const currentMember = currentUser
+        ? membersResponse.data.find((member) => member.userId === currentUser.id)
+        : null;
 
       const nextProfileMap = buildProfileDescriptionByCode(profilesResponse.data);
 
       setMemberUsers(allowedUsers);
       setMemberProfileDescriptionByCode(nextProfileMap);
+      setCurrentMemberPermission(currentMember?.permission ?? null);
       setMembers(buildOperationMemberRows(membersResponse.data, usersResponse.data, nextProfileMap));
     } catch {
       setMembers([]);
+      setCurrentMemberPermission(null);
       setMembersErrorMessage("Não foi possível carregar os membros da operação.");
     } finally {
       setMembersLoading(false);
     }
-  }, [operationId]);
+  }, [currentUser, operationId]);
 
-  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const isCoordinatorUser = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"])), [currentUser]);
 
-  const isPlanning = useMemo(() => Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"])), [currentUser]);
+  const isPlanning = useMemo(() => {
+    if (currentMemberPermission != null) return currentMemberPermission === "PLANNING";
+    return Boolean(currentUser && hasAnyProfile(currentUser, ["PLANNING"]) && !isCoordinatorUser);
+  }, [currentUser, currentMemberPermission, isCoordinatorUser]);
 
-  const isCurrentUserCoordinator = useMemo(() => {
-    return Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"]));
-  }, [currentUser]);
+  const isCurrentUserCoordinator = useMemo(
+    () => currentMemberPermission === "COORDINATOR" || isCoordinatorUser,
+    [currentMemberPermission, isCoordinatorUser]
+  );
+
+  const canManageTargets = useMemo(
+    () => (currentMemberPermission === "COORDINATOR" || currentMemberPermission === "EDITOR") || isCoordinatorUser,
+    [currentMemberPermission, isCoordinatorUser]
+  );
+
+  const canManageMembers = useMemo(() => currentMemberPermission === "COORDINATOR" || isCoordinatorUser, [currentMemberPermission, isCoordinatorUser]);
+
+  const canManageOperation = useMemo(() => currentMemberPermission === "COORDINATOR" || isCoordinatorUser, [currentMemberPermission, isCoordinatorUser]);
 
   const sendToPlanning = useCallback(async () => {
     if (operationId == null) return false;
@@ -478,8 +499,8 @@ export function useOperationDetailsPage() {
         dispatch(
           showToast({
             severity: "success",
-            summary: "Alvo removido",
-            detail: "O alvo foi removido com sucesso.",
+            summary: "Alvo desvinculado",
+            detail: "O alvo foi desvinculado da operação com sucesso.",
           })
         );
         await loadTargets();
@@ -590,6 +611,9 @@ export function useOperationDetailsPage() {
     deleteTarget: deleteTargetById,
     isCurrentUserCoordinator,
     isPlanning,
+    canManageTargets,
+    canManageMembers,
+    canManageOperation,
     sendToPlanning,
   };
 }

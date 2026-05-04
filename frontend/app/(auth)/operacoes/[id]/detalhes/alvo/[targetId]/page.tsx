@@ -10,8 +10,19 @@ import {
   useTargetProntuario,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/[targetId]/(hooks)/useTargetRecord";
 import { formatDateToDisplay, maskCpf } from "@/utils/formatters";
+import { useCurrentOperationMember } from "@/app/(auth)/operacoes/[id]/detalhes/(hooks)/useCurrentOperationMember";
+import { useTargetTabs } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(hooks)/useTargetTabs";
+import { useParams, useRouter } from "next/navigation";
 
 export default function TargetProntuarioPage() {
+  const router = useRouter();
+  const params = useParams() as { id: string };
+  const { permission, loading: permissionLoading } = useCurrentOperationMember();
+  const { hasAccessToTab, canEditContent } = useTargetTabs({
+    permission,
+    currentTabId: "PRONTUARIO_DO_ALVO",
+  });
+
   const {
     target,
     loading,
@@ -34,7 +45,33 @@ export default function TargetProntuarioPage() {
     handleSaveSelectedCategory,
     setCustomFieldForm,
     canEdit,
-  } = useTargetProntuario();
+  } = useTargetProntuario({
+    canEditOverride: canEditContent,
+  });
+
+  if (!permissionLoading && !hasAccessToTab("PRONTUARIO_DO_ALVO")) {
+    return (
+      <>
+        <TargetSectionsHeader activeTabId="PRONTUARIO_DO_ALVO" />
+
+        <Card className="prontuario-surface-card">
+          <div className="flex flex-col gap-4">
+            <Typography variant="h3">Prontuário do Alvo</Typography>
+            <Typography variant="p">Seu perfil não possui acesso a esta seção.</Typography>
+            <div className="flex justify-end gap-2">
+              <Button
+                label="Voltar para a operação"
+                outlined
+                className="prontuario-dialog-cancel-button"
+                icon={<Icon icon="arrow_back" />}
+                onClick={() => router.push(`/operacoes/${params.id}/detalhes`)}
+              />
+            </div>
+          </div>
+        </Card>
+      </>
+    );
+  }
 
   if (loading) {
     return (
@@ -76,7 +113,14 @@ export default function TargetProntuarioPage() {
   ];
 
   // COMPILANDO TODOS OS CAMPOS COMPLEMENTARES E RASCUNHOS DAS SEÇÕES
-  const allCustomFields = sections.flatMap((section) => section.entryState.customFields || []);
+  // Correção: Map utilizado para deduplicar os campos complementares.
+  const allCustomFields = Array.from(
+    new Map(
+      sections
+        .flatMap((section) => section.entryState.customFields || [])
+        .map((field) => [field.id, field])
+    ).values()
+  );
   const allDrafts = sections.reduce((acc, section) => ({ ...acc, ...(section.entryState.drafts || {}) }), {});
 
   return (
@@ -125,7 +169,6 @@ export default function TargetProntuarioPage() {
                         onRemoveInstance={handleRemoveGroupInstance}
                       />
                     ))}
-                    {/* O painel de Custom Fields foi removido daqui */}
                   </div>
                 ))}
               </div>

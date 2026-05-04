@@ -21,6 +21,8 @@ import {
   validateTargetForm,
 } from "@/app/(auth)/operacoes/[id]/detalhes/alvo/(utils)/targetForm";
 import { hasAnyProfile } from "@/utils/userProfiles";
+import { OperationMemberPermission } from "@/domain/types/operationMember";
+import { useCurrentOperationMember } from "@/app/(auth)/operacoes/[id]/detalhes/(hooks)/useCurrentOperationMember";
 import { unmaskCpf } from "@/utils/formatters";
 
 type DuplicateTargetInfo = {
@@ -33,6 +35,7 @@ export function useCreateTarget() {
   const params = useParams() as { id: string };
   const dispatch = useAppDispatch();
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const { permission } = useCurrentOperationMember();
 
   const operationId = Number(params.id);
 
@@ -43,7 +46,9 @@ export function useCreateTarget() {
   const [matchAlertLoading, setMatchAlertLoading] = useState(false);
   const [duplicateTarget, setDuplicateTarget] = useState<DuplicateTargetInfo | null>(null);
   const [pendingPayload, setPendingPayload] = useState<TargetPayload | null>(null);
-  const canEdit = Boolean(currentUser && !hasAnyProfile(currentUser, ["PLANNING"]));
+  const isCoordinatorUser = Boolean(currentUser && hasAnyProfile(currentUser, ["COOR_INTELLIGENCE", "COORDINATOR", "ADMIN"]));
+  const effectivePermission: OperationMemberPermission | null = isCoordinatorUser ? "COORDINATOR" : permission ?? null;
+  const canEdit = Boolean(currentUser && (isCoordinatorUser || !hasAnyProfile(currentUser, ["PLANNING"]))) && (effectivePermission === "COORDINATOR" || effectivePermission === "EDITOR");
 
   const handleChange = useCallback(<K extends keyof TargetFormState>(field: K, value: TargetFormState[K]) => {
     setForm((state) => ({ ...state, [field]: value }));
