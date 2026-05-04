@@ -88,6 +88,10 @@ const LEGACY_CUSTOM_FIELD_INPUT_TYPE_MAP: Record<string, ProntuarioCustomFieldIn
   TEXTO: "TEXT",
   NUMERICO: "NUMBER",
   DATA: "DATE",
+  ARQUIVO: "INPUT",
+  FILE: "INPUT",
+  IMAGE: "INPUT",
+  MEDIA: "INPUT",
 };
 
 const normalizeCustomFieldInputType = (inputType: string): ProntuarioCustomFieldInputType => {
@@ -826,31 +830,31 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
     removePendingImageUploadsByEntry(activeEntry.infoEntry.id);
   }, [refreshEntryState, removePendingImageUploadsByEntry, selectedCategoryCode, selectedEntryState]);
 
-  const reloadEntryById = useCallback(async (entryId: number) => {
-    let categoryCode: ProntuarioCategoryCode | null = null;
-    let entry: InfoEntryResponse | null = null;
+ const reloadEntryById = useCallback(async (entryId: number) => {
+    // Encontra TODAS as categorias que estão utilizando esse mesmo entryId
+    const categoriesToUpdate = Object.entries(entryStates)
+      .filter(([, state]) => state?.infoEntry.id === entryId)
+      .map(([code, state]) => ({ code: code as ProntuarioCategoryCode, entry: state!.infoEntry }));
 
-    Object.entries(entryStates).forEach(([code, state]) => {
-      if (state?.infoEntry.id === entryId) {
-        categoryCode = code as ProntuarioCategoryCode;
-        entry = state.infoEntry;
-      }
+    if (categoriesToUpdate.length === 0) {
+      return;
+    }
+
+    // Dispara a atualização para todas as categorias afetadas em paralelo
+    const refreshedEntries = await Promise.all(
+      categoriesToUpdate.map(({ code, entry }) => refreshEntryState(code, entry))
+    );
+
+    setEntryStates((current) => {
+      const next = { ...current };
+      categoriesToUpdate.forEach(({ code }, index) => {
+        if (refreshedEntries[index]) {
+          next[code] = refreshedEntries[index];
+        }
+      });
+      return next;
     });
-
-    if (!categoryCode || !entry) {
-      return;
-    }
-
-    const refreshedEntry = await refreshEntryState(categoryCode, entry);
-
-    if (!refreshedEntry) {
-      return;
-    }
-
-    setEntryStates((current) => ({
-      ...current,
-      [categoryCode as ProntuarioCategoryCode]: refreshedEntry,
-    }));
+    
     removePendingImageUploadsByEntry(entryId);
   }, [entryStates, refreshEntryState, removePendingImageUploadsByEntry]);
 

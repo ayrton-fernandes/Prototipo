@@ -201,6 +201,10 @@ const INPUT_TYPE_ALIASES: Record<string, CanonicalInputType> = {
   DATE: "DATE",
   DROPDOWN: "DROPDOWN",
   INPUT: "INPUT",
+  FILE: "INPUT",
+  IMAGE: "INPUT",
+  MEDIA: "INPUT",
+  ARQUIVO: "INPUT",
 };
 
 export const normalizeInputType = (inputType: string | null | undefined): CanonicalInputType | null => {
