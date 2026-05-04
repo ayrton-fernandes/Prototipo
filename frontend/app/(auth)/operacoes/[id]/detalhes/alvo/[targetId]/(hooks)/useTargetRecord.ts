@@ -1003,8 +1003,17 @@ export function useTargetProntuario(options: UseTargetProntuarioOptions = {}) {
         const customFields = state.customFields;
         const drafts = state.drafts;
 
-        const draftEntriesToPersist = Object.entries(drafts)
-          .filter(([, draft]) => draft.valueContent.trim().length > 0);
+        // Agora os rascunhos não perdem fotos recém-adicionadas
+        const draftEntriesToPersist = Object.entries(drafts).filter(
+          ([draftKey, draft]) => {
+            const hasTextValue = draft.valueContent.trim().length > 0;
+            const hasPendingImage = pendingImageUploadsByDraftKey[draftKey] != null;
+            
+            // Mantém o campo se ele tiver texto OU se tiver uma imagem na fila de upload
+            return hasTextValue || hasPendingImage;
+          }
+        );
+        // ------------------------------
 
         const invalidGroupInstanceDrafts = draftEntriesToPersist
           .map(([, draft]) => draft)
